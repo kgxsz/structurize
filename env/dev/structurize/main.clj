@@ -1,5 +1,5 @@
 (ns structurize.main
-  (:require [structurize.system :refer [make-system system-config-opts]]
+  (:require [structurize.core :refer [make-system system-config-opts]]
             [clojure.tools.namespace.repl :refer [refresh refresh-all]]
             [com.stuartsierra.component :as component]))
 

@@ -13,13 +13,17 @@ pom.xml.asc
 /classes/
 /target/
 /checkouts/
+/dev-resources/public/
 .lein-deps-sum
 .lein-repl-history
 .lein-plugins/
 .lein-failures
+.lein-env
 .nrepl-port
 profiles.clj
 
+### Tooling ###
+figwheel_server.log
 
 ### OSX ###
 .DS_Store
