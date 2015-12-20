@@ -1,9 +1,10 @@
 (ns structurize.main
-  (:require [com.stuartsierra.component :as component]
+  (:require [structurize.system :refer [make-system system-config-opts]]
             [clojure.tools.namespace.repl :refer [refresh refresh-all]]
-            [structurize.system :refer [make-system]]))
+            [com.stuartsierra.component :as component]))
 
-(def system (make-system))
+
+(def system (make-system system-config-opts))
 
 (defn start! []
   (alter-var-root #'system component/start))
