@@ -27,15 +27,15 @@
                                   :port 4000}
 
                    :cljsbuild {:builds [{:id "structurize"
-                                          :source-paths ["src/cljs" "env/dev"]
-                                          :figwheel     {:on-jsload "structurize.main/reload!"}
-                                          :compiler     {:output-dir "dev-resources/public/js"
-                                                         :output-to "dev-resources/public/js/structurize.js"
-                                                         :main "structurize.main"
-                                                         :asset-path "/js/"
-                                                         :optimizations :none
-                                                         :source-map true}}]}
+                                         :source-paths ["src/cljs" "env/dev"]
+                                         :figwheel {:on-jsload "structurize.main/reload!"}
+                                         :compiler {:output-dir "dev-resources/public/js"
+                                                    :output-to "dev-resources/public/js/structurize.js"
+                                                    :main "structurize.main"
+                                                    :asset-path "/js/"
+                                                    :optimizations :none
+                                                    :source-map true}}]}
 
                    :figwheel {:repl false
-                              :nrepl-port 7002
+                              :nrepl-port 5000
                               :css-dirs ["dev-resources/public/css"]}}})
