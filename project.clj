@@ -13,6 +13,10 @@
 
   :plugins [[lein-environ "1.0.1"]]
 
+  :clean-targets ^{:protect false} ["target/"
+                                    "dev-resources/public/js/"
+                                    "dev-resources/public/css/"]
+
   :profiles {:dev {:source-paths ["src/clj" "env/dev"]
 
                    :env {:port 3000}

@@ -5,13 +5,24 @@
             [environ.core :refer [env]]
             [ring.util.response :refer [response status content-type]]
             [hiccup.page :refer [html5 include-js]]
-            [ring.middleware.defaults :as rd]
+            [ring.middleware.defaults :as rmd]
             [taoensso.sente :as sente]
             [taoensso.sente.server-adapters.http-kit :refer [sente-web-server-adapter]]
             [org.httpkit.server :refer [run-server]]
-            [taoensso.timbre :as log]))
+            [taoensso.timbre :as log]
+            [taoensso.sente :as sente]
+            [taoensso.sente.server-adapters.http-kit :refer (sente-web-server-adapter)]))
 
-(def root
+
+(defn receive-event! [{:keys [event send-fn ring-req ?reply-fn]}]
+  (let [[id ?payload] event]
+    (log/info "Received event!" id)
+    (when (and (= :hello/world id)
+               ?reply-fn)
+      (?reply-fn [:hello/world "Well hello to you too"]))))
+
+
+(def root-page
   (html5
    [:head
     [:title "Structurize"]]
@@ -21,29 +32,28 @@
     (include-js "/js/structurize.js")
     [:script {:type "text/javascript"} "structurize.main.start();"]]))
 
-(def routes ["/" {"a" :a
-                  "b" :b
-                  true :root}])
-
-(def handlers {:a (fn [request] (response "a?"))
-               :b (fn [request] (response "b?"))
-               :root (fn [request] (-> root response (content-type "text/html")))})
-
 
 ;;;;;;;;;;;; Handler goods ;;;;;;;;;;;;;;;
+
 
 (defrecord Handler [config-opts]
   component/Lifecycle
 
   (start [component]
     (log/info "Starting handler event loop")
-    (let [handler-fn (br/make-handler routes handlers)
-          handler-fn (-> handler-fn (rd/wrap-defaults (:middleware-opts config-opts)))]
-      (assoc component :handler-fn handler-fn)))
+    (let [chsk (sente/make-channel-socket! sente-web-server-adapter {})
+          stop-chsk-router (sente/start-chsk-router! (:ch-recv chsk) receive-event!)
+          handler (-> (br/make-handler ["/" {"chsk" {:get (:ajax-get-or-ws-handshake-fn chsk)
+                                                     :post (:ajax-post-fn chsk)}
+                                             true (fn [request] (-> root-page response (content-type "text/html")))}])
+                      (rmd/wrap-defaults (:middleware-opts config-opts)))]
+      (assoc component :handler handler :stop-chsk-router stop-chsk-router)))
 
   (stop [component]
-    (log/info "Stopping handler event loop")
-    component))
+    (when-let [stop-chsk-router (:stop-chsk-router component)]
+      (log/info "Stopping handler event loop")
+      (stop-chsk-router))
+    (dissoc component :stop-chsk-router)))
 
 
 (defn make-handler [config-opts]
@@ -57,14 +67,14 @@
 
   (start [component]
     (log/info "Starting server on port" (:port config-opts))
-    (let [stop-server-fn (run-server (:handler-fn handler) config-opts)]
-      (assoc component :stop-server-fn stop-server-fn)))
+    (let [stop-server (run-server (:handler handler) config-opts)]
+      (assoc component :stop-server stop-server)))
 
   (stop [component]
-    (when-let [stop-server-fn (:stop-server-fn component)]
+    (when-let [stop-server (:stop-server component)]
       (log/info "Stopping server")
-      (stop-server-fn))
-    (dissoc component :stop-server-fn)))
+      (stop-server))
+    (dissoc component :stop-server)))
 
 
 (defn make-server [config-opts]
