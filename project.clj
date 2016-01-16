@@ -9,7 +9,8 @@
                  [ring "1.4.0"]
                  [ring/ring-defaults "0.1.5"]
                  [com.taoensso/sente "1.7.0"]
-                 [com.taoensso/timbre "4.1.4"]]
+                 [com.taoensso/timbre "4.1.4"]
+                 [com.cemerick/url "0.1.1"]]
 
   :plugins [[lein-environ "1.0.1"]]
 
@@ -32,10 +33,10 @@
 
                    :cljsbuild {:builds [{:id "structurize"
                                          :source-paths ["src/cljs" "env/dev"]
-                                         :figwheel {:on-jsload "structurize.main/reload!"}
+                                         :figwheel {:on-jsload "structurize.runner/reload!"}
                                          :compiler {:output-dir "dev-resources/public/js"
                                                     :output-to "dev-resources/public/js/structurize.js"
-                                                    :main "structurize.main"
+                                                    :main "structurize.runner"
                                                     :asset-path "/js/"
                                                     :optimizations :none
                                                     :source-map true}}]}

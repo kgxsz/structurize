@@ -14,7 +14,7 @@
             [taoensso.sente.server-adapters.http-kit :refer (sente-web-server-adapter)]))
 
 
-(defn receive-event! [{:keys [event send-fn ring-req ?reply-fn]}]
+(defn event-msg-handler [{:keys [event send-fn ring-req ?reply-fn]}]
   (let [[id ?payload] event]
     (log/info "Received event!" id)
     (when (and (= :hello/world id)
@@ -30,7 +30,7 @@
     [:div#root
      [:h1 "Loading your stuff!"]]
     (include-js "/js/structurize.js")
-    [:script {:type "text/javascript"} "structurize.main.start();"]]))
+    [:script {:type "text/javascript"} "structurize.runner.start();"]]))
 
 
 ;;;;;;;;;;;; Handler goods ;;;;;;;;;;;;;;;
@@ -42,7 +42,7 @@
   (start [component]
     (log/info "Starting handler event loop")
     (let [chsk (sente/make-channel-socket! sente-web-server-adapter {})
-          stop-chsk-router (sente/start-chsk-router! (:ch-recv chsk) receive-event!)
+          stop-chsk-router (sente/start-chsk-router! (:ch-recv chsk) event-msg-handler)
           handler (-> (br/make-handler ["/" {"chsk" {:get (:ajax-get-or-ws-handshake-fn chsk)
                                                      :post (:ajax-post-fn chsk)}
                                              true (fn [request] (-> root-page response (content-type "text/html")))}])
@@ -53,7 +53,7 @@
     (when-let [stop-chsk-router (:stop-chsk-router component)]
       (log/info "Stopping handler event loop")
       (stop-chsk-router))
-    (dissoc component :stop-chsk-router)))
+    (assoc component :stop-chsk-router nil)))
 
 
 (defn make-handler [config-opts]
@@ -74,7 +74,7 @@
     (when-let [stop-server (:stop-server component)]
       (log/info "Stopping server")
       (stop-server))
-    (dissoc component :stop-server)))
+    (assoc component :stop-server nil)))
 
 
 (defn make-server [config-opts]
