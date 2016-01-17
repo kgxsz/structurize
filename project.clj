@@ -23,7 +23,8 @@
                    :env {:port 3000}
 
                    :dependencies [[org.clojure/tools.namespace "0.2.11"]
-                                  [reagent "0.5.1"]]
+                                  [reagent "0.5.1"]
+                                  [cljs-uuid "0.0.4"]]
 
                    :plugins [[lein-figwheel "0.5.0-2"]]
 

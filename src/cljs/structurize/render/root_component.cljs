@@ -1,8 +1,9 @@
-(ns structurize.core
+(ns structurize.render.root-component
   (:require [structurize.system :refer [system]]
             [cemerick.url :refer [url]]
             [reagent.core :as r]
-            [taoensso.timbre :as log]))
+            [taoensso.timbre :as log]
+            [cljs-uuid.core :as uuid]))
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; other components
@@ -28,12 +29,15 @@
 
 (defn login-with-github-component []
   (log/info "mount login-with-github-component")
-  [:button
-   [:a
-    {:href (-> (url (get-in system [:config-opts :general :github-auth-url]))
-               (assoc :query {:client_id (get-in system [:config-opts :general :github-auth-client-id])})
-               str)}
-    "Login with Github!"]])
+  (let [random (str (uuid/make-random))]
+    (log/info random)
+    [:button
+     [:a
+      {:href (-> (url (get-in system [:config-opts :general :github-auth-url]))
+                 (assoc :query {:client_id (get-in system [:config-opts :general :github-auth-client-id])
+                                :state random})
+                 str)}
+      "Login with Github!"]]))
 
 
 
@@ -48,6 +52,5 @@
    [secondary-view]
    [login-with-github-component]])
 
-
-(defn render-root! []
-  (r/render [root-view] (js/document.getElementById "root")))
+(defn root-controller []
+  [root-view])

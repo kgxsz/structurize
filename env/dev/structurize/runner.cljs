@@ -1,11 +1,11 @@
 (ns ^:figwheel-no-load structurize.runner
-  (:require [structurize.core :as core]))
+  (:require [structurize.render :as render]))
 
 
 (defn reload! []
-  (core/render-root!))
+  (render/render-root!))
 
 
 (defn ^:export start []
   (enable-console-print!)
-  (core/render-root!))
+  (render/render-root!))
