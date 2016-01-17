@@ -15,8 +15,7 @@
 
   (start [component]
     (log/info "Initialising channel socket connection")
-    (let [type (get-in config-opts [:chsk-conn :type])
-          chsk-conn (sente/make-channel-socket! "/chsk" {:type type})]
+    (let [chsk-conn (sente/make-channel-socket! "/chsk" {:type (:type config-opts)})]
       (sente/start-chsk-router! (:ch-recv chsk-conn) event-msg-handler)
       (assoc component :chsk-conn chsk-conn)))
 
@@ -34,12 +33,10 @@
 
 
 (defn make-system []
-  (-> (component/system-map
-       :config-opts config-opts
-       :!app-state (r/atom {:secondary-view {:click-count 0}})
-       :chsk-conn (map->ChskConn {}))
-      (component/system-using
-       {:chsk-conn [:config-opts]})))
+  (component/system-map
+   :config-opts config-opts
+   :!app-state (r/atom {:secondary-view {:click-count 0}})
+   :chsk-conn (map->ChskConn {:config-opts (:chsk-conn config-opts)})))
 
 
 (defonce system (component/start (make-system)))

@@ -15,15 +15,14 @@
 
 (defn secondary-view []
   (log/debug "mount secondary view")
-  (let [!app-state (-> system :!app-state)
-        !secondary-view-cursor (r/cursor !app-state [:secondary-view])]
-    (log/debug "config-opts:" (-> system :config-opts))
-    (log/debug "app-state:" (-> system :!app-state deref))
+  (let [!secondary-view-cursor (r/cursor (:!app-state system) [:secondary-view])]
+    (log/debug "config-opts:" (:config-opts system))
+    (log/debug "app-state:" @(:!app-state system))
     [:div
      [:p "secondary view"]
      [:button
       {:on-click #(swap! !secondary-view-cursor update :click-count inc)}
-      (str "clicks: " (-> !secondary-view-cursor deref :click-count))]
+      (str "clicks: " (:click-count @!secondary-view-cursor))]
      [tertiary-view]]))
 
 
@@ -31,9 +30,9 @@
   (log/info "mount login-with-github-component")
   [:button
    [:a
-    {:href (-> (url (-> system :config-opts :general :github-auth-url))
-               (assoc :query {:client_id (-> system :config-opts :general :github-auth-client-id)})
-               (str))}
+    {:href (-> (url (get-in system [:config-opts :general :github-auth-url]))
+               (assoc :query {:client_id (get-in system [:config-opts :general :github-auth-client-id])})
+               str)}
     "Login with Github!"]])
 
 
