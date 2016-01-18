@@ -6,8 +6,7 @@
 
 
 (defonce ^:private config-opts
-  {:general {:github-auth-url (env :github-auth-url)
-             :github-auth-client-id (env :github-auth-client-id)
+  {:general {:github-auth-url "https://github.com/login/oauth/authorize"
              :something (env :something "default")}
    :chsk-conn chsk-conn/config-opts})
 

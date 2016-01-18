@@ -2,7 +2,6 @@
 
   :dependencies [[org.clojure/clojure "1.7.0"]
                  [com.stuartsierra/component "0.3.1"]
-                 [environ "1.0.1"]
                  [bidi "1.22.1"]
                  [http-kit "2.1.18"]
                  [hiccup "1.0.5"]
@@ -12,15 +11,11 @@
                  [com.taoensso/timbre "4.1.4"]
                  [com.cemerick/url "0.1.1"]]
 
-  :plugins [[lein-environ "1.0.1"]]
-
   :clean-targets ^{:protect false} ["target/"
                                     "dev-resources/public/js/"
                                     "dev-resources/public/css/"]
 
   :profiles {:dev {:source-paths ["src/clj" "env/dev"]
-
-                   :env {:port 3000}
 
                    :dependencies [[org.clojure/tools.namespace "0.2.11"]
                                   [reagent "0.5.1"]

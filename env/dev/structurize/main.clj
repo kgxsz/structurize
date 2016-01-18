@@ -4,7 +4,7 @@
             [com.stuartsierra.component :as component]))
 
 
-(def system (system/make-system system/config-opts))
+(def system (system/make-system))
 
 (defn start! []
   (alter-var-root #'system component/start))

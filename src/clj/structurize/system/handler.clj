@@ -7,18 +7,7 @@
             [taoensso.timbre :as log]))
 
 
-(def config-opts {:middleware-opts {:params {:urlencoded true
-                                             :nested true
-                                             :keywordize true}
-                                    :security {:anti-forgery true
-                                               :xss-protection {:enable? true, :mode :block}
-                                               :frame-options :sameorigin
-                                               :content-type-options :nosniff}
-                                    :static {:resources "public"}
-                                    :responses {:not-modified-responses true
-                                                :absolute-redirects true
-                                                :content-types true
-                                                :default-charset "utf-8"}}})
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; root rendering
 
 
 (def root-page
@@ -32,21 +21,22 @@
     [:script {:type "text/javascript"} "structurize.runner.start();"]]))
 
 
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; component setup
+
+
 (defrecord Handler [config-opts chsk-conn]
   component/Lifecycle
 
   (start [component]
     (log/info "Initialising handler")
-    (let [handler (-> (br/make-handler ["/" {"chsk" {:get (:ajax-get-or-ws-handshake-fn chsk-conn)
+    (let [middleware-opts (get-in config-opts [:handler :middleware-opts])
+          handler (-> (br/make-handler ["/" {"chsk" {:get (:ajax-get-or-ws-handshake-fn chsk-conn)
                                                      :post (:ajax-post-fn chsk-conn)}
                                              true (fn [request] (-> root-page response (content-type "text/html")))}])
-                      (rmd/wrap-defaults (:middleware-opts config-opts)))]
+                      (rmd/wrap-defaults middleware-opts))]
       (assoc component :handler handler)))
 
   (stop [component]
     (log/info "Stopping handler")
     (assoc component :handler nil)))
-
-
-(defn make-handler [config-opts]
-  (map->Handler {:config-opts config-opts}))

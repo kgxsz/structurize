@@ -5,7 +5,7 @@
             [taoensso.timbre :as log]))
 
 
-(def config-opts {})
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; event message handling
 
 
 (defn event-msg-handler [{:keys [event send-fn ring-req ?reply-fn]}]
@@ -16,11 +16,15 @@
       (?reply-fn [:hello/world "Well hello to you too"]))))
 
 
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; component setup
+
+
 (defrecord ChskConn [config-opts]
   component/Lifecycle
 
   (start [component]
-    (log/info "Initialising channel socket connection")
+    (log/info "Initialising chsk-conn")
     (let [chsk-conn (sente/make-channel-socket! sente-web-server-adapter {})
           stop-chsk-router! (sente/start-chsk-router! (:ch-recv chsk-conn) event-msg-handler)]
       (assoc component
@@ -30,13 +34,9 @@
 
   (stop [component]
     (when-let [stop-chsk-router! (:stop-chsk-router! component)]
-      (log/info "Stopping channel socket connection")
+      (log/info "Stopping chsk-conn")
       (stop-chsk-router!))
     (assoc component
            :ajax-get-or-ws-handshake-fn nil
            :ajax-post-fn nil
            :stop-chsk-router! nil)))
-
-
-(defn make-chsk-conn [config-opts]
-  (map->ChskConn {:config-opts config-opts}))
