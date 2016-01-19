@@ -18,8 +18,7 @@
   :profiles {:dev {:source-paths ["src/clj" "env/dev"]
 
                    :dependencies [[org.clojure/tools.namespace "0.2.11"]
-                                  [reagent "0.5.1"]
-                                  [cljs-uuid "0.0.4"]]
+                                  [reagent "0.5.1"]]
 
                    :plugins [[lein-figwheel "0.5.0-2"]]
 

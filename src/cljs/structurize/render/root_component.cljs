@@ -2,8 +2,7 @@
   (:require [structurize.system :refer [system]]
             [cemerick.url :refer [url]]
             [reagent.core :as r]
-            [taoensso.timbre :as log]
-            [cljs-uuid.core :as uuid]))
+            [taoensso.timbre :as log]))
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; other components
@@ -29,15 +28,12 @@
 
 (defn login-with-github-component []
   (log/info "mount login-with-github-component")
-  (let [random (str (uuid/make-random))]
-    (log/info random)
-    [:button
-     [:a
-      {:href (-> (url (get-in system [:config-opts :general :github-auth-url]))
-                 (assoc :query {:client_id (get-in system [:config-opts :general :github-auth-client-id])
-                                :state random})
-                 str)}
-      "Login with Github!"]]))
+  [:button
+   [:a
+    {:href (-> (url (get-in system [:config-opts :general :github-auth-url]))
+               (assoc :query {:client_id (get-in system [:config-opts :general :github-auth-client-id])})
+               str)}
+    "Login with Github!"]])
 
 
 
