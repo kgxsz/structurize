@@ -21,8 +21,9 @@
   {})
 
 
-(defn handler-config-opts [config]
-  {:middleware-opts {:params {:urlencoded true
+(defn server-config-opts [config]
+  {:http-kit-opts {:port (:port config)}
+   :middleware-opts {:params {:urlencoded true
                               :nested true
                               :keywordize true}
                      :security {:anti-forgery true
@@ -36,16 +37,11 @@
                                  :default-charset "utf-8"}}})
 
 
-(defn server-config-opts [config]
-   {:port (:port config)})
-
-
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; config loading
 
 
 (defn load-config []
-  ;; TODO - massive amount of work around logging the variables and which ones are being picked up through the env vars
   (let [home (System/getProperty "user.home")
         public-config (-> "resources/config.edn" slurp edn/read-string)
         private-config (-> (str home "/.lein/structurize/config.edn") slurp edn/read-string)]
@@ -65,12 +61,10 @@
       (assoc component
              :general (general-config-opts config)
              :chsk-conn (chsk-conn-config-opts config)
-             :handler (handler-config-opts config)
              :server (server-config-opts config))))
 
   (stop [component]
     (assoc component
            :general nil
            :chsk-conn nil
-           :handler nil
            :server nil)))
