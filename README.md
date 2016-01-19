@@ -4,6 +4,7 @@
 [![Stories in Ready](https://badge.waffle.io/kgxsz/structurize.svg?label=ready&title=Ready)](http://waffle.io/kgxsz/structurize)
 
 ## Local development setup
+- Ensure that you have setup the private configuration file: `~/.lein/structurize/config.edn`.
 - To start the back end: `lein repl :headless`.
 - To start the front end: `lein figwheel`.
 - To see the front end, hit `localhost:3000`.
