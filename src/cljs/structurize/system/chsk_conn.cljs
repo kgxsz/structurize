@@ -4,10 +4,6 @@
             [taoensso.timbre :as log]))
 
 
-(defonce config-opts
-  {:type :auto})
-
-
 (defn send-hello
   [send-fn]
   (let [hello-ev [:hello/world "HIYA"]]
@@ -31,14 +27,11 @@
 
   (start [component]
     (log/info "Initialising channel socket connection")
-    (let [{:keys [ch-recv chsk-send!]} (sente/make-channel-socket! "/chsk" {:type (:type config-opts)})]
+    (let [chsk-opts (get-in config-opts [:chsk-conn :chsk-opts])
+          {:keys [ch-recv chsk-send!]} (sente/make-channel-socket! "/chsk" chsk-opts)]
       (sente/start-chsk-router! ch-recv event-msg-handler)
       (assoc component
              :ch-recv ch-recv
              :chsk-send! chsk-send!)))
 
   (stop [component] component))
-
-
-(defn make-chsk-conn [config-opts]
-  (map->ChskConn {:config-opts config-opts}))

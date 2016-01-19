@@ -1,25 +1,20 @@
 (ns structurize.system
-  (:require [structurize.system.chsk-conn :as chsk-conn]
-            [structurize.env :refer [env]]
+  (:require [structurize.system.chsk-conn :refer [map->ChskConn]]
+            [structurize.system.config-opts :refer [map->ConfigOpts]]
             [com.stuartsierra.component :as component]
             [reagent.core :as r]))
-
-
-(defonce ^:private config-opts
-  {:general {:github-auth-url "https://github.com/login/oauth/authorize"
-             :something (env :something "default")}
-   :chsk-conn chsk-conn/config-opts})
-
 
 (defonce ^:private !app-state
   (r/atom {:secondary-view {:click-count 0}}))
 
 
-(defn make-system [config-opts]
-  (component/system-map
-   :config-opts config-opts
-   :!app-state !app-state
-   :chsk-conn (chsk-conn/make-chsk-conn (:chsk-conn config-opts))))
+(defn make-system []
+  (-> (component/system-map
+       :config-opts (map->ConfigOpts {})
+       :!app-state !app-state
+       :chsk-conn (map->ChskConn {}))
+      (component/system-using
+       {:chsk-conn [:config-opts]})))
 
 
-(defonce system (component/start (make-system config-opts)))
+(defonce system (component/start (make-system)))

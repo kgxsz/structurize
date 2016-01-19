@@ -16,7 +16,7 @@
 (defn secondary-view []
   (log/debug "mount secondary view")
   (let [!secondary-view-cursor (r/cursor (:!app-state system) [:secondary-view])]
-    (log/debug "config-opts:" (:config-opts system))
+    (log/debug "config-opts:" (get-in system [:config-opts :general]))
     (log/debug "app-state:" @(:!app-state system))
     [:div
      [:p "secondary view"]
