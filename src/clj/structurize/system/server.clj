@@ -41,7 +41,7 @@
 
   (start [component]
     (let [http-kit-opts (get-in config-opts [:server :http-kit-opts])
-          middleware-opts (get-in config-opts [:handler :middleware-opts])
+          middleware-opts (get-in config-opts [:server :middleware-opts])
           handler (-> (br/make-handler (make-routes chsk-conn))
                       (rmd/wrap-defaults middleware-opts))
           stop-server (run-server handler http-kit-opts)]
