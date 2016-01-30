@@ -29,8 +29,5 @@
            :general general-config-opts
            :chsk-conn chsk-conn-config-opts))
 
-  (stop [component]
-    (assoc component
-           :general nil
-           :chsk-conn nil)))
+  (stop [component] component))
 

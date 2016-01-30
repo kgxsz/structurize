@@ -6,10 +6,6 @@
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; component config opts
 
-(def config
-  {:port 3000
-   :github-auth-client-id "5983375a79d32f8c66ba"})
-
 
 (defn general-config-opts [config]
   {:github-access-token-url "https://github.com/login/oauth/access_token"
@@ -63,8 +59,4 @@
              :chsk-conn (chsk-conn-config-opts config)
              :server (server-config-opts config))))
 
-  (stop [component]
-    (assoc component
-           :general nil
-           :chsk-conn nil
-           :server nil)))
+  (stop [component] component))
