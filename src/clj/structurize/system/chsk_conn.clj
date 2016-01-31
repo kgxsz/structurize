@@ -36,7 +36,4 @@
     (when-let [stop-chsk-router! (:stop-chsk-router! component)]
       (log/info "Stopping chsk-conn")
       (stop-chsk-router!))
-    (assoc component
-           :ajax-get-or-ws-handshake-fn nil
-           :ajax-post-fn nil
-           :stop-chsk-router! nil)))
+    component))

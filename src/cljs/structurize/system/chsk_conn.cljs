@@ -26,7 +26,7 @@
   component/Lifecycle
 
   (start [component]
-    (log/info "Initialising channel socket connection")
+    (log/info "Initialising chsk-conn")
     (let [chsk-opts (get-in config-opts [:chsk-conn :chsk-opts])
           {:keys [ch-recv chsk-send!]} (sente/make-channel-socket! "/chsk" chsk-opts)]
       (sente/start-chsk-router! ch-recv event-msg-handler)

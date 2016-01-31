@@ -1,21 +1,23 @@
 (ns structurize.system
   (:require [structurize.system.chsk-conn :refer [map->ChskConn]]
             [structurize.system.config-opts :refer [map->ConfigOpts]]
+            [structurize.system.renderer :refer [map->Renderer]]
+            [structurize.system.state :refer [map->State]]
             [com.stuartsierra.component :as component]
             [reagent.core :as r]))
 
-
-(defonce ^:private !app-state
-  (r/atom {:secondary-view {:click-count 0}}))
 
 
 (defn make-system []
   (-> (component/system-map
        :config-opts (map->ConfigOpts {})
-       :!app-state !app-state
-       :chsk-conn (map->ChskConn {}))
+       :chsk-conn (map->ChskConn {})
+       :state (map->State {})
+       :renderer (map->Renderer {}))
       (component/system-using
-       {:chsk-conn [:config-opts]})))
+       {:chsk-conn [:config-opts]
+        :state [:config-opts]
+        :renderer [:state :chsk-conn]})))
 
 
 (defonce system (component/start (make-system)))

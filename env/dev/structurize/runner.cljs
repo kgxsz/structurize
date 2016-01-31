@@ -1,11 +1,11 @@
 (ns ^:figwheel-no-load structurize.runner
-  (:require [structurize.render :as render]))
+  (:require [structurize.system :refer [system]]
+            [structurize.system.renderer :as renderer]))
 
 
 (defn reload! []
-  (render/render-root!))
+  (renderer/render-root! (select-keys system [:config-opts :state :chsk-conn])))
 
 
 (defn ^:export start []
-  (enable-console-print!)
-  (render/render-root!))
+  (enable-console-print!))

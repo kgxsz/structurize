@@ -1,4 +1,4 @@
 (ns structurize.config)
 
 (defonce config
-  {:something "not default"})
+  {:init-click-count-a 3})

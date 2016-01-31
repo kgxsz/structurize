@@ -4,20 +4,13 @@
             [taoensso.timbre :as log]))
 
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; component config opts
-
-
 (defonce general-config-opts
   {:github-auth-url "https://github.com/login/oauth/authorize"
-   :something (:something config)})
+   :init-click-count-a (:init-click-count-a config)})
 
 
 (defonce chsk-conn-config-opts
   {:chsk-opts {:type :auto}})
-
-
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; component setup
 
 
 (defrecord ConfigOpts []
