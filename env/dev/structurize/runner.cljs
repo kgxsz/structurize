@@ -4,7 +4,7 @@
 
 
 (defn reload! []
-  (renderer/render-root! (select-keys system [:config-opts :state :chsk-conn])))
+  (renderer/render-root! (select-keys system [:config-opts :state :<event])))
 
 
 (defn ^:export start []

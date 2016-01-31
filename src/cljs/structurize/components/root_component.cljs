@@ -1,7 +1,9 @@
 (ns structurize.components.root-component
   (:require [cemerick.url :refer [url]]
             [reagent.core :as r]
-            [taoensso.timbre :as log]))
+            [taoensso.timbre :as log]
+            [cljs.core.async :as a])
+  (:require-macros [cljs.core.async.macros :refer [go]]))
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; other components
@@ -20,19 +22,19 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; root component
 
 
-(defn click-counter-a [{:keys [state]}]
+(defn click-counter-a [{:keys [state <event]}]
   (log/debug "mount/render click-counter-a")
   (let [!click-count (:!click-count-a state)]
     [:button
-     {:on-click #(swap! !click-count inc)}
+     {:on-click #(go (a/>! <event [:inc-click-count/c {}]))}
      (str "clicks: " @!click-count)]))
 
 
-(defn click-counter-b [{:keys [state]}]
+(defn click-counter-b [{:keys [state <event]}]
   (log/debug "mount/render click-counter-b")
   (let [!click-count (:!click-count-b state)]
     [:button
-     {:on-click #(swap! !click-count inc)}
+     {:on-click #(go (a/>! <event [:inc-click-count/b {}]))}
      (str "clicks: " @!click-count)]))
 
 

@@ -5,16 +5,16 @@
             [taoensso.timbre :as log]))
 
 
-(defn render-root! [ctx]
-  (r/render [root-component ctx] (js/document.getElementById "root")))
+(defn render-root! [Δ]
+  (r/render [root-component Δ] (js/document.getElementById "root")))
 
 
-(defrecord Renderer [config-opts state chsk-conn]
+(defrecord Renderer [config-opts state <event]
   component/Lifecycle
 
   (start [component]
     (log/info "Initialising renderer")
-    (render-root! {:config-opts config-opts :state state :chsk-conn chsk-conn})
+    (render-root! {:config-opts config-opts :state state :<event <event})
     component)
 
   (stop [component] component))
