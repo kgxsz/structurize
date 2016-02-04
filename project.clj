@@ -1,6 +1,7 @@
 (defproject structurize "0.1.0-SNAPSHOT"
 
   :dependencies [[org.clojure/clojure "1.7.0"]
+                 [org.clojure/core.async "0.2.374"]
                  [com.stuartsierra/component "0.3.1"]
                  [bidi "1.22.1"]
                  [http-kit "2.1.18"]

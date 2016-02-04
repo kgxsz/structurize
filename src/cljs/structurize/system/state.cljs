@@ -5,7 +5,9 @@
 
 
 (defn make-global-state [{:keys [general]}]
-  (r/atom {:click-count {:a (:init-click-count-a general)
+  (r/atom {:message-status {}
+           :message-reply {}
+           :click-count {:a (:init-click-count-a general)
                          :b 0}}))
 
 
@@ -18,6 +20,7 @@
       (assoc component
              :!global !global
              :!click-count-a (r/cursor !global [:click-count :a])
-             :!click-count-b (r/cursor !global [:click-count :b]))))
+             :!click-count-b (r/cursor !global [:click-count :b])
+             :!github-auth-attempt (r/cursor !global [:github-auth-attempt]))))
 
   (stop [component] component))

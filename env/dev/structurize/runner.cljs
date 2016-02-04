@@ -4,7 +4,7 @@
 
 
 (defn reload! []
-  (renderer/render-root! (select-keys system [:config-opts :state :<event])))
+  (renderer/render-root! (select-keys system [:config-opts :state :bus :comms])))
 
 
 (defn ^:export start []

@@ -5,21 +5,21 @@
   (:require-macros [cljs.core.async.macros :refer [go-loop]]))
 
 
-(defn dispatch-event [[type data] state chsk-conn]
-  (log/debug "Dispatching event:" type)
-  (case type
-    :inc-click-count/a (swap! (:!click-count-a state) inc)
-    :inc-click-count/b (swap! (:!click-count-b state) inc)
-    (log/error "No dispatch for event:" type)))
+(defn process-event [[id {:keys [cursor Δ]}] state]
+  (log/debug "processing event:" id)
+  (if-let [state (and Δ (get state (or cursor :!global)))]
+    (swap! state Δ)
+    (log/error "Failed to process event:" id)))
 
 
-(defrecord Machine [config-opts <event chsk-conn state]
+(defrecord Machine [config-opts state bus]
   component/Lifecycle
 
   (start [component]
     (log/info "Initialising machine")
-    (let [<loop (go-loop [] (dispatch-event (a/<! <event) state chsk-conn) (recur))]
-      (assoc component :<loop <loop)))
+    (let [<event (:<event bus)]
+      (go-loop [] (process-event (a/<! <event) state) (recur))
+      component))
 
   (stop [component] component))
 

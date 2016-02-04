@@ -2,7 +2,8 @@
   (:require [com.stuartsierra.component :as component]
             [taoensso.sente :as sente]
             [taoensso.sente.server-adapters.http-kit :refer [sente-web-server-adapter]]
-            [taoensso.timbre :as log]))
+            [taoensso.timbre :as log]
+            [clojure.core.async :refer [go <! timeout]]))
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; event message handling
@@ -11,9 +12,9 @@
 (defn event-msg-handler [{:keys [event send-fn ring-req ?reply-fn]}]
   (let [[id ?payload] event]
     (log/info "Received event!" id)
-    (when (and (= :hello/world id)
-               ?reply-fn)
-      (?reply-fn [:hello/world "Well hello to you too"]))))
+    (when (and (= :auth/login-with-github id) ?reply-fn)
+      (go (<! (timeout 2000))
+          (?reply-fn [:auth/login-with-github {:attempt-id 123 :client-id 456}])))))
 
 
 
