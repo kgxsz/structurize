@@ -22,26 +22,30 @@
 
 (defn login-with-github [{:keys [state], {:keys [send!]} :comms}]
   (log/debug "mount/render login-with-github")
-  [:div
-   [:span (str @(:!global state))]
-   [:button
-    {:on-click (fn [] (send! {:message [:auth/login-with-github {}]}))}
-    "Login with GitHub"
+  (let [!message-status (r/cursor (:!global state) [:message-status :auth/login-with-github])]
+    [:div
+     [:span (str @(:!global state))]
+     [:button
+      {:on-click (fn [] (send! {:message [:auth/login-with-github {}]}))}
+      (case @!message-status
+        :sent "logging in!"
+        :received "logged in!"
+        nil "log in with GitHub")
 
-    ;; The send message has an ID, use this. Let your state include a thing that tracks the send-status for that id,
-    ;; so it'll be in transit, or success, or failed. These can be generalised and used by any component that wants
-    ;; to react on those situations. What we do with the returning data is something we'd want to define specifically
-    ;; here. Put it in a cache if you want, we don't care, that's the point.
+      ;; The send message has an ID, use this. Let your state include a thing that tracks the send-status for that id,
+      ;; so it'll be in transit, or success, or failed. These can be generalised and used by any component that wants
+      ;; to react on those situations. What we do with the returning data is something we'd want to define specifically
+      ;; here. Put it in a cache if you want, we don't care, that's the point.
 
 
-    ;; Compose the functions that dress the data and render them, make them independent of how I get the data down there.
+      ;; Compose the functions that dress the data and render them, make them independent of how I get the data down there.
 
 
-    #_[:a
-       {:href (-> (url (get-in system [:config-opts :general :github-auth-url]))
-                  (assoc :query {:client_id (get-in system [:config-opts :general :github-auth-client-id])})
-                  str)}
-       "Login with Github!"]]])
+      #_[:a
+         {:href (-> (url (get-in system [:config-opts :general :github-auth-url]))
+                    (assoc :query {:client_id (get-in system [:config-opts :general :github-auth-client-id])})
+                    str)}
+         "Login with Github!"]]]))
 
 
 (defn root [Φ]
