@@ -7,7 +7,7 @@
 
 (defn process-event [[id {:keys [cursor Δ]}] state]
   (log/debug "processing event:" id)
-  (if-let [state (and Δ (get state (or cursor :!global)))]
+  (if-let [state (and Δ (get state (or cursor :!core)))]
     (swap! state Δ)
     (log/error "Failed to process event:" id)))
 

@@ -4,16 +4,13 @@
             [taoensso.timbre :as log]))
 
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; component config opts
-
-
 (defn general-config-opts [config]
   {:github-access-token-url "https://github.com/login/oauth/access_token"
    :github-auth-client-id (:github-auth-client-id config)
    :github-auth-client-secret (:github-auth-client-secret config)})
 
 
-(defn chsk-conn-config-opts [config]
+(defn comms-config-opts [config]
   {})
 
 
@@ -31,10 +28,6 @@
                                  :absolute-redirects true
                                  :content-types true
                                  :default-charset "utf-8"}}})
-
-
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; config loading
 
 
 (defn load-config []
@@ -56,7 +49,7 @@
     (let [config (load-config)]
       (assoc component
              :general (general-config-opts config)
-             :chsk-conn (chsk-conn-config-opts config)
+             :comms (comms-config-opts config)
              :server (server-config-opts config))))
 
   (stop [component] component))

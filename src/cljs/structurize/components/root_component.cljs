@@ -22,9 +22,9 @@
 
 (defn login-with-github [{:keys [state], {:keys [send!]} :comms}]
   (log/debug "mount/render login-with-github")
-  (let [!message-status (r/cursor (:!global state) [:message-status :auth/login-with-github])]
+  (let [!message-status (r/cursor (:!core state) [:message-status :auth/login-with-github])]
     [:div
-     [:span (str @(:!global state))]
+     [:span (str @(:!core state))]
      [:button
       {:on-click (fn [] (send! {:message [:auth/login-with-github {}]}))}
       (case @!message-status

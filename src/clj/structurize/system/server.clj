@@ -8,9 +8,6 @@
             [taoensso.timbre :as log]))
 
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; page rendering
-
-
 (def root-page
   (html5
    [:head
@@ -22,13 +19,9 @@
     [:script {:type "text/javascript"} "structurize.runner.start();"]]))
 
 
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; routing
-
-
-(defn make-routes [chsk-conn]
-  ["/" {"chsk" {:get (:ajax-get-or-ws-handshake-fn chsk-conn)
-                :post (:ajax-post-fn chsk-conn)}
+(defn make-routes [comms]
+  ["/" {"chsk" {:get (:ajax-get-or-ws-handshake-fn comms)
+                :post (:ajax-post-fn comms)}
         true (fn [request] (-> root-page response (content-type "text/html")))}])
 
 
@@ -36,13 +29,13 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; component setup
 
 
-(defrecord Server [config-opts chsk-conn]
+(defrecord Server [config-opts comms]
   component/Lifecycle
 
   (start [component]
     (let [http-kit-opts (get-in config-opts [:server :http-kit-opts])
           middleware-opts (get-in config-opts [:server :middleware-opts])
-          handler (-> (br/make-handler (make-routes chsk-conn))
+          handler (-> (br/make-handler (make-routes comms))
                       (rmd/wrap-defaults middleware-opts))
           stop-server (run-server handler http-kit-opts)]
 

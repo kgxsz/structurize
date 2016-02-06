@@ -16,11 +16,11 @@
 
   (start [component]
     (log/info "Initialising state")
-    (let [!global (make-global-state config-opts)]
+    (let [!core (make-global-state config-opts)]
       (assoc component
-             :!global !global
-             :!click-count-a (r/cursor !global [:click-count :a])
-             :!click-count-b (r/cursor !global [:click-count :b])
-             :!github-auth-attempt (r/cursor !global [:github-auth-attempt]))))
+             :!core !core
+             :!click-count-a (r/cursor !core [:click-count :a])
+             :!click-count-b (r/cursor !core [:click-count :b])
+             :!github-auth-attempt (r/cursor !core [:github-auth-attempt]))))
 
   (stop [component] component))
