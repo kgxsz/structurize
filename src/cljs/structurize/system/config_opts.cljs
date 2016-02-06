@@ -28,6 +28,10 @@
   {})
 
 
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; component setup
+
+
 (defrecord ConfigOpts []
   component/Lifecycle
 

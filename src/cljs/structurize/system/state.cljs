@@ -11,6 +11,9 @@
                          :b 0}}))
 
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; component setup
+
+
 (defrecord State [config-opts]
   component/Lifecycle
 
@@ -20,7 +23,6 @@
       (assoc component
              :!core !core
              :!click-count-a (r/cursor !core [:click-count :a])
-             :!click-count-b (r/cursor !core [:click-count :b])
-             :!github-auth-attempt (r/cursor !core [:github-auth-attempt]))))
+             :!click-count-b (r/cursor !core [:click-count :b]))))
 
   (stop [component] component))

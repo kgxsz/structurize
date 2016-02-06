@@ -12,6 +12,10 @@
     (log/error "Failed to process event:" id)))
 
 
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; component setup
+
+
 (defrecord Machine [config-opts state bus]
   component/Lifecycle
 
@@ -22,5 +26,3 @@
       component))
 
   (stop [component] component))
-
-

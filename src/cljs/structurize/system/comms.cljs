@@ -6,7 +6,10 @@
   (:require-macros [cljs.core.async.macros :refer [go]]))
 
 
-(defn make-receive [{:keys [emit-event!]}]
+(defn make-receive
+  "Returns a function that receives a message and dispatches it appropriately."
+  [{:keys [emit-event!]}]
+
   (fn [{:keys [event id ?data]}]
     (log/info "Received message:" id)
     #_(go (a/>! <event [:comms-event {:id id :?data ?data}]))
@@ -20,22 +23,29 @@
 
   (fn [{[id _ :as message] :message, :keys [timeout]}]
     (log/debug "Sending message to server:" id)
-    (emit-event! [:message-status {:Δ (fn [core] (update-in core [:message-status id] (constantly :sent)))}])
+    (emit-event! [:message-sent {:Δ (fn [core] (assoc-in core [:message-status id] :sent))}])
 
     (send-fn
       message
-      (or timeout 5000)
-      (fn [[id ?payload :as reply]]
+      (or timeout 10000)
+      (fn [reply]
         (if (sente/cb-success? reply)
-          (do (log/debug "Received a reply message from server:" reply)
-              (emit-event! [:message-reply {:Δ (fn [state]
-                                                 (-> state
-                                                     (update-in [:message-status id] (constantly :received))
-                                                     (update-in [:message-reply id] (constantly ?payload))))}]))
-          (log/debug "Comms failed with:" reply))))))
+          (let [[id ?payload] reply]
+            (log/debug "Received a reply message from server:" reply)
+            (emit-event! [:message-received {:Δ (fn [core]
+                                                  (-> core
+                                                      (assoc-in [:message-status id] :received)
+                                                      (assoc-in [:message-reply id] ?payload)))}]))
+          (do
+            (log/error "Comms failed with:" reply)
+            (emit-event! [:message-failed {:Δ (fn [core] (assoc-in core [:message-status id] :failed))}])))))))
 
 
-(defrecord Comms [config-opts bus state]
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; component setup
+
+
+(defrecord Comms [config-opts bus]
   component/Lifecycle
 
   (start [component]

@@ -4,6 +4,7 @@
             [taoensso.timbre :as log])
   (:require-macros [cljs.core.async.macros :refer [go]]))
 
+
 (defrecord Bus [config-opts]
   component/Lifecycle
 

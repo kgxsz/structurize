@@ -6,12 +6,24 @@
             [clojure.core.async :refer [go <! timeout]]))
 
 
-(defn receive [{:keys [event send-fn ring-req ?reply-fn]}]
-  (let [[id ?payload] event]
-    (log/info "Received message:" id)
-    (when (and (= :auth/login-with-github id) ?reply-fn)
-      (go (<! (timeout 1000))
-          (?reply-fn [:auth/login-with-github {:attempt-id 123 :client-id 456}])))))
+(defn init-github-auth [config-opts id ?reply-fn]
+  (let [client-id (get-in config-opts [:general :github-auth-client-id])
+        state (str (java.util.UUID/randomUUID))]
+    (go (<! (timeout 1000)) (?reply-fn [id {:state state :client-id client-id}]))))
+
+
+(defn make-receive
+  "Returns a function that receives a message and dispatches it appropriately."
+  [config-opts]
+
+  (fn [{:keys [send-fn ring-req ?reply-fn], [id ?payload] :event}]
+    (log/debug "Received message:" id)
+
+    (case id
+      :auth/init-github-auth (init-github-auth config-opts id ?reply-fn)
+      :chsk/ws-ping nil
+      :chsk/uidport-open nil
+      (log/error "Failed to process message:" id))))
 
 
 
@@ -24,7 +36,7 @@
   (start [component]
     (log/info "Initialising comms")
     (let [chsk-conn (sente/make-channel-socket! sente-web-server-adapter {})
-          stop-chsk-router! (sente/start-chsk-router! (:ch-recv chsk-conn) receive)]
+          stop-chsk-router! (sente/start-chsk-router! (:ch-recv chsk-conn) (make-receive config-opts))]
       (assoc component
              :ajax-get-or-ws-handshake-fn (:ajax-get-or-ws-handshake-fn chsk-conn)
              :ajax-post-fn (:ajax-post-fn chsk-conn)

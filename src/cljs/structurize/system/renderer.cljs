@@ -1,12 +1,16 @@
 (ns structurize.system.renderer
-  (:require [reagent.core :as r]
+  (:require [structurize.components.root-component :refer [root]]
             [com.stuartsierra.component :as component]
-            [structurize.components.root-component :refer [root]]
+            [reagent.core :as r]
             [taoensso.timbre :as log]))
 
 
 (defn render-root! [Φ]
   (r/render [root Φ] (js/document.getElementById "root")))
+
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; component setup
 
 
 (defrecord Renderer [config-opts state bus comms]
