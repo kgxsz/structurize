@@ -1,13 +1,13 @@
 (ns structurize.system.side-effector
   (:require [structurize.routes :refer [routes]]
             [bidi.bidi :as b]
-            [cemerick.url :refer [url map->query query->map]]
+            [cemerick.url :refer [map->query query->map]]
             [cljs.core.async :as a]
+            [clojure.string :as str]
             [com.stuartsierra.component :as component]
             [goog.events :as events]
             [taoensso.sente :as sente]
-            [taoensso.timbre :as log]
-            [clojure.string :as str])
+            [taoensso.timbre :as log])
   (:require-macros [cljs.core.async.macros :refer [go]]
                    [secretary.core :refer [defroute]])
   (:import [goog.history Html5History EventType]))
@@ -83,7 +83,7 @@
 
   (fn [{:keys [event id ?data]}]
     (log/info "received message from server:" id)
-    #_(go (a/>! <event [:comms-event {:id id :?data ?data}]))
+    #_(go (a/>! <event [:comms-event {:id id :?data ?data}])) ;; TODO: need to field these messages and dispatch accordingly
     (when (and (= id :chsk/state) (= (:first-open? ?data)))
          (log/info "comms established"))))
 

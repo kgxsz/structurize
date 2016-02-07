@@ -1,9 +1,7 @@
 (ns structurize.components.root-component
   (:require [structurize.routes :refer [routes]]
             [bidi.bidi :as b]
-            [cemerick.url :refer [url]]
             [reagent.core :as r]
-            [bidi.bidi :as b]
             [taoensso.timbre :as log])
   (:require-macros [cljs.core.async.macros :refer [go]]))
 
@@ -38,8 +36,8 @@
     (when (= :received @!message-status)
       (let [{:keys [client-id attempt-id]} @!message-reply
             redirect-uri (str (:host general) (b/path-for routes :auth-github))]
-        (change-history! {:prefix  "https://github.com"
-                          :path  "/login/oauth/authorize"
+        (change-history! {:prefix "https://github.com"
+                          :path "/login/oauth/authorize"
                           :query {:client_id client-id
                                   :state attempt-id
                                   :redirect_uri redirect-uri}})))
@@ -58,20 +56,28 @@
   [:span (str @(:!core state))])
 
 
-(defn root [{{:keys [change-history!]} :side-effector
+(defn root [{{:keys [!handler]} :state
+             {:keys [change-history!]} :side-effector
              :as Φ}]
   (log/debug "mount/render root-component")
-  [:div
-   [:h1 "Front end ready!"]
-   [click-counter-a Φ]
-   [click-counter-b Φ]
-   [login-with-github Φ]
-   [event-state-watch Φ]
-   [:button {:on-click  #(change-history! {:path (b/path-for routes :foo)
-                                           :query {:a 1, :b 2}})}
-    "update foo"]
-   [:button {:on-click  #(change-history! {:path (b/path-for routes :bar)})}
-    "update bar"]
-   [:button {:on-click #(change-history! {:query {:y "keigo+&1"}
-                                          :replace? true})}
-    "nuke params"]])
+
+  (case @!handler
+    :home [:div
+           [:h1 "Front end ready!"]
+           [click-counter-a Φ]
+           [click-counter-b Φ]
+           [login-with-github Φ]
+           [event-state-watch Φ]
+           [:button {:on-click  #(change-history! {:path (b/path-for routes :foo)
+                                                   :query {:a 1, :b 2}})}
+            "update foo"]
+           [:button {:on-click  #(change-history! {:path (b/path-for routes :bar)})}
+            "update bar"]
+           [:button {:on-click #(change-history! {:query {:y "keigo+&1"}
+                                                  :replace? true})}
+            "nuke params"]]
+
+    :github-auth [:div
+                  [:h3 "github auth confirmation"]]
+
+    [:div [:h2 "Couldn't find this goshdarn page"]]))
