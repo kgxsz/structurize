@@ -5,14 +5,13 @@
 
 
 (defonce general-config-opts
-  {:github-auth-url "https://github.com/login/oauth/authorize"
-   :init-click-count-a (:init-click-count-a config)})
+  {:init-click-count-a (:init-click-count-a config)})
 
 
 (defonce bus-config-opts
   {})
 
-(defonce comms-config-opts
+(defonce side-effector-config-opts
   {:chsk-opts {:type :auto}})
 
 
@@ -40,7 +39,7 @@
     (assoc component
            :general general-config-opts
            :bus bus-config-opts
-           :comms comms-config-opts
+           :side-effector side-effector-config-opts
            :state state-config-opts
            :machine machine-config-opts
            :renderer renderer-config-opts))

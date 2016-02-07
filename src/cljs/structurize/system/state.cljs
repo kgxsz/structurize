@@ -7,8 +7,11 @@
 (defn make-global-state [{:keys [general]}]
   (r/atom {:message-status {}
            :message-reply {}
+           :event nil
+           :location nil
            :click-count {:a (:init-click-count-a general)
                          :b 0}}))
+
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; component setup
@@ -22,6 +25,7 @@
     (let [!core (make-global-state config-opts)]
       (assoc component
              :!core !core
+             :!host (r/cursor !core [:location :host])
              :!click-count-a (r/cursor !core [:click-count :a])
              :!click-count-b (r/cursor !core [:click-count :b]))))
 

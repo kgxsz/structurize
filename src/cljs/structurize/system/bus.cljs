@@ -10,8 +10,7 @@
 
   (start [component]
     (log/info "Initialising bus")
-    (let [<event (a/chan)
-          emit-event! (fn [e] (go (a/>! <event e)))]
-      (assoc component :<event <event :emit-event! emit-event!)))
+    (let [<event (a/chan)]
+      (assoc component :<event <event)))
 
   (stop [component] component))

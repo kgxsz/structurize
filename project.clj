@@ -3,14 +3,13 @@
   :dependencies [[org.clojure/clojure "1.7.0"]
                  [org.clojure/core.async "0.2.374"]
                  [com.stuartsierra/component "0.3.1"]
-                 [bidi "1.22.1"]
+                 [bidi "1.25.0"]
                  [http-kit "2.1.18"]
                  [hiccup "1.0.5"]
                  [ring "1.4.0"]
                  [ring/ring-defaults "0.1.5"]
                  [com.taoensso/sente "1.7.0"]
-                 [com.taoensso/timbre "4.1.4"]
-                 [com.cemerick/url "0.1.1"]]
+                 [com.taoensso/timbre "4.1.4"]]
 
   :clean-targets ^{:protect false} ["target/"
                                     "dev-resources/public/js/"
@@ -19,7 +18,9 @@
   :profiles {:dev {:source-paths ["src/clj" "env/dev"]
 
                    :dependencies [[org.clojure/tools.namespace "0.2.11"]
-                                  [reagent "0.5.1"]]
+                                  [reagent "0.5.1"]
+                                  [com.cemerick/url "0.1.1"]
+                                  [secretary "1.2.3"]]
 
                    :plugins [[lein-figwheel "0.5.0-2"]]
 

@@ -1,6 +1,6 @@
 (ns structurize.system
   (:require [structurize.system.bus :refer [map->Bus]]
-            [structurize.system.comms :refer [map->Comms]]
+            [structurize.system.side-effector :refer [map->SideEffector]]
             [structurize.system.config-opts :refer [map->ConfigOpts]]
             [structurize.system.machine :refer [map->Machine]]
             [structurize.system.renderer :refer [map->Renderer]]
@@ -12,16 +12,16 @@
   (-> (component/system-map
        :config-opts (map->ConfigOpts {})
        :bus (map->Bus {})
-       :comms (map->Comms {})
+       :side-effector (map->SideEffector {})
        :state (map->State {})
        :machine (map->Machine {})
        :renderer (map->Renderer {}))
       (component/system-using
        {:bus [:config-opts]
-        :comms [:config-opts :bus]
+        :side-effector [:config-opts :bus]
         :state [:config-opts]
         :machine [:config-opts :state :bus]
-        :renderer [:config-opts :state :bus :comms]})))
+        :renderer [:config-opts :state :side-effector]})))
 
 
 (defonce system (component/start (make-system)))

@@ -5,10 +5,11 @@
   (:require-macros [cljs.core.async.macros :refer [go-loop]]))
 
 
-(defn process-event [[id {:keys [cursor Δ]}] state]
+(defn process-event [[id {:keys [cursor Δ]}] {:keys [!core] :as state}]
   (log/debug "processing event:" id)
-  (if-let [state (and Δ (get state (or cursor :!core)))]
-    (swap! state Δ)
+  (if-let [cursor-or-core (and Δ (or (get state cursor) !core))]
+    (do (swap! !core assoc :event id)
+        (swap! cursor-or-core Δ))
     (log/error "Failed to process event:" id)))
 
 

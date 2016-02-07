@@ -9,16 +9,15 @@
   (r/render [root Φ] (js/document.getElementById "root")))
 
 
-
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; component setup
 
 
-(defrecord Renderer [config-opts state bus comms]
+(defrecord Renderer [config-opts state bus side-effector]
   component/Lifecycle
 
   (start [component]
     (log/info "Initialising renderer")
-    (render-root! {:config-opts config-opts :state state :bus bus :comms comms})
+    (render-root! {:config-opts config-opts :state state :side-effector side-effector})
     component)
 
   (stop [component] component))
