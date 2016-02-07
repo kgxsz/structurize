@@ -1,12 +1,13 @@
 (ns structurize.system.side-effector
   (:require [structurize.routes :refer [routes]]
             [bidi.bidi :as b]
-            [cemerick.url :refer [url]]
+            [cemerick.url :refer [url map->query query->map]]
             [cljs.core.async :as a]
             [com.stuartsierra.component :as component]
             [goog.events :as events]
             [taoensso.sente :as sente]
-            [taoensso.timbre :as log])
+            [taoensso.timbre :as log]
+            [clojure.string :as str])
   (:require-macros [cljs.core.async.macros :refer [go]]
                    [secretary.core :refer [defroute]])
   (:import [goog.history Html5History EventType]))
@@ -16,24 +17,38 @@
 
 
 (defn make-navigation-handler
-  "Returns a function that handles google navigation
-   events and emits the relevant event."
-  [emit-event!]
+  "Returns a function that handles browser navigation
+   events and emits the location-change event, which will
+   cause an update to the location information in the state."
+  [history emit-event!]
 
   (fn [g-event]
-    (let [url (url js/window.location.href)
-          host (str (:protocol url) "://" (:host url) (when (pos? (:port url)) (str ":" (:port url))))
-          location (merge (select-keys url [:path :query])
-                          (b/match-route routes (:path url))
-                          {:host host})]
-      (log/debug "received navigation from browser:" (:path location))
+    (let [token (.getToken history)
+          [path query] (str/split token "?")
+          location (merge {:path path
+                           :query (query->map query)}
+                          (b/match-route routes path))]
+      (log/debug "received navigation from browser:" token)
       (when-not (.-isNavigation g-event) (js/window.scrollTo 0 0))
       (emit-event! [:location-change {:Δ (fn [core] (assoc core :location location))}]))))
 
 
+(defn make-transformer
+  "Custom transformer required to manage query parameters."
+  []
+  (let [transformer (Html5History.TokenTransformer.)]
+    (set! transformer.retrieveToken
+          (fn [path-prefix location]
+            (str (.-pathname location) (.-search location))))
+    (set! transformer.createUrl
+          (fn [token path-prefix location]
+            (str path-prefix token)))
+    transformer))
+
+
 (defn make-history []
-  (doto (Html5History.)
-    (.setPathPrefix (str js/window.location.protocol "//" js/window.location.host))
+  (doto (Html5History. js/window (make-transformer))
+    (.setPathPrefix "")
     (.setUseFragment false)))
 
 
@@ -44,22 +59,19 @@
 
 
 (defn make-change-history!
-  "Returns a function that receives a token and changes the history.
-   If replace? is true, the history will be replaced rather than put
-   in the stack, such that the change will not be included in forward
-   and back navigation. If leave? is true, then we leave the app entirely."
-  [emit-event!]
-  (let [history (make-history)
-        navigation-handler (make-navigation-handler emit-event!)]
-    (listen-for-navigation history navigation-handler)
-    (fn change-history!
-      ([token] (change-history! token {}))
-      ([token {:keys [replace? leave?]}]
-       (log/debug "dispatching navigation to browser:" token)
-       (cond
-         leave? (set! js/window.location token)
-         replace? (.replaceToken history token)
-         :else (.setToken history token))))))
+  "Returns a function that takes a map of options and updates the
+   browser's navigation accordingly. The browser will fire a navigation
+   event if the history changes, which will be dealt with by a listener."
+  [history]
+  (fn [{:keys [prefix path query replace?]}]
+    (let [query-string (when-not (str/blank? (map->query query)) (str "?" (map->query query)))
+          current-path (-> (.getToken history) (str/split "?") first)
+          token (str (or path current-path) query-string)]
+      (log/debug "dispatching navigation to browser:" (str prefix token))
+      (cond
+        prefix (set! js/window.location (str prefix token))
+        replace? (.replaceToken history token)
+        :else (.setToken history token)))))
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; comms setup
@@ -121,16 +133,18 @@
   (start [component]
     (log/info "initialising side-effector")
     (let [emit-event! (make-emit-event! bus)
+          history (make-history)
+          {:keys [ch-recv send-fn]} (sente/make-channel-socket! "/chsk" (get-in config-opts [:side-effector :chsk-opts]))]
 
-          chsk-opts (get-in config-opts [:side-effector :chsk-opts])
-          {:keys [ch-recv send-fn]} (sente/make-channel-socket! "/chsk" chsk-opts)]
-
+      (log/info "begin listening for messages from server")
       (sente/start-chsk-router! ch-recv (make-receive emit-event!))
 
+      (log/info "begin listening for navigation from the browser")
+      (listen-for-navigation history (make-navigation-handler history emit-event!))
 
       (assoc component
              :emit-event! emit-event!
              :send! (make-send! send-fn emit-event!)
-             :change-history! (make-change-history! emit-event!))))
+             :change-history! (make-change-history! history))))
 
   (stop [component] component))

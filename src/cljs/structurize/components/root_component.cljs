@@ -26,7 +26,8 @@
    (str "clicks: " @!click-count-b)])
 
 
-(defn login-with-github [{{:keys [!core !host]} :state
+(defn login-with-github [{{:keys [general]} :config-opts
+                          {:keys [!core]} :state
                           {:keys [send! emit-event! change-history!]} :side-effector}]
 
   (log/debug "mount/render login-with-github")
@@ -35,14 +36,13 @@
         !message-reply (r/cursor !core [:message-reply :auth/init-github-auth])]
 
     (when (= :received @!message-status)
-      (let [{:keys [client-id state]} @!message-reply
-            redirect-uri (str @!host (b/path-for routes :auth-github))
-            location (-> (url "https://github.com")
-                         (assoc :path "/login/oauth/authorize")
-                         (assoc :query {:client_id client-id
-                                        :state state
-                                        :redirect_uri redirect-uri}))]
-        (change-history! location {:leave? true})))
+      (let [{:keys [client-id attempt-id]} @!message-reply
+            redirect-uri (str (:host general) (b/path-for routes :auth-github))]
+        (change-history! {:prefix  "https://github.com"
+                          :path  "/login/oauth/authorize"
+                          :query {:client_id client-id
+                                  :state attempt-id
+                                  :redirect_uri redirect-uri}})))
 
     [:div
      [:button
@@ -67,10 +67,11 @@
    [click-counter-b Φ]
    [login-with-github Φ]
    [event-state-watch Φ]
-   [:button {:on-click  #(change-history! "/dfd")}
-    "dfd"]
-   [:button {:on-click #(change-history! "/dfg" {:replace? true})}
-    "adsda"]
-   [:a {:href "/ab"
-        :on-click #(change-history! "a")}
-    "go"]])
+   [:button {:on-click  #(change-history! {:path (b/path-for routes :foo)
+                                           :query {:a 1, :b 2}})}
+    "update foo"]
+   [:button {:on-click  #(change-history! {:path (b/path-for routes :bar)})}
+    "update bar"]
+   [:button {:on-click #(change-history! {:query {:y "keigo+&1"}
+                                          :replace? true})}
+    "nuke params"]])

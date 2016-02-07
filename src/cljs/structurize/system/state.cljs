@@ -21,11 +21,10 @@
   component/Lifecycle
 
   (start [component]
-    (log/info "Initialising state")
+    (log/info "initialising state")
     (let [!core (make-global-state config-opts)]
       (assoc component
              :!core !core
-             :!host (r/cursor !core [:location :host])
              :!click-count-a (r/cursor !core [:click-count :a])
              :!click-count-b (r/cursor !core [:click-count :b]))))
 

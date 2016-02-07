@@ -9,7 +9,7 @@
   component/Lifecycle
 
   (start [component]
-    (log/info "Initialising bus")
+    (log/info "initialising bus")
     (let [<event (a/chan)]
       (assoc component :<event <event)))
 

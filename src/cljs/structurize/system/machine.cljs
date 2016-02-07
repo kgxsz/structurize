@@ -10,7 +10,7 @@
   (if-let [cursor-or-core (and Δ (or (get state cursor) !core))]
     (do (swap! !core assoc :event id)
         (swap! cursor-or-core Δ))
-    (log/error "Failed to process event:" id)))
+    (log/error "failed to process event:" id)))
 
 
 
@@ -21,7 +21,7 @@
   component/Lifecycle
 
   (start [component]
-    (log/info "Initialising machine")
+    (log/info "initialising machine")
     (let [<event (:<event bus)]
       (go-loop [] (process-event (a/<! <event) state) (recur))
       component))

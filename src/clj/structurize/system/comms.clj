@@ -8,8 +8,8 @@
 
 (defn init-github-auth [config-opts id ?reply-fn]
   (let [client-id (get-in config-opts [:general :github-auth-client-id])
-        state (str (java.util.UUID/randomUUID))]
-    (go (<! (timeout 1000)) (?reply-fn [id {:state state :client-id client-id}]))))
+        attempt-id (str (java.util.UUID/randomUUID))]
+    (go (<! (timeout 1000)) (?reply-fn [id {:attempt-id attempt-id :client-id client-id}]))))
 
 
 (defn make-receive
@@ -17,13 +17,14 @@
   [config-opts]
 
   (fn [{:keys [send-fn ring-req ?reply-fn], [id ?payload] :event}]
-    (log/debug "Received message:" id)
+    (log/debug "received message:" id)
 
     (case id
       :auth/init-github-auth (init-github-auth config-opts id ?reply-fn)
       :chsk/ws-ping nil
       :chsk/uidport-open nil
-      (log/error "Failed to process message:" id))))
+      :chsk/uidport-close nil
+      (log/error "failed to process message:" id))))
 
 
 
@@ -34,7 +35,7 @@
   component/Lifecycle
 
   (start [component]
-    (log/info "Initialising comms")
+    (log/info "initialising comms")
     (let [chsk-conn (sente/make-channel-socket! sente-web-server-adapter {})
           stop-chsk-router! (sente/start-chsk-router! (:ch-recv chsk-conn) (make-receive config-opts))]
       (assoc component
@@ -44,6 +45,6 @@
 
   (stop [component]
     (when-let [stop-chsk-router! (:stop-chsk-router! component)]
-      (log/info "Stopping comms")
+      (log/info "stopping comms")
       (stop-chsk-router!))
     component))

@@ -16,7 +16,7 @@
   component/Lifecycle
 
   (start [component]
-    (log/info "Initialising renderer")
+    (log/info "initialising renderer")
     (render-root! {:config-opts config-opts :state state :side-effector side-effector})
     component)
 

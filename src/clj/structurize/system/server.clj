@@ -39,11 +39,11 @@
                       (rmd/wrap-defaults middleware-opts))
           stop-server (run-server handler http-kit-opts)]
 
-      (log/info "Starting server on port" (:port http-kit-opts))
+      (log/info "starting server on port" (:port http-kit-opts))
       (assoc component :stop-server stop-server)))
 
   (stop [component]
     (when-let [stop-server (:stop-server component)]
-      (log/info "Stopping server")
+      (log/info "stopping server")
       (stop-server))
     (assoc component :stop-server nil)))

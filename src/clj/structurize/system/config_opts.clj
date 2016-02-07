@@ -45,7 +45,7 @@
   component/Lifecycle
 
   (start [component]
-    (log/info "Initialising config-opts")
+    (log/info "initialising config-opts")
     (let [config (load-config)]
       (assoc component
              :general (general-config-opts config)

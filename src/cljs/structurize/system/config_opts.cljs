@@ -5,7 +5,8 @@
 
 
 (defonce general-config-opts
-  {:init-click-count-a (:init-click-count-a config)})
+  {:host (:host config)
+   :init-click-count-a (:init-click-count-a config)})
 
 
 (defonce bus-config-opts
@@ -35,7 +36,7 @@
   component/Lifecycle
 
   (start [component]
-    (log/info "Initialising config-opts")
+    (log/info "initialising config-opts")
     (assoc component
            :general general-config-opts
            :bus bus-config-opts
