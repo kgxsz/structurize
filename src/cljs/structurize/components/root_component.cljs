@@ -77,7 +77,20 @@
                                                   :replace? true})}
             "nuke params"]]
 
-    :github-auth [:div
-                  [:h3 "github auth confirmation"]]
+    :foo [:div
+          [:h3 "foo"]
+          [event-state-watch Φ]]
 
-    [:div [:h2 "Couldn't find this goshdarn page"]]))
+    :bar [:div
+          [:h3 "bar"]
+          [event-state-watch Φ]]
+
+    :unknown [:div
+              [:h1 "uh oh, couldn't handle this!"]
+              [event-state-watch Φ]]
+
+    :auth-github [:div
+                  [:h3 "github auth confirmation"]
+                  [event-state-watch Φ]]
+
+    [:h1 "Loading your stuff!"]))

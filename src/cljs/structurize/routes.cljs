@@ -2,8 +2,9 @@
 
 
 (defonce routes
-  ["/" {"" :home
-        "auth/github" :auth-github
-        "foo" :foo
-        "bar" :bar}])
+  ["/" [["" :home]
+        ["auth/github" :auth-github]
+        ["foo" :foo]
+        ["bar" :bar]
+        [true :unknown]]])
 
