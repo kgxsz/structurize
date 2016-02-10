@@ -6,10 +6,15 @@
             [clojure.core.async :refer [go <! timeout]]))
 
 
-(defn init-github-auth [config-opts id ?reply-fn]
+(defn init-auth-with-github [config-opts id ?reply-fn]
   (let [client-id (get-in config-opts [:general :github-auth-client-id])
         attempt-id (str (java.util.UUID/randomUUID))]
     (go (<! (timeout 1000)) (?reply-fn [id {:attempt-id attempt-id :client-id client-id}]))))
+
+
+(defn confirm-auth-with-github [config-opts id ?payload ?reply-fn]
+  (log/debug "CONFIRMING AUTH WITH GITHUB!" ?payload)
+  (go (<! (timeout 1000)) (?reply-fn [id {:something "something!"}])))
 
 
 (defn make-receive
@@ -20,7 +25,8 @@
     (log/debug "received message:" id)
 
     (case id
-      :auth/init-github-auth (init-github-auth config-opts id ?reply-fn)
+      :auth/init-auth-with-github (init-auth-with-github config-opts id ?reply-fn)
+      :auth/confirm-auth-with-github (confirm-auth-with-github config-opts id ?payload ?reply-fn)
       :chsk/ws-ping nil
       :chsk/uidport-open nil
       :chsk/uidport-close nil

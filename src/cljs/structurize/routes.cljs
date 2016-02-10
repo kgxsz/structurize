@@ -3,8 +3,6 @@
 
 (defonce routes
   ["/" [["" :home]
-        ["auth/github" :auth-github]
-        ["foo" :foo]
-        ["bar" :bar]
+        ["auth/github" :auth-with-github]
         [true :unknown]]])
 

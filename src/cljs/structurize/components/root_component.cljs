@@ -30,12 +30,12 @@
 
   (log/debug "mount/render login-with-github")
 
-  (let [!message-status (r/cursor !core [:message-status :auth/init-github-auth])
-        !message-reply (r/cursor !core [:message-reply :auth/init-github-auth])]
+  (let [!message-status (r/cursor !core [:message-status :auth/init-auth-with-github])
+        !message-reply (r/cursor !core [:message-reply :auth/init-auth-with-github])]
 
     (when (= :received @!message-status)
       (let [{:keys [client-id attempt-id]} @!message-reply
-            redirect-uri (str (:host general) (b/path-for routes :auth-github))]
+            redirect-uri (str (:host general) (b/path-for routes :auth-with-github))]
         (change-history! {:prefix "https://github.com"
                           :path "/login/oauth/authorize"
                           :query {:client_id client-id
@@ -44,7 +44,7 @@
 
     [:div
      [:button
-      {:on-click (fn [] (send! {:message [:auth/init-github-auth {}]}))}
+      {:on-click (fn [] (send! {:message [:auth/init-auth-with-github {}]}))}
       (case @!message-status
         :sent "logging in!"
         :received "logged in!"
@@ -56,41 +56,57 @@
   [:span (str @(:!core state))])
 
 
-(defn root [{{:keys [!handler]} :state
-             {:keys [change-history!]} :side-effector
-             :as Φ}]
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; top level pages
+
+
+
+(defn home-page [{{:keys [change-history!]} :side-effector
+                  :as Φ}]
+  (log/debug "mount/render home-page")
+  [:div
+   [:h1 "Front end ready!"]
+   [click-counter-a Φ]
+   [click-counter-b Φ]
+   [login-with-github Φ]
+   [event-state-watch Φ]])
+
+
+(defn auth-with-github-page [{{:keys [!query]} :state
+                              {:keys [send! change-history!]} :side-effector
+                              :as Φ}]
+  (log/debug "mount/render auth-with-github-page")
+
+  (when (and (get @!query "code") (get @!query "state"))
+    (send! {:message [:auth/confirm-auth-with-github {:state (get @!query "state") :code (get @!query "code")}]})
+    (change-history! {:query {}, :replace? true}))
+
+  [:div
+   [:h1 "We're authorizing you with github!"]
+   [event-state-watch Φ]
+   [:button {:on-click  #(change-history! {:path (b/path-for routes :home)})}
+    "Go home!"]])
+
+
+(defn unknown-page [{{:keys [change-history!]} :side-effector
+                     :as Φ}]
+  (log/debug "mount/render unkown-page")
+  [:div
+   [:h1 "What?! Where the hell am I?"]
+   [event-state-watch Φ]
+   [:button {:on-click  #(change-history! {:path (b/path-for routes :home)})}
+    "Go home!"]])
+
+
+(defn init-page []
+  (log/debug "mount/render init-page")
+  [:div
+   [:h1 "Loading your stuff!"]])
+
+
+(defn root [{{:keys [!handler]} :state :as Φ}]
   (log/debug "mount/render root-component")
-
   (case @!handler
-    :home [:div
-           [:h1 "Front end ready!"]
-           [click-counter-a Φ]
-           [click-counter-b Φ]
-           [login-with-github Φ]
-           [event-state-watch Φ]
-           [:button {:on-click  #(change-history! {:path (b/path-for routes :foo)
-                                                   :query {:a 1, :b 2}})}
-            "update foo"]
-           [:button {:on-click  #(change-history! {:path (b/path-for routes :bar)})}
-            "update bar"]
-           [:button {:on-click #(change-history! {:query {:y "keigo+&1"}
-                                                  :replace? true})}
-            "nuke params"]]
-
-    :foo [:div
-          [:h3 "foo"]
-          [event-state-watch Φ]]
-
-    :bar [:div
-          [:h3 "bar"]
-          [event-state-watch Φ]]
-
-    :unknown [:div
-              [:h1 "uh oh, couldn't handle this!"]
-              [event-state-watch Φ]]
-
-    :auth-github [:div
-                  [:h3 "github auth confirmation"]
-                  [event-state-watch Φ]]
-
-    [:h1 "Loading your stuff!"]))
+    :home [home-page Φ]
+    :auth-with-github [auth-with-github-page Φ]
+    :unknown [unknown-page Φ]
+    [init-page Φ]))

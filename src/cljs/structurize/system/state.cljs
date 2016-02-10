@@ -11,7 +11,6 @@
                          :b 0}}))
 
 
-
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; component setup
 
 
@@ -24,6 +23,7 @@
       (assoc component
              :!core !core
              :!handler (r/cursor !core [:location :handler])
+             :!query (r/cursor !core [:location :query])
              :!click-count-a (r/cursor !core [:click-count :a])
              :!click-count-b (r/cursor !core [:click-count :b]))))
 
