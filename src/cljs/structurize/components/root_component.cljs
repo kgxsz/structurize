@@ -76,9 +76,10 @@
                               :as Φ}]
   (log/debug "mount/render auth-with-github-page")
 
-  (when (and (:state @!query) (:code @!query))
-    (send! {:message [:auth/confirm-auth-with-github {:state (:state @!query) :code (:code @!query)}]})
-    (change-history! {:query {}, :replace? true}))
+  (let [{:keys [state code] :as ?payload} (select-keys @!query [:state :code])]
+    (when (and state code)
+      (send! {:message [:auth/confirm-auth-with-github ?payload]})
+      (change-history! {:query {}, :replace? true})))
 
   [:div
    [:h1 "We're authorizing you with github!"]
