@@ -7,7 +7,8 @@
             [com.stuartsierra.component :as component]
             [goog.events :as events]
             [taoensso.sente :as sente]
-            [taoensso.timbre :as log])
+            [taoensso.timbre :as log]
+            [medley.core :as m])
   (:require-macros [cljs.core.async.macros :refer [go]]
                    [secretary.core :refer [defroute]])
   (:import [goog.history Html5History EventType]))
@@ -26,7 +27,7 @@
     (let [token (.getToken history)
           [path query] (str/split token "?")
           location (merge {:path path
-                           :query (query->map query)}
+                           :query (->> query query->map (m/map-keys keyword))}
                           (b/match-route routes path))]
       (log/debug "received navigation from browser:" token)
       (when-not (.-isNavigation g-event) (js/window.scrollTo 0 0))

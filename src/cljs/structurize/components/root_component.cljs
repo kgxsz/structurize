@@ -76,8 +76,8 @@
                               :as Φ}]
   (log/debug "mount/render auth-with-github-page")
 
-  (when (and (get @!query "code") (get @!query "state"))
-    (send! {:message [:auth/confirm-auth-with-github {:state (get @!query "state") :code (get @!query "code")}]})
+  (when (and (:state @!query) (:code @!query))
+    (send! {:message [:auth/confirm-auth-with-github {:state (:state @!query) :code (:code @!query)}]})
     (change-history! {:query {}, :replace? true}))
 
   [:div
