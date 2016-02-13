@@ -13,7 +13,8 @@
   {})
 
 (defonce side-effector-config-opts
-  {:chsk-opts {:type :auto}})
+  {:chsk-opts {:type :auto
+               :packer :edn}})
 
 
 (defonce state-config-opts

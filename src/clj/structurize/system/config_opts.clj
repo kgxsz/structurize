@@ -11,7 +11,7 @@
 
 
 (defn comms-config-opts [config]
-  {})
+  {:chsk-opts {:packer :edn}})
 
 
 (defn server-config-opts [config]

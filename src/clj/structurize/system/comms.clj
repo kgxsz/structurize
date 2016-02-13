@@ -33,7 +33,6 @@
       (log/error "failed to process message:" id))))
 
 
-
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; component setup
 
 
@@ -42,7 +41,7 @@
 
   (start [component]
     (log/info "initialising comms")
-    (let [chsk-conn (sente/make-channel-socket! sente-web-server-adapter {})
+    (let [chsk-conn (sente/make-channel-socket! sente-web-server-adapter (get-in config-opts [:comms :chsk-opts]))
           stop-chsk-router! (sente/start-chsk-router! (:ch-recv chsk-conn) (make-receive config-opts))]
       (assoc component
              :ajax-get-or-ws-handshake-fn (:ajax-get-or-ws-handshake-fn chsk-conn)
