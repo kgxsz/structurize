@@ -99,7 +99,6 @@
          :access-token-request-failed [:h3 "Couldn't retreive an access token from GitHub."]
          [:h3 "Couldn't complete the login process with Github."])
 
-       [:h1 "We're authorizing you with github!"]
        [event-state-watch Φ]
        [:button {:on-click  #(change-history! {:path (b/path-for routes :home)})}
         "home"]]
