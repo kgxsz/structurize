@@ -82,7 +82,7 @@
   "Returns a function that receives a message and dispatches it appropriately."
   [emit-event!]
 
-  (fn [{:keys [event id ?data]}]
+  (fn [{:keys [event id ?data send-fn]}]
     (log/info "received message from server:" id)
     #_(go (a/>! <event [:comms-event {:id id :?data ?data}])) ;; TODO: need to field these messages and dispatch accordingly
     (when (and (= id :chsk/state) (= (:first-open? ?data)))

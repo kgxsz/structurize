@@ -10,7 +10,10 @@
                  [medley "0.7.1"]
                  [ring/ring-defaults "0.1.5"]
                  [com.taoensso/sente "1.7.0"]
-                 [com.taoensso/timbre "4.1.4"]]
+                 [com.taoensso/timbre "4.1.4"]
+                 [org.clojure/data.json "0.2.6"]
+                 [clj-time "0.11.0"]
+                 [camel-snake-kebab "0.3.2"]]
 
   :clean-targets ^{:protect false} ["target/"
                                     "dev-resources/public/js/"

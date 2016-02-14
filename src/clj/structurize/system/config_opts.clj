@@ -5,9 +5,9 @@
 
 
 (defn general-config-opts [config]
-  {:github-access-token-url "https://github.com/login/oauth/access_token"
-   :github-auth-client-id (:github-auth-client-id config)
-   :github-auth-client-secret (:github-auth-client-secret config)})
+  {:github-auth-client-id (:github-auth-client-id config)
+   :github-auth-client-secret (:github-auth-client-secret config)
+   :github-auth-scope "user:email"})
 
 
 (defn comms-config-opts [config]

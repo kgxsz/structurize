@@ -34,12 +34,13 @@
         !message-reply (r/cursor !core [:message-reply :auth/init-auth-with-github])]
 
     (when (= :received @!message-status)
-      (let [{:keys [client-id attempt-id]} @!message-reply
+      (let [{:keys [client-id attempt-id scope]} @!message-reply
             redirect-uri (str (:host general) (b/path-for routes :auth-with-github))]
         (change-history! {:prefix "https://github.com"
                           :path "/login/oauth/authorize"
                           :query {:client_id client-id
                                   :state attempt-id
+                                  :scope scope
                                   :redirect_uri redirect-uri}})))
 
     [:div
