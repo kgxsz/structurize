@@ -8,7 +8,7 @@
 (defn make-system []
   (-> (component/system-map
         :config-opts (map->ConfigOpts {})
-        :db (atom {:auth-with-github #{}})
+        :db (atom {:auth-with-github {}})
         :comms (map->Comms {})
         :server (map->Server {}))
       (component/system-using

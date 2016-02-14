@@ -11,7 +11,7 @@
 
   (log/debug "mount/render click-counter-a")
   [:button
-   {:on-click #(emit-event! [:inc-click-count/a {:cursor :!click-count-a, :Δ inc}])}
+   {:on-click #(emit-event! [:inc-click-count/a {:cursor :!click-count-a :Δ inc}])}
    (str "clicks: " @!click-count-a)])
 
 
@@ -20,7 +20,7 @@
 
   (log/debug "mount/render click-counter-b")
   [:button
-   {:on-click #(emit-event! [:inc-click-count/b {:cursor :!click-count-b, :Δ inc}])}
+   {:on-click #(emit-event! [:inc-click-count/b {:cursor :!click-count-b :Δ inc}])}
    (str "clicks: " @!click-count-b)])
 
 
@@ -77,10 +77,10 @@
                               :as Φ}]
   (log/debug "mount/render auth-with-github-page")
 
-  (let [{:keys [state code] :as ?payload} (select-keys @!query [:state :code])]
-    (when (and state code)
+  (let [{:keys [state code error] :as ?payload} (select-keys @!query [:state :code :error])]
+    (when (or (and state code) error)
       (send! {:message [:auth/confirm-auth-with-github ?payload]})
-      (change-history! {:query {}, :replace? true})))
+      (change-history! {:query {} :replace? true})))
 
   [:div
    [:h1 "We're authorizing you with github!"]
