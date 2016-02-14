@@ -28,9 +28,8 @@
     (if error
       ;; there was an error during the front-end redirect
 
-      (do
-        (log/info "error in front-end redirect to GitHub:" error)
-        (?reply-fn [id {:error error}]))
+      (do (log/info "error in front-end redirect to GitHub:" error)
+          (?reply-fn [id {:error (csk/->kebab-case-keyword error)}]))
 
       (if attempt
         ;; there's no attempt associated with this confirmation
@@ -61,26 +60,22 @@
 
                   (let [user-data (json/read-str body :key-fn csk/->kebab-case-keyword)]
                     (swap! db assoc-in [:auth-with-github state :confirmed-at] (time/now))
-                    (?reply-fn [id {:user-data (select-keys user-data [:email :name :login :avatar-url])}]))
+                    (?reply-fn [id {:user-data user-data}]))
 
-                  (do
-                    (log/infof "api request to GitHub failed for attempt %s, with status %s, and error %s %s :" state status error body)
-                    (swap! db update-in [:auth-with-github state] assoc :failed-at (time/now) :error :api-request-failed)
-                    (?reply-fn [id {:error :api-request-failed}])))
+                  (do (log/infof "api request to GitHub failed for attempt %s, with status %s, and error %s %s :" state status error body)
+                      (swap! db update-in [:auth-with-github state] assoc :failed-at (time/now) :error :api-request-failed)
+                      (?reply-fn [id {:error :api-request-failed}])))
 
-                (do
-                  (log/info "GitHub auth scope does not match for attempt" state)
-                  (swap! db update-in [:auth-with-github state] assoc :failed-at (time/now) :error :scope-does-not-match)
-                  (?reply-fn [id {:error :scope-does-not-match}]))))
+                (do (log/info "GitHub auth scope does not match for attempt" state)
+                    (swap! db update-in [:auth-with-github state] assoc :failed-at (time/now) :error :scope-does-not-match)
+                    (?reply-fn [id {:error :scope-does-not-match}]))))
 
-            (do
-              (log/infof "access token request to GitHub failed for attempt %s, with status %s, and error %s %s :" state status error body)
-              (swap! db update-in [:auth-with-github state] assoc :failed-at (time/now) :error :access-token-request-failed)
-              (?reply-fn [id {:error :access-token-request-failed}]))))
+            (do (log/infof "access token request to GitHub failed for attempt %s, with status %s, and error %s %s :" state status error body)
+                (swap! db update-in [:auth-with-github state] assoc :failed-at (time/now) :error :access-token-request-failed)
+                (?reply-fn [id {:error :access-token-request-failed}]))))
 
-        (do
-          (log/info "unable to match state for GitHub authentication where state is" state)
-          (?reply-fn [id {:error :unable-to-match-state}]))))))
+        (do (log/info "unable to match state for GitHub authentication where state is" state)
+            (?reply-fn [id {:error :unable-to-match-state}]))))))
 
 
 (defn make-receive

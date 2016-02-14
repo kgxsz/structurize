@@ -48,7 +48,7 @@
       {:on-click (fn [] (send! {:message [:auth/init-auth-with-github {}]}))}
       (case @!message-status
         :sent "logging in!"
-        :received "logged in!"
+        :received "logging in!"
         "log in with GitHub")]]))
 
 
@@ -72,21 +72,43 @@
    [event-state-watch Φ]])
 
 
-(defn auth-with-github-page [{{:keys [!query]} :state
+(defn auth-with-github-page [{{:keys [!core !query]} :state
                               {:keys [send! change-history!]} :side-effector
                               :as Φ}]
   (log/debug "mount/render auth-with-github-page")
 
-  (let [{:keys [state code error] :as ?payload} (select-keys @!query [:state :code :error])]
-    (when (or (and state code) error)
-      (send! {:message [:auth/confirm-auth-with-github ?payload]})
-      (change-history! {:query {} :replace? true})))
+  (let [{:keys [state code error] :as ?payload} (select-keys @!query [:state :code :error])
+        !message-status (r/cursor !core [:message-status :auth/confirm-auth-with-github])
+        !message-reply (r/cursor !core [:message-reply :auth/confirm-auth-with-github])]
 
-  [:div
-   [:h1 "We're authorizing you with github!"]
-   [event-state-watch Φ]
-   [:button {:on-click  #(change-history! {:path (b/path-for routes :home)})}
-    "Go home!"]])
+    (cond
+      (or (and state code) error) (do (send! {:message [:auth/confirm-auth-with-github ?payload]})
+                                      (change-history! {:query {} :replace? true}))
+
+      (= :received @!message-status) (let [{:keys [user-data error]} @!message-reply]
+                                       (if-not error
+                                         (change-history! {:path (b/path-for routes :home)}))))
+
+    (if-let [error (:error @!message-reply)]
+
+      [:div
+       [:h1 "Login with GitHub failed."]
+       (case error
+         :api-request-failed [:h3 "Unable to retrieve your login details from GitHub at this time. Please try later."]
+         :scope-does-not-match [:h3 "It appears that the permissions you have given us are not sufficient."]
+         :access-token-request-failed [:h3 "Couldn't retreive an access token from GitHub."]
+         [:h3 "Couldn't complete the login process with Github."])
+
+       [:h1 "We're authorizing you with github!"]
+       [event-state-watch Φ]
+       [:button {:on-click  #(change-history! {:path (b/path-for routes :home)})}
+        "home"]]
+
+      [:div
+       [:h1 "We're authorizing you with github!"]
+       [event-state-watch Φ]
+       [:button {:on-click  #(change-history! {:path (b/path-for routes :home)})}
+        "home"]])))
 
 
 (defn unknown-page [{{:keys [change-history!]} :side-effector
