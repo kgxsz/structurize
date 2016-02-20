@@ -85,8 +85,9 @@
   (fn [{:keys [event id ?data send-fn]}]
     (log/info "received message from server:" id)
     #_(go (a/>! <event [:comms-event {:id id :?data ?data}])) ;; TODO: need to field these messages and dispatch accordingly
-    (when (and (= id :chsk/state) (= (:first-open? ?data)))
-         (log/info "comms established"))))
+    (cond
+      (and (= id :chsk/state) (= (:first-open? ?data))) (log/info "comms established:" ?data)
+      (= id :chsk/handshake) (log/info "handshake:" ?data))))
 
 
 (defn make-send!
@@ -135,7 +136,7 @@
     (log/info "initialising side-effector")
     (let [emit-event! (make-emit-event! bus)
           history (make-history)
-          {:keys [ch-recv send-fn]} (sente/make-channel-socket! "/chsk" (get-in config-opts [:side-effector :chsk-opts]))]
+          {:keys [ch-recv send-fn state]} (sente/make-channel-socket! "/chsk" (get-in config-opts [:side-effector :chsk-opts]))]
 
       (log/info "begin listening for messages from server")
       (sente/start-chsk-router! ch-recv (make-receive emit-event!))

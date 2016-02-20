@@ -19,10 +19,13 @@
    :middleware-opts {:params {:urlencoded true
                               :nested true
                               :keywordize true}
-                     :security {:anti-forgery true
+                     :security {:anti-forgery {:read-token (fn [req] (-> req :params :csrf-token))}
                                 :xss-protection {:enable? true, :mode :block}
                                 :frame-options :sameorigin
                                 :content-type-options :nosniff}
+                     :session {:flash true
+                               :cookie-attrs {:http-only true
+                                              :max-age 3600}}
                      :static {:resources "public"}
                      :responses {:not-modified-responses true
                                  :absolute-redirects true
@@ -35,7 +38,6 @@
         public-config (-> "resources/config.edn" slurp edn/read-string)
         private-config (-> (str home "/.lein/structurize/config.edn") slurp edn/read-string)]
     (merge public-config private-config)))
-
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; component setup
