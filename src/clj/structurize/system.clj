@@ -13,4 +13,4 @@
         :server (map->Server {}))
       (component/system-using
        {:comms [:config-opts :db]
-        :server [:config-opts :comms]})))
+        :server [:config-opts :db :comms]})))

@@ -7,6 +7,7 @@
 (defn make-global-state [{:keys [general]}]
   (r/atom {:message-status {}
            :message-reply {}
+           :auth-request-status {}
            :click-count {:a (:init-click-count-a general)
                          :b 0}}))
 

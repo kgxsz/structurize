@@ -1,6 +1,7 @@
 (ns structurize.components.root-component
   (:require [structurize.routes :refer [routes]]
             [bidi.bidi :as b]
+            [camel-snake-kebab.core :as csk]
             [reagent.core :as r]
             [taoensso.timbre :as log])
   (:require-macros [cljs.core.async.macros :refer [go]]))
@@ -60,7 +61,6 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; top level pages
 
 
-
 (defn home-page [{{:keys [change-history!]} :side-effector
                   :as Φ}]
   (log/debug "mount/render home-page")
@@ -73,31 +73,23 @@
 
 
 (defn auth-with-github-page [{{:keys [!core !query]} :state
-                              {:keys [send! change-history!]} :side-effector
+                              {:keys [auth! change-history!]} :side-effector
                               :as Φ}]
   (log/debug "mount/render auth-with-github-page")
 
-  (let [{:keys [state code error] :as ?payload} (select-keys @!query [:state :code :error])
-        !message-status (r/cursor !core [:message-status :auth/confirm-auth-with-github])
-        !message-reply (r/cursor !core [:message-reply :auth/confirm-auth-with-github])]
+  (let [{:keys [code error] attempt-id :state} @!query
+        !auth-request-status (r/cursor !core [:auth-request-status :github])]
 
     (cond
-      (or (and state code) error) (do (send! {:message [:auth/confirm-auth-with-github ?payload]})
-                                      (change-history! {:query {} :replace? true}))
+      (and code attempt-id) (do (auth! code attempt-id)
+                                (change-history! {:query {} :replace? true}))
+      (= :succeeded @!auth-request-status) (change-history! {:path (b/path-for routes :home)}))
 
-      (= :received @!message-status) (let [{:keys [user-data error]} @!message-reply]
-                                       (if-not error
-                                         (change-history! {:path (b/path-for routes :home)}))))
-
-    (if-let [error (:error @!message-reply)]
+    (if (or error (= :failed @!auth-request-status))
 
       [:div
-       [:h1 "Login with GitHub failed."]
-       (case error
-         :api-request-failed [:h3 "Unable to retrieve your login details from GitHub at this time. Please try later."]
-         :scope-does-not-match [:h3 "It appears that the permissions you have given us are not sufficient."]
-         :access-token-request-failed [:h3 "Couldn't retreive an access token from GitHub."]
-         [:h3 "Couldn't complete the login process with Github."])
+       [:h1 "Login with GitHub failed "]
+       [:h3 "Couldn't complete the login process with Github."]
 
        [event-state-watch Φ]
        [:button {:on-click  #(change-history! {:path (b/path-for routes :home)})}
