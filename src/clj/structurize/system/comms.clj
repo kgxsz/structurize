@@ -7,7 +7,7 @@
             [taoensso.timbre :as log]))
 
 
-(defn init-auth-with-github [{:keys [config-opts db]} [id ?data] ?reply-fn]
+(defn init-auth-with-github [{:keys [config-opts db]} [id ?data] uid ?reply-fn]
   (let [client-id (get-in config-opts [:general :github-auth-client-id])
         attempt-id (str (java.util.UUID/randomUUID))
         scope (get-in config-opts [:general :github-auth-scope])]
@@ -15,6 +15,11 @@
     (log/debug "initialising GitHub auth for attempt:" attempt-id)
     (swap! db assoc-in [:auth-with-github attempt-id] {:initialised-at (time/now)})
     (go (<! (timeout 1000)) (?reply-fn [id {:attempt-id attempt-id :client-id client-id :scope scope}]))))
+
+
+(defn me [{:keys [config-opts db]} [id ?data] uid ?reply-fn]
+  (let [user (select-keys (get-in @db [:users uid]) [:name :email :login])]
+    (go (<! (timeout 1000)) (?reply-fn [id {:user user}]))))
 
 
 (defn make-receive
@@ -25,11 +30,12 @@
     (log/debugf "received message: %s from client: %s with uid: %s" id client-id uid)
 
     (case id
-      :auth/init-auth-with-github (init-auth-with-github φ event ?reply-fn)
+      :auth/init-auth-with-github (init-auth-with-github φ event uid ?reply-fn)
+      :users/me (me φ event uid ?reply-fn)
       :chsk/ws-ping nil
       :chsk/uidport-open nil
       :chsk/uidport-close nil
-      (log/error "failed to process message:" id))))
+      (log/error "No handling function to process message:" id))))
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; component setup
@@ -43,6 +49,8 @@
     (let [chsk-conn (sente/make-channel-socket! sente-web-server-adapter (get-in config-opts [:comms :chsk-opts]))
           stop-chsk-router! (sente/start-chsk-router! (:ch-recv chsk-conn) (make-receive {:config-opts config-opts :db db}))]
       (assoc component
+             ;; enumerate the http handlers here, server uses then judiciously
+             ;; the ws handlers are multimethoded on the recevie function
              :ajax-get-or-ws-handshake-fn (:ajax-get-or-ws-handshake-fn chsk-conn)
              :ajax-post-fn (:ajax-post-fn chsk-conn)
              :stop-chsk-router! stop-chsk-router!)))

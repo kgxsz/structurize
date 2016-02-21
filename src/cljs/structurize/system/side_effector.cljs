@@ -84,10 +84,10 @@
 
   (fn [{:keys [event id ?data send-fn]}]
     (log/info "received message from server:" id)
-    #_(go (a/>! <event [:comms-event {:id id :?data ?data}])) ;; TODO: need to field these messages and dispatch accordingly
     (cond
-      (= id :chsk/state) (log/info "chsk state:" ?data)
-      (= id :chsk/handshake) (log/info "chsk handshake:" ?data))))
+      (= id :chsk/state) (do (log/info "chsk status change")
+                             (emit-event! [:chsk-status-update {:Δ (fn [core] (assoc core :chsk-status (if (:open? ?data) :open :closed)))}]))
+      (= id :chsk/handshake) (log/info "chsk handshake"))))
 
 
 (defn make-send!
@@ -172,6 +172,8 @@
       (listen-for-navigation history (make-navigation-handler history emit-event!))
 
       (assoc component
+             ;; this guy can still give  these side effecting fucntions in a nice bundle, but they
+             ;; need to come from things like
              :emit-event! emit-event!
              :send! (make-send! send-fn emit-event!)
              :auth! (make-auth! chsk chsk-state emit-event!)

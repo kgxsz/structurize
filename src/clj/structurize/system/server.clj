@@ -12,18 +12,19 @@
             [taoensso.timbre :as log]))
 
 
-(def root-page
-  (html5
-   [:head
-    [:title "Structurize"]]
-   [:body
-    [:div#root
-     [:h1 "Loading your stuff!"]]
-    (include-js "/js/structurize.js")
-    [:script {:type "text/javascript"} "structurize.runner.start();"]]))
+(defn root-page-handler [request]
+  (let [root-page (html5
+                   [:head
+                    [:title "Structurize"]]
+                   [:body
+                    [:div#root
+                     [:h1 "Loading your stuff!"]]
+                    (include-js "/js/structurize.js")
+                    [:script {:type "text/javascript"} "structurize.runner.start();"]])]
+    (-> root-page response (content-type "text/html"))))
 
 
-(defn make-auth
+(defn make-auth-handler
   "Returns a request handler function that carries out a GitHub auth given the code and the attempt-id.
    If successful, the user-id is put into the session."
   [config-opts db]
@@ -81,11 +82,12 @@
             {:status 401})))))
 
 
+
 (defn make-routes [config-opts db comms]
   ["/" {"chsk" {:get (:ajax-get-or-ws-handshake-fn comms)
                 :post (:ajax-post-fn comms)}
-        "auth" {:post (make-auth config-opts db)}
-        true (fn [request] (-> root-page response (content-type "text/html")))}])
+        "auth" {:post (make-auth-handler config-opts db)}
+        true root-page-handler}])
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; component setup
@@ -97,7 +99,8 @@
   (start [component]
     (let [http-kit-opts (get-in config-opts [:server :http-kit-opts])
           middleware-opts (get-in config-opts [:server :middleware-opts])
-          handler (-> (br/make-handler (make-routes config-opts db comms))
+          routes (make-routes config-opts db comms)
+          handler (-> (br/make-handler routes)
                       (rmd/wrap-defaults middleware-opts))
           stop-server (run-server handler http-kit-opts)]
 

@@ -27,7 +27,7 @@
 
 (defn login-with-github [{{:keys [general]} :config-opts
                           {:keys [!core]} :state
-                          {:keys [send! emit-event! change-history!]} :side-effector}]
+                          {:keys [send! change-history!]} :side-effector}]
 
   (log/debug "mount/render login-with-github")
 
@@ -118,10 +118,17 @@
    [:h1 "Loading your stuff!"]])
 
 
-(defn root [{{:keys [!handler]} :state :as Φ}]
+(defn root [{{:keys [!chsk-status !handler]} :state
+             {:keys [send!]} :side-effector
+             :as Φ}]
   (log/debug "mount/render root-component")
+
+  (when (= :open @!chsk-status)
+    (send! {:message [:users/me {}]}))
+
+
   (case @!handler
     :home [home-page Φ]
     :auth-with-github [auth-with-github-page Φ]
-    :unknown [unknown-page Φ]
-    [init-page Φ]))
+    :init [init-page Φ]
+    :unknown [unknown-page Φ]))
