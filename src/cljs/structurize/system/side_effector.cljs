@@ -95,7 +95,7 @@
    when the message is dispatched, and another when the message reply is received."
   [send-fn emit-event!]
 
-  (fn [{[id _ :as message] :message, :keys [timeout]}]
+  (fn [[id _ :as message] {:keys [timeout]}]
     (log/debug "dispatching message to server:" id)
     (emit-event! [:message-sent {:Δ (fn [core] (assoc-in core [:message-status id] :sent))}])
 
@@ -106,40 +106,45 @@
         (if (sente/cb-success? reply)
           (let [[id ?payload] reply]
             (log/debug "received a reply message from server:" id)
-            (emit-event! [:message-received {:Δ (fn [core]
-                                                  (-> core
-                                                      (assoc-in [:message-status id] :received)
-                                                      (assoc-in [:message-reply id] ?payload)))}]))
+            (emit-event! [:message-reply-received {:Δ (fn [core] (-> core
+                                                                    (assoc-in [:message-status id] :reply-received)
+                                                                    (assoc-in [:message-reply id] ?payload)))}]))
           (do
             (log/warn "message failed with:" reply)
-            (emit-event! [:message-failed {:Δ (fn [core] (assoc-in core [:message-status id] :failed))}])))))))
+            (emit-event! [:message-failed {:Δ (fn [core] (-> core
+                                                            (assoc-in [:message-status id] :failed)
+                                                            (assoc-in [:message-reply id] reply)))}])))))))
 
 
-(defn make-auth!
-  "Returns a function that makes a post request to our auth end-point. An event is emitted
+(defn make-post!
+  "Returns a function that makes an ajax post to the server. An event is emitted
    when the request is made, and another when the response is received."
   [chsk chsk-state emit-event!]
 
-  (fn [code attempt-id]
-    (log/debug "dispatching GitHub auth request to server")
-    (emit-event! [:auth-request-sent {:Δ (fn [core] (assoc-in core [:auth-request-status :github] :sent))}])
+  (fn [[path params] {:keys [timeout]}]
+    (log/debug "dispatching post to server:" path)
+    (emit-event! [:post-sent {:Δ (fn [core] (assoc-in core [:post-status path] :sent))}])
 
     (sente/ajax-lite
-      "/auth"
-      {:method :post
-       :timeout-ms 10000
-       :params {:code code
-                :attempt-id attempt-id
-                :csrf-token (:csrf-token @chsk-state)}}
-      (fn [response]
-        (if (:success? response)
-          (do
-            (log/debug "GitHub auth request succeeded")
-            (emit-event! [:auth-request-succeeded {:Δ (fn [core] (assoc-in core [:auth-request-status :github] :succeeded))}])
-            (sente/chsk-reconnect! chsk))
-          (do
-            (log/warn "GitHub auth request failed with" (:?error response))
-            (emit-event! [:auth-request-failed {:Δ (fn [core] (assoc-in core [:auth-request-status :github] :failed))}])))))))
+     path
+     {:method :post
+      :timeout-ms (or timeout 10000)
+      :params (merge params (select-keys @chsk-state [:csrf-token]))}
+     (fn [response]
+       (if (:success? response)
+         (do
+           (log/debug "received a post response from server:" path)
+           (emit-event! [:post-response-received {:Δ (fn [core] (-> core
+                                                                   (assoc-in [:post-status path] :response-received)
+                                                                   (assoc-in [:post-response path] (:?content response))))}])
+           ;; we reconnect the websocket connection here to pick up any changes
+           ;; in the session that may have come about with the post request
+           (sente/chsk-reconnect! chsk))
+         (do
+           (log/warn "post failed with:" response)
+           (emit-event! [:post-failed {:Δ (fn [core] (-> core
+                                                        (assoc-in [:post-status path] :failed)
+                                                        (assoc-in [:post-response path] response)))}])))))))
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; event emitter setup
@@ -175,8 +180,9 @@
              ;; this guy can still give  these side effecting fucntions in a nice bundle, but they
              ;; need to come from things like
              :emit-event! emit-event!
+             :reconnect! #(sente/chsk-reconnect! chsk)
              :send! (make-send! send-fn emit-event!)
-             :auth! (make-auth! chsk chsk-state emit-event!)
+             :post! (make-post! chsk chsk-state emit-event!)
              :change-history! (make-change-history! history))))
 
   (stop [component] component))

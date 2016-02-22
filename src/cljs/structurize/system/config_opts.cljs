@@ -5,8 +5,7 @@
 
 
 (defonce general-config-opts
-  {:host (:host config)
-   :init-click-count-a (:init-click-count-a config)})
+  {:host (:host config)})
 
 
 (defonce bus-config-opts

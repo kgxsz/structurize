@@ -7,13 +7,12 @@
 (defn make-global-state [{:keys [general]}]
   (r/atom {:message-status {}
            :message-reply {}
+           :post-status {}
+           :post-response {}
            :location {:path nil
                       :handler :init
                       :query nil}
-           :auth-request-status {}
-           :chsk-status :init
-           :click-count {:a (:init-click-count-a general)
-                         :b 0}}))
+           :chsk-status :init}))
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; component setup
