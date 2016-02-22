@@ -7,13 +7,13 @@
             [taoensso.timbre :as log]))
 
 
-(defn init-auth-with-github [{:keys [config-opts db]} [id ?data] uid ?reply-fn]
+(defn init-sign-in-with-github [{:keys [config-opts db]} [id ?data] uid ?reply-fn]
   (let [client-id (get-in config-opts [:general :github-auth-client-id])
         attempt-id (str (java.util.UUID/randomUUID))
         scope (get-in config-opts [:general :github-auth-scope])]
 
-    (log/debug "initialising GitHub auth for attempt:" attempt-id)
-    (swap! db assoc-in [:auth-with-github attempt-id] {:initialised-at (time/now)})
+    (log/debug "initialising GitHub sign in for attempt:" attempt-id)
+    (swap! db assoc-in [:sign-in-with-github attempt-id] {:initialised-at (time/now) :client-id client-id})
     (go (<! (timeout 1000)) (?reply-fn [id {:attempt-id attempt-id :client-id client-id :scope scope}]))))
 
 
@@ -30,7 +30,7 @@
     (log/debugf "received message: %s from client: %s with uid: %s" id client-id uid)
 
     (case id
-      :auth/init-auth-with-github (init-auth-with-github φ event uid ?reply-fn)
+      :sign-in/init-sign-in-with-github (init-sign-in-with-github φ event uid ?reply-fn)
       :users/me (me φ event uid ?reply-fn)
       :chsk/ws-ping nil
       :chsk/uidport-open nil

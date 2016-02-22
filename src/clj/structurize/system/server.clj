@@ -24,14 +24,14 @@
     (-> root-page response (content-type "text/html"))))
 
 
-(defn make-auth-handler
-  "Returns a request handler function that carries out a GitHub auth given the code and the attempt-id.
-   If successful, the user-id is put into the session."
+(defn make-github-sign-in-handler
+  "Returns a request handler function that carries out a GitHub oauth sign in given the
+   code and the attempt-id. If successful, the user-id is put into the session."
   [config-opts db]
 
   (fn [{:keys [session params]}]
     (let [{:keys [code attempt-id]} params
-          attempt (get-in @db [:auth-with-github attempt-id])]
+          attempt (get-in @db [:sign-in-with-github attempt-id])]
 
       (if attempt
 
@@ -45,7 +45,7 @@
                                                                          "code" code}
                                                           :timeout 5000})]
 
-          (log/debug "confirming GitHub auth for attempt:" attempt-id)
+          (log/debug "confirming GitHub sign in for attempt:" attempt-id)
 
           (if (= 200 status)
             (let [{:keys [access-token scope]} (json/read-str body :key-fn csk/->kebab-case-keyword)
@@ -61,32 +61,36 @@
 
                   (let [user-data (json/read-str body :key-fn csk/->kebab-case-keyword)
                         uid (:id user-data)]
-                    (log/debug "GitHub auth successful for attempt:" attempt-id)
-                    (swap! db assoc-in [:auth-with-github attempt-id :confirmed-at] (time/now))
+                    (log/debug "GitHub sign in successful for attempt:" attempt-id)
+                    (swap! db assoc-in [:sign-in-with-github attempt-id :confirmed-at] (time/now))
                     (swap! db assoc-in [:users uid] user-data)
                     {:status 200 :session (assoc session :uid uid)})
 
-                  (do (log/infof "api request to GitHub failed for attempt %s, with status %s, and error %s %s :" attempt-id status error body)
-                      (swap! db update-in [:auth-with-github attempt-id] assoc :failed-at (time/now) :error :api-request-failed)
+                  (do (log/infof "api request to GitHub failed for sign in attempt %s, with status %s, and error %s %s :" attempt-id status error body)
+                      (swap! db update-in [:sign-in-with-github attempt-id] assoc :failed-at (time/now) :error :api-request-failed)
                       {:status 401}))
 
-                (do (log/info "GitHub auth scope does not match for attempt" attempt-id)
-                    (swap! db update-in [:auth-with-github attempt-id] assoc :failed-at (time/now) :error :scope-does-not-match)
+                (do (log/info "GitHub auth scope is insufficient for sign in attempt" attempt-id)
+                    (swap! db update-in [:sign-in-with-github attempt-id] assoc :failed-at (time/now) :error :auth-scope-insufficient)
                     {:status 401})))
 
-            (do (log/infof "access token request to GitHub failed for attempt %s, with status %s, and error %s %s :" attempt-id status error body)
-                (swap! db update-in [:auth-with-github attempt-id] assoc :failed-at (time/now) :error :access-token-request-failed)
+            (do (log/infof "access token request to GitHub failed for sign in attempt %s, with status %s, and error %s %s :" attempt-id status error body)
+                (swap! db update-in [:sign-in-with-github attempt-id] assoc :failed-at (time/now) :error :access-token-request-failed)
                 {:status 401})))
 
-        (do (log/info "unable to match attempt for GitHub authentication with attempt-id" attempt-id)
+        (do (log/info "unable to match a GitHub sign in attempt for attempt-id" attempt-id)
             {:status 401})))))
 
+
+(defn sign-out-handler [request]
+  {:status 200 :session nil})
 
 
 (defn make-routes [config-opts db comms]
   ["/" {"chsk" {:get (:ajax-get-or-ws-handshake-fn comms)
                 :post (:ajax-post-fn comms)}
-        "auth" {:post (make-auth-handler config-opts db)}
+        "sign-in/github" {:post (make-github-sign-in-handler config-opts db)}
+        "sign-out" {:post sign-out-handler}
         true root-page-handler}])
 
 
