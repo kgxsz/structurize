@@ -31,7 +31,22 @@
       {:on-click (fn [] (send! [:sign-in/init-sign-in-with-github {}]))}
       (case @!message-status
         :sent "signing in!"
-        "log in with GitHub")]]))
+        "sign in with GitHub")]]))
+
+
+(defn sign-out [{{:keys [!core]} :state
+                 {:keys [post!]} :side-effector}]
+
+  (log/debug "mount/render sign-out-with-github")
+
+  (let [!post-status (r/cursor !core [:post-status "/sign-out"])]
+
+    [:div
+     [:button
+      {:on-click (fn [] (post! ["/sign-out" {}]))}
+      (case @!post-status
+        :sent "signing out!"
+        "sign out")]]))
 
 
 (defn event-state-watch [{:keys [state]}]
@@ -50,6 +65,7 @@
   [:div
    [:h1 "Front end ready!"]
    [sign-in-with-github Φ]
+   [sign-out Φ]
    [event-state-watch Φ]])
 
 
@@ -69,8 +85,8 @@
     (if (or error (= :failed @!post-status))
 
       [:div
-       [:h1 "Login with GitHub failed "]
-       [:h3 "Couldn't complete the login process with Github."]
+       [:h1 "Sign in with GitHub failed "]
+       [:h3 "Couldn't complete the sign in process with Github."]
 
        [event-state-watch Φ]
        [:button {:on-click  #(change-history! {:path (b/path-for routes :home)})}
@@ -102,11 +118,11 @@
 (defn root [{{:keys [!chsk-status !handler]} :state
              {:keys [send!]} :side-effector
              :as Φ}]
+
   (log/debug "mount/render root-component")
 
   (when (= :open @!chsk-status)
     (send! [:users/me {}]))
-
 
   (case @!handler
     :home [home-page Φ]
