@@ -1,6 +1,5 @@
 (ns structurize.system.comms
   (:require [clj-time.core :as time]
-            [clojure.core.async :refer [go <! timeout]]
             [com.stuartsierra.component :as component]
             [taoensso.sente :as sente]
             [taoensso.sente.server-adapters.http-kit :refer [sente-web-server-adapter]]
@@ -14,12 +13,12 @@
 
     (log/debug "initialising GitHub sign in for attempt:" attempt-id)
     (swap! db assoc-in [:sign-in-with-github attempt-id] {:initialised-at (time/now) :client-id client-id})
-    (go (<! (timeout 1000)) (?reply-fn [id {:attempt-id attempt-id :client-id client-id :scope scope}]))))
+    (?reply-fn [id {:attempt-id attempt-id :client-id client-id :scope scope}])))
 
 
 (defn me [{:keys [config-opts db]} [id ?data] uid ?reply-fn]
   (let [user (select-keys (get-in @db [:users uid]) [:name :email :login])]
-    (go (<! (timeout 1000)) (?reply-fn [id {:user user}]))))
+    (?reply-fn [id {:user user}])))
 
 
 (defn make-receive
@@ -49,10 +48,7 @@
     (let [chsk-conn (sente/make-channel-socket! sente-web-server-adapter (get-in config-opts [:comms :chsk-opts]))
           stop-chsk-router! (sente/start-chsk-router! (:ch-recv chsk-conn) (make-receive {:config-opts config-opts :db db}))]
       (assoc component
-             ;; enumerate the http handlers here, server uses then judiciously
-             ;; the ws handlers are multimethoded on the recevie function
-             :ajax-get-or-ws-handshake-fn (:ajax-get-or-ws-handshake-fn chsk-conn)
-             :ajax-post-fn (:ajax-post-fn chsk-conn)
+             :chsk-conn chsk-conn
              :stop-chsk-router! stop-chsk-router!)))
 
   (stop [component]
