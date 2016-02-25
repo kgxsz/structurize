@@ -90,7 +90,7 @@
   component/Lifecycle
 
   (start [component]
-    (log/info "building handlers")
+    (log/info "initialising handlers")
     (let []
       (assoc component
              :chsk-get-handler (get-in comms [:chsk-conn :ajax-get-or-ws-handshake-fn])

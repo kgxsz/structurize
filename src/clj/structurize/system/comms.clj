@@ -1,12 +1,21 @@
 (ns structurize.system.comms
   (:require [clj-time.core :as time]
+            [clojure.core.async :refer [go <! timeout]]
             [com.stuartsierra.component :as component]
             [taoensso.sente :as sente]
             [taoensso.sente.server-adapters.http-kit :refer [sente-web-server-adapter]]
             [taoensso.timbre :as log]))
 
 
-(defn init-sign-in-with-github [{:keys [config-opts db]} [id ?data] uid ?reply-fn]
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; multi-method handling
+
+
+(defmulti handler (fn [_ event-message] (:id event-message)))
+
+
+(defmethod handler :sign-in/init-sign-in-with-github
+  [{:keys [config-opts db]} {:keys [uid ?reply-fn] [id ?data] :event}]
+
   (let [client-id (get-in config-opts [:general :github-auth-client-id])
         attempt-id (str (java.util.UUID/randomUUID))
         scope (get-in config-opts [:general :github-auth-scope])]
@@ -16,25 +25,38 @@
     (?reply-fn [id {:attempt-id attempt-id :client-id client-id :scope scope}])))
 
 
-(defn me [{:keys [config-opts db]} [id ?data] uid ?reply-fn]
+(defmethod handler :users/me
+  [{:keys [config-opts db]} {:keys [uid ?reply-fn] [id ?data] :event}]
+
   (let [user (select-keys (get-in @db [:users uid]) [:name :email :login])]
     (?reply-fn [id {:user user}])))
 
 
-(defn make-receive
-  "Returns a function that receives a message and dispatches it appropriately."
-  [φ]
+(defmethod handler :chsk/ws-ping
+  [φ event-message])
 
-  (fn [{:keys [event id ?data send-fn uid ring-req ?reply-fn client-id]}]
-    (log/debugf "received message: %s from client: %s with uid: %s" id client-id uid)
 
-    (case id
-      :sign-in/init-sign-in-with-github (init-sign-in-with-github φ event uid ?reply-fn)
-      :users/me (me φ event uid ?reply-fn)
-      :chsk/ws-ping nil
-      :chsk/uidport-open nil
-      :chsk/uidport-close nil
-      (log/error "No handling function to process message:" id))))
+(defmethod handler :chsk/uidport-open
+  [φ event-message])
+
+
+(defmethod handler :chsk/uidport-close
+  [φ event-message])
+
+
+(defmethod handler :default
+  [φ {:keys [id]}]
+  (log/debug "unhandled event-message:" id))
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; top level handling
+
+
+(defn make-handler [φ]
+  "Returns a function that receives a message and handles it appropriately via multimethods"
+  (fn [{:keys [id client-id uid] :as event-message}]
+    (log/debugf "received %s from client %s with uid %s" id client-id uid)
+    (handler φ event-message)))
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; component setup
@@ -46,7 +68,7 @@
   (start [component]
     (log/info "initialising comms")
     (let [chsk-conn (sente/make-channel-socket! sente-web-server-adapter (get-in config-opts [:comms :chsk-opts]))
-          stop-chsk-router! (sente/start-chsk-router! (:ch-recv chsk-conn) (make-receive {:config-opts config-opts :db db}))]
+          stop-chsk-router! (sente/start-chsk-router! (:ch-recv chsk-conn) (make-handler {:config-opts config-opts :db db}))]
       (assoc component
              :chsk-conn chsk-conn
              :stop-chsk-router! stop-chsk-router!)))
