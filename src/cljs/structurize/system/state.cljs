@@ -28,8 +28,6 @@
              :!core !core
              :!handler (r/cursor !core [:location :handler])
              :!query (r/cursor !core [:location :query])
-             :!chsk-status (r/cursor !core [:chsk-status])
-             :!click-count-a (r/cursor !core [:click-count :a])
-             :!click-count-b (r/cursor !core [:click-count :b]))))
+             :!chsk-status (r/cursor !core [:chsk-status]))))
 
   (stop [component] component))

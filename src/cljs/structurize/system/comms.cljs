@@ -103,7 +103,8 @@
   (start [component]
     (log/info "initialising comms")
     (let [emit-event! (:emit-event! bus)
-          {:keys [chsk ch-recv send-fn] chsk-state :state} (sente/make-channel-socket! "/chsk" (get-in config-opts [:side-effector :chsk-opts]))]
+          chsk-opts (get-in config-opts [:comms :chsk-opts])
+          {:keys [chsk ch-recv send-fn] chsk-state :state} (sente/make-channel-socket! "/chsk" chsk-opts)]
 
       (log/info "begin listening for messages from server")
       (sente/start-chsk-router! ch-recv (make-receive emit-event!))

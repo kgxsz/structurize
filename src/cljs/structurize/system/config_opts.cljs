@@ -11,9 +11,15 @@
 (defonce bus-config-opts
   {})
 
-(defonce side-effector-config-opts
+(defonce browser-config-opts
+  {})
+
+(defonce comms-config-opts
   {:chsk-opts {:type :auto
                :packer :edn}})
+
+(defonce side-effector-config-opts
+  {})
 
 
 (defonce state-config-opts
@@ -40,6 +46,8 @@
     (assoc component
            :general general-config-opts
            :bus bus-config-opts
+           :browser browser-config-opts
+           :comms comms-config-opts
            :side-effector side-effector-config-opts
            :state state-config-opts
            :machine machine-config-opts
