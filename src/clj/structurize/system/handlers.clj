@@ -3,7 +3,7 @@
             [clj-time.core :as time]
             [clojure.data.json :as json]
             [com.stuartsierra.component :as component]
-            [hiccup.page :refer [html5 include-js]]
+            [hiccup.page :refer [html5 include-js include-css]]
             [org.httpkit.client :as http]
             [ring.util.response :refer [response content-type]]
             [taoensso.timbre :as log]))
@@ -12,7 +12,9 @@
 (defn root-page-handler [request]
   (let [root-page (html5
                    [:head
-                    [:title "Structurize"]]
+                    [:title "Structurize"]
+                    [:meta {:name "viewport" :content "width = device-width, initial-scale = 1.0, user-scalable = no"}]
+                    (include-css "/css/style.css")]
                    [:body
                     [:div#root
                      [:h1 "Loading your stuff!"]]

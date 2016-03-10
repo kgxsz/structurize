@@ -13,6 +13,7 @@
                  [com.taoensso/timbre "4.1.4"]
                  [org.clojure/data.json "0.2.6"]
                  [clj-time "0.11.0"]
+                 [garden "1.3.2"]
                  [camel-snake-kebab "0.3.2"]]
 
   :clean-targets ^{:protect false} ["target/"
@@ -26,7 +27,8 @@
                                   [com.cemerick/url "0.1.1"]
                                   [secretary "1.2.3"]]
 
-                   :plugins [[lein-figwheel "0.5.0-2"]]
+                   :plugins [[lein-figwheel "0.5.0-2"]
+                             [lein-garden "0.2.6"]]
 
                    :repl-options {:init-ns structurize.main
                                   :init (structurize.main/start!)
@@ -41,6 +43,12 @@
                                                     :asset-path "/js/"
                                                     :optimizations :none
                                                     :source-map true}}]}
+
+                   :garden {:builds [{:id "main"
+                                      :source-paths ["src/clj"]
+                                      :stylesheet structurize.styles.main/main
+                                      :compiler {:output-to "dev-resources/public/css/style.css"
+                                                 :pretty-print? true}}]}
 
                    :figwheel {:repl false
                               :nrepl-port 5000
