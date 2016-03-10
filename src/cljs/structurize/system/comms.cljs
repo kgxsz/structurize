@@ -15,14 +15,15 @@
 
 (defmethod handler :chsk/state
   [emit-event! {:keys [event id ?data send-fn] :as event-message}]
-  (log/debug "chsk status change")
   (emit-event! [:chsk-status-update {:Δ (fn [core] (assoc core :chsk-status (if (:open? ?data) :open :closed)))}]))
 
 
 (defmethod handler :chsk/handshake
-  [emit-event! {:keys [event id ?data send-fn] :as event-message}]
-  (log/info "chsk handshake"))
+  [])
 
+(defmethod handler :default
+  [emit-event! {:keys [event id ?data send-fn] :as event-message}]
+  (log/debug "unhandled event-message:" id))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; comms setup
 
