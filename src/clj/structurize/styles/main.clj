@@ -1,6 +1,6 @@
 (ns structurize.styles.main
   (:require [garden.units :as u]
-            [garden.color :as gc]))
+            [garden.color :as c]))
 
 (def meyer-reset
   [[:html :body :div :span :applet :object :iframe :h1 :h2 :h3 :h4 :h5 :h6 :p
@@ -25,21 +25,28 @@
 
 
 (def body
-  [:body
-   {:font-family      "sans-serif"
-    :font-size        (u/px 10)
-    :line-height      1.5
-    :background-color "#AAA"}])
+  [:body {:font-family "monospace"
+          :font-size (u/px 10)
+          :line-height 1.5
+          :background-color (c/color-name->hex :indianred)}])
 
 
-(def app [:div#app
-          {:width    (u/vw 100)
-           :height   (u/vh 100)
-           :position :relative}])
+(def root
+  [:div#root {:width (u/vw 100)
+              :height (u/vh 100)
+              :position :relative}])
 
+(def event-state
+  [:div.event-state {:width (u/vw 50)
+                     :height (u/vh 100)
+                     :background-color (c/color-name->hex :lavender)
+                     :position :fixed
+                     :top 0
+                     :right 0}])
 
 (def main
   [meyer-reset
    html
    body
-   app])
+   root
+   event-state])

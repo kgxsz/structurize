@@ -1,7 +1,7 @@
 (ns structurize.components.root-component
-  (:require [structurize.routes :refer [routes]]
+  (:require [structurize.components.even-state-component :refer [event-state]]
+            [structurize.routes :refer [routes]]
             [bidi.bidi :as b]
-            [camel-snake-kebab.core :as csk]
             [reagent.core :as r]
             [taoensso.timbre :as log])
   (:require-macros [cljs.core.async.macros :refer [go]]))
@@ -48,14 +48,6 @@
         :sent "signing out!"
         "sign out")]]))
 
-
-(defn event-state-watch [{:keys [state]}]
-  (log/debug "mount/render event-state-watch")
-  [:span (str @(:!core state))])
-
-
-
-
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; top level pages
 
 
@@ -65,8 +57,7 @@
   [:div
    [:h1 "Front end ready!"]
    [sign-in-with-github Φ]
-   [sign-out Φ]
-   [event-state-watch Φ]])
+   [sign-out Φ]])
 
 
 (defn sign-in-with-github-page [{{:keys [!core !query]} :state
@@ -88,13 +79,11 @@
        [:h1 "Sign in with GitHub failed "]
        [:h3 "Couldn't complete the sign in process with Github."]
 
-       [event-state-watch Φ]
        [:button {:on-click  #(change-location! {:path (b/path-for routes :home)})}
         "home"]]
 
       [:div
        [:h1 "We're signing you in with github!"]
-       [event-state-watch Φ]
        [:button {:on-click  #(change-location! {:path (b/path-for routes :home)})}
         "home"]])))
 
@@ -104,7 +93,6 @@
   (log/debug "mount/render unkown-page")
   [:div
    [:h1 "What?! Where the hell am I?"]
-   [event-state-watch Φ]
    [:button {:on-click  #(change-location! {:path (b/path-for routes :home)})}
     "Go home!"]])
 
@@ -124,8 +112,11 @@
   (when (= :open @!chsk-status)
     (send! [:users/me]))
 
-  (case @!handler
-    :home [home-page Φ]
-    :sign-in-with-github [sign-in-with-github-page Φ]
-    :init [init-page Φ]
-    :unknown [unknown-page Φ]))
+  [:div
+   [event-state Φ]
+
+   (case @!handler
+     :home [home-page Φ]
+     :sign-in-with-github [sign-in-with-github-page Φ]
+     :init [init-page Φ]
+     :unknown [unknown-page Φ])])

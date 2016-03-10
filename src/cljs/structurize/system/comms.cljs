@@ -6,7 +6,6 @@
   (:import [goog.history Html5History EventType]))
 
 
-
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; multi-method handling
 
 
@@ -24,6 +23,7 @@
 (defmethod handler :default
   [emit-event! {:keys [event id ?data send-fn] :as event-message}]
   (log/debug "unhandled event-message:" id))
+
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; comms setup
 
