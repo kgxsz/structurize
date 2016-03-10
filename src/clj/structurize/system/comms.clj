@@ -52,8 +52,9 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; top level handling
 
 
-(defn make-handler [φ]
+(defn make-handler
   "Returns a function that receives a message and handles it appropriately via multimethods"
+  [φ]
   (fn [{:keys [id client-id uid] :as event-message}]
     (log/debugf "received %s from client %s with uid %s" id client-id uid)
     (handler φ event-message)))

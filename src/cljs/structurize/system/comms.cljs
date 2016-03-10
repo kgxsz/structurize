@@ -7,19 +7,33 @@
 
 
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; multi-method handling
+
+
+(defmulti handler (fn [_ event-message] (:id event-message)))
+
+
+(defmethod handler :chsk/state
+  [emit-event! {:keys [event id ?data send-fn] :as event-message}]
+  (log/debug "chsk status change")
+  (emit-event! [:chsk-status-update {:Δ (fn [core] (assoc core :chsk-status (if (:open? ?data) :open :closed)))}]))
+
+
+(defmethod handler :chsk/handshake
+  [emit-event! {:keys [event id ?data send-fn] :as event-message}]
+  (log/info "chsk handshake"))
+
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; comms setup
 
 
-(defn make-receive
-  "Returns a function that receives a message and dispatches it appropriately."
+(defn make-handler
+  "Returns a function that receives a message and handles it appropriately via multimethods"
   [emit-event!]
 
-  (fn [{:keys [event id ?data send-fn]}]
-    (log/info "received message from server:" id)
-    (cond
-      (= id :chsk/state) (do (log/info "chsk status change")
-                             (emit-event! [:chsk-status-update {:Δ (fn [core] (assoc core :chsk-status (if (:open? ?data) :open :closed)))}]))
-      (= id :chsk/handshake) (log/info "chsk handshake"))))
+  (fn [{:keys [event id ?data send-fn] :as event-message}]
+    (log/debug "received message from server:" id)
+    (handler emit-event! event-message)))
 
 
 (defn make-send!
@@ -107,7 +121,7 @@
           {:keys [chsk ch-recv send-fn] chsk-state :state} (sente/make-channel-socket! "/chsk" chsk-opts)]
 
       (log/info "begin listening for messages from server")
-      (sente/start-chsk-router! ch-recv (make-receive emit-event!))
+      (sente/start-chsk-router! ch-recv (make-handler emit-event!))
 
       (assoc component
              :send! (make-send! send-fn emit-event!)
