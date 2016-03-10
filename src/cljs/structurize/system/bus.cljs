@@ -5,18 +5,12 @@
   (:require-macros [cljs.core.async.macros :refer [go]]))
 
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; event emitter setup
-
-
 (defn make-emit-event!
   "Returns a function that emits events onto the bus' event channel."
   [<event]
   (fn [[id _ :as event]]
     (log/debug "emitting event:" id)
     (go (a/>! <event event))))
-
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; component setup
 
 
 (defrecord Bus [config-opts]

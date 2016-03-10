@@ -8,8 +8,8 @@
 
 
 (defn sign-in-with-github [{{:keys [general]} :config-opts
-                          {:keys [!core]} :state
-                          {:keys [send! change-history!]} :side-effector}]
+                            {:keys [!core]} :state
+                            {:keys [send! change-location!]} :side-effector}]
 
   (log/debug "mount/render sign-in-with-github")
 
@@ -19,12 +19,12 @@
     (when (= :reply-received @!message-status)
       (let [{:keys [client-id attempt-id scope]} @!message-reply
             redirect-uri (str (:host general) (b/path-for routes :sign-in-with-github))]
-        (change-history! {:prefix "https://github.com"
-                          :path "/login/oauth/authorize"
-                          :query {:client_id client-id
-                                  :state attempt-id
-                                  :scope scope
-                                  :redirect_uri redirect-uri}})))
+        (change-location! {:prefix "https://github.com"
+                           :path "/login/oauth/authorize"
+                           :query {:client_id client-id
+                                   :state attempt-id
+                                   :scope scope
+                                   :redirect_uri redirect-uri}})))
 
     [:div
      [:button
@@ -59,7 +59,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; top level pages
 
 
-(defn home-page [{{:keys [change-history!]} :side-effector
+(defn home-page [{{:keys [change-location!]} :side-effector
                   :as Φ}]
   (log/debug "mount/render home-page")
   [:div
@@ -70,8 +70,8 @@
 
 
 (defn sign-in-with-github-page [{{:keys [!core !query]} :state
-                              {:keys [post! change-history!]} :side-effector
-                              :as Φ}]
+                                 {:keys [post! change-location!]} :side-effector
+                                 :as Φ}]
   (log/debug "mount/render sign-in-with-github-page")
 
   (let [{:keys [code error] attempt-id :state} @!query
@@ -79,8 +79,8 @@
 
     (cond
       (and code attempt-id) (do (post! ["/sign-in/github" {:code code, :attempt-id attempt-id}])
-                                (change-history! {:query {} :replace? true}))
-      (= :response-received @!post-status) (change-history! {:path (b/path-for routes :home)}))
+                                (change-location! {:query {} :replace? true}))
+      (= :response-received @!post-status) (change-location! {:path (b/path-for routes :home)}))
 
     (if (or error (= :failed @!post-status))
 
@@ -89,23 +89,23 @@
        [:h3 "Couldn't complete the sign in process with Github."]
 
        [event-state-watch Φ]
-       [:button {:on-click  #(change-history! {:path (b/path-for routes :home)})}
+       [:button {:on-click  #(change-location! {:path (b/path-for routes :home)})}
         "home"]]
 
       [:div
        [:h1 "We're signing you in with github!"]
        [event-state-watch Φ]
-       [:button {:on-click  #(change-history! {:path (b/path-for routes :home)})}
+       [:button {:on-click  #(change-location! {:path (b/path-for routes :home)})}
         "home"]])))
 
 
-(defn unknown-page [{{:keys [change-history!]} :side-effector
+(defn unknown-page [{{:keys [change-location!]} :side-effector
                      :as Φ}]
   (log/debug "mount/render unkown-page")
   [:div
    [:h1 "What?! Where the hell am I?"]
    [event-state-watch Φ]
-   [:button {:on-click  #(change-history! {:path (b/path-for routes :home)})}
+   [:button {:on-click  #(change-location! {:path (b/path-for routes :home)})}
     "Go home!"]])
 
 
@@ -122,7 +122,7 @@
   (log/debug "mount/render root-component")
 
   (when (= :open @!chsk-status)
-    (send! [:users/me {}]))
+    (send! [:users/me]))
 
   (case @!handler
     :home [home-page Φ]

@@ -12,6 +12,6 @@
            :emit-event! (:emit-event! bus)
            :send! (:send! comms)
            :post! (:post! comms)
-           :change-history! (:change-history! browser)))
+           :change-location! (:change-location! browser)))
 
   (stop [component] component))

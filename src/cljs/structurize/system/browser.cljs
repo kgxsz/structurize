@@ -14,9 +14,11 @@
 
 
 (defn make-navigation-handler
+
   "Returns a function that handles browser navigation
    events and emits the location-change event, which will
    cause an update to the location information in the state."
+
   [history emit-event!]
 
   (fn [g-event]
@@ -55,16 +57,26 @@
     (.setEnabled true)))
 
 
-(defn make-change-history!
+(defn make-change-location!
+
   "Returns a function that takes a map of options and updates the
-   browser's navigation accordingly. The browser will fire a navigation
-   event if the history changes, which will be dealt with by a listener."
+   browser's location accordingly. The browser will fire a navigation
+   event if the location changes, which will be dealt with by a listener.
+
+   The returned function expects:
+
+   prefix - the part before the path, set it if you want to navigate to a different site
+   path - the path you wish to navigate to
+   query - map of query params
+   replace? - ensures that the browser replaces the current location in history"
+
   [history]
+
   (fn [{:keys [prefix path query replace?]}]
     (let [query-string (when-not (str/blank? (map->query query)) (str "?" (map->query query)))
           current-path (-> (.getToken history) (str/split "?") first)
           token (str (or path current-path) query-string)]
-      (log/debug "dispatching navigation to browser:" (str prefix token))
+      (log/debug "dispatching change of location to browser:" (str prefix token))
       (cond
         prefix (set! js/window.location (str prefix token))
         replace? (.replaceToken history token)
@@ -85,7 +97,7 @@
       (listen-for-navigation history (make-navigation-handler history (:emit-event! bus)))
 
       (assoc component
-             :change-history! (make-change-history! history))))
+             :change-location! (make-change-location! history))))
 
   (stop [component] component))
 

@@ -23,8 +23,15 @@
 
 
 (defn make-send!
+
   "Returns a function that takes a message to send, an event is emitted
-   when the message is dispatched, and another when the message reply is received."
+   when the message is dispatched, and another when the message reply is received.
+
+   The returned function expects:
+
+   message - the sente message, in the form of a vector, with id
+   timeout - in milliseconds"
+
   [send-fn emit-event!]
 
   (fn [[id _ :as message] {:keys [timeout]}]
@@ -49,8 +56,16 @@
 
 
 (defn make-post!
+
   "Returns a function that makes an ajax post to the server. An event is emitted
-   when the request is made, and another when the response is received."
+   when the request is made, and another when the response is received.
+
+   The returned function expects:
+
+   path - path to post to
+   params - map of params to post
+   timeout - in milliseconds"
+
   [chsk chsk-state emit-event!]
 
   (fn [[path params] {:keys [timeout]}]
