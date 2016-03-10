@@ -42,7 +42,14 @@
                      :background-color (c/color-name->hex :lavender)
                      :position :fixed
                      :top 0
-                     :right 0}])
+                     :right 0}
+
+   [:div.state {:overflow :auto
+                :background-color (c/color-name->hex :skyblue)}
+
+    [:div.opening-brace {:float :left}]
+
+    [:div.keys-values {:float :left}]]])
 
 (def main
   [meyer-reset

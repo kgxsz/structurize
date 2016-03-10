@@ -6,6 +6,8 @@
   (let [core @(:!core state)]
     [:div.event-state
      [:div.state
-      (for [[k v] core]
-        [:div {:key k}
-         (str k " " v)])]]))
+      [:div.opening-brace "{"]
+      [:div.keys-values
+       (for [[k v] core]
+         [:div.key-value {:key k}
+          (str k " " v)])]]]))
