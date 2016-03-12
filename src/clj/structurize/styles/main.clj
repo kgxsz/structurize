@@ -32,24 +32,31 @@
 
 
 (def root
-  [:div#root {:width (u/vw 100)
-              :height (u/vh 100)
-              :position :relative}])
+  [:#root {:width (u/vw 100)
+           :height (u/vh 100)
+           :position :relative}])
 
 (def event-state
-  [:div.event-state {:width (u/vw 50)
-                     :height (u/vh 100)
-                     :background-color (c/color-name->hex :lavender)
-                     :position :fixed
-                     :top 0
-                     :right 0}
+  [:.event-state {:width (u/vw 50)
+                  :height (u/vh 100)
+                  :background-color (c/color-name->hex :lavender)
+                  :position :fixed
+                  :top 0
+                  :right 0}
 
-   [:div.state {:overflow :auto
-                :background-color (c/color-name->hex :skyblue)}
-
-    [:div.opening-brace {:float :left}]
-
-    [:div.keys-values {:float :left}]]])
+   [:.state
+    [:.node {:display :flex}
+     [:.keys-values
+      [:.key-value {:display :flex}
+       [:.value :.key {:padding-bottom (u/rem 0.1)}
+        [:span {:padding-bottom (u/rem 0.2)
+                :padding-left (u/rem 0.1)
+                :padding-right (u/rem 0.1)
+                :border-radius (u/px 2)}
+         [:&:hover {:cursor :pointer
+                     :background-color (c/color-name->hex :indianred)}]]]
+       [:.key {:margin-right (u/rem 0.3)}]
+       [:.value {}]]]]]])
 
 (def main
   [meyer-reset

@@ -15,9 +15,6 @@
            :chsk-status :init}))
 
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; component setup
-
-
 (defrecord State [config-opts]
   component/Lifecycle
 
