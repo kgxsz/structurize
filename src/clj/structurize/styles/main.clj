@@ -25,8 +25,7 @@
 
 
 (def body
-  [:body {:font-family "monospace"
-          :font-size (u/px 10)
+  [:body {:font-size (u/px 10)
           :line-height 1.5
           :background-color (c/color-name->hex :indianred)}])
 
@@ -39,24 +38,34 @@
 (def event-state
   [:.event-state {:width (u/vw 50)
                   :height (u/vh 100)
-                  :background-color (c/color-name->hex :lavender)
+                  :background-color (c/color-name->hex :ivory)
                   :position :fixed
                   :top 0
                   :right 0}
 
-   [:.state
-    [:.node {:display :flex}
-     [:.keys-values
-      [:.key-value {:display :flex}
-       [:.value :.key {:padding-bottom (u/rem 0.1)}
-        [:span {:padding-bottom (u/rem 0.2)
-                :padding-left (u/rem 0.1)
-                :padding-right (u/rem 0.1)
-                :border-radius (u/px 2)}
-         [:&:hover {:cursor :pointer
-                     :background-color (c/color-name->hex :indianred)}]]]
-       [:.key {:margin-right (u/rem 0.3)}]
-       [:.value {}]]]]]])
+   [:.state {:font-family "monospace"}
+
+    [:.nodes-container {:display :flex
+                        :margin-bottom (u/rem 0.1)
+                        :border-radius (u/px 2)}
+     [:&.focused {:background-color (c/color-name->hex :pink)}]
+
+     [:.node {:display :flex}
+
+      [:.node-key :.node-value {:margin-bottom (u/rem 0.1)
+                                :padding-bottom (u/rem 0.1)
+                                :padding-left (u/rem 0.2)
+                                :padding-right (u/rem 0.2)
+                                :border-radius (u/px 2)}
+       [:&:hover {:cursor :pointer}]]
+
+      [:.node-key {:margin-right (u/rem 0.2)}
+       [:&.cursored {:background-color (c/color-name->hex :indianred)}]
+       [:&.focused {:background-color (c/color-name->hex :lavender)}]]
+
+      [:.node-value
+       [:&.focused {:background-color (c/color-name->hex :pink)}]]]]]])
+
 
 (def main
   [meyer-reset
