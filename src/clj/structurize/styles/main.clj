@@ -27,7 +27,11 @@
 (def body
   [:body {:font-size (u/px 10)
           :line-height 1.5
-          :background-color (c/color-name->hex :indianred)}])
+          :background-image "url(\"/images/blurred-background.jpg\")"
+          :background-repeat :no-repeat
+          :background-position [:center :center]
+          :background-attachements :fixed
+          :background-size :cover}])
 
 
 (def root
@@ -38,33 +42,45 @@
 (def event-state
   [:.event-state {:width (u/vw 50)
                   :height (u/vh 100)
-                  :background-color (c/color-name->hex :ivory)
+                  :background-color "#272B30"
+                  :color "#DDD"
+                  :font-size (u/rem 1.2)
                   :position :fixed
                   :top 0
                   :right 0}
 
    [:.state {:font-family "monospace"}
 
-    [:.nodes-container {:display :flex
-                        :margin-bottom (u/rem 0.1)
-                        :border-radius (u/px 2)}
-     [:&.focused {:background-color (c/color-name->hex :pink)}]
+    [:.nodes-container {:display :flex}
+
+     [:.node-key :.node-value {:background-color "#474C51"
+                               :margin-bottom (u/rem 0.2)
+                               :padding-left (u/rem 0.2)
+                               :padding-right (u/rem 0.3)
+                               :padding-bottom (u/rem 0.1)
+                               :border-radius (u/px 3)}
+      [:&:hover {:cursor :default}]]
+
+     [:&.focused
+      [:.node-key :.node-value {:background-color "#2478BD"}]]
 
      [:.node {:display :flex}
 
-      [:.node-key :.node-value {:margin-bottom (u/rem 0.1)
-                                :padding-bottom (u/rem 0.1)
-                                :padding-left (u/rem 0.2)
-                                :padding-right (u/rem 0.2)
-                                :border-radius (u/px 2)}
-       [:&:hover {:cursor :pointer}]]
+      [:.node-key {:margin-right (u/rem 0.2)
+                   :display :flex
+                   :align-items :center}
 
-      [:.node-key {:margin-right (u/rem 0.2)}
-       [:&.cursored {:background-color (c/color-name->hex :indianred)}]
-       [:&.focused {:background-color (c/color-name->hex :lavender)}]]
+       [:&.focused {:background-color "#3E6733"}]
+
+       [:.node-key-flag.cursored {:width (u/rem 0.9)
+                                  :height (u/rem 0.9)
+                                  :border-radius (u/rem 0.2)
+                                  :margin-left (u/rem 0.2)
+                                  :margin-right (u/rem 0.2)
+                                  :background-color "#F3C96E"}]]
 
       [:.node-value
-       [:&.focused {:background-color (c/color-name->hex :pink)}]]]]]])
+       [:&.focused {:background-color "#2478BD"}]]]]]])
 
 
 (def main

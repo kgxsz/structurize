@@ -1,4 +1,4 @@
-(ns structurize.components.even-state-component
+(ns structurize.components.event-state-component
   (:require [taoensso.timbre :as log]
             [reagent.ratom :as rr]
             [clojure.string :as string]))
@@ -40,10 +40,11 @@
            [:div.node {:key k}
             [:div.node-key-container
              [:div.node-key
-              {:class (classify (when (= path (take (count path) focused-node)) :focused)
-                                (when (contains? cursors path) :cursored))
+              {:class (when (= path (take (count path) focused-node)) :focused)
                :on-mouse-over (fn [e] (focus-node) (.stopPropagation e))
                :on-mouse-out (fn [e] (blur-node) (.stopPropagation e))}
+
+              [:div.node-key-flag {:class (when (contains? cursors path) :cursored)}]
 
               (stringify k)]]
             (if (map? v)
