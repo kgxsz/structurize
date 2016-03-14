@@ -1,5 +1,5 @@
 (ns structurize.components.root-component
-  (:require [structurize.components.even-state-component :refer [event-state]]
+  (:require [structurize.components.event-state-component :refer [event-state]]
             [structurize.routes :refer [routes]]
             [bidi.bidi :as b]
             [reagent.core :as r]
