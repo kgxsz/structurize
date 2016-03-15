@@ -39,22 +39,22 @@
            :height (u/vh 100)
            :position :relative}])
 
-(def event-state
-  [:.event-state {:width (u/vw 50)
-                  :height (u/vh 100)
-                  :background-color "#272B30"
-                  :color "#DDD"
-                  :font-size (u/rem 1.2)
-                  :position :fixed
-                  :top 0
-                  :right 0}
+(def event-state-display
+  [:.event-state-display {:width (u/vw 50)
+                          :height (u/vh 100)
+                          :background-color "#272B30"
+                          :color "#DDD"
+                          :font-size (u/rem 1.2)
+                          :position :fixed
+                          :top 0
+                          :right 0}
 
-   [:.state {:font-family "monospace"
-             :margin (u/rem 1.5)
-             :padding (u/rem 1)
-             :background-color "#343337"
-             :border-radius (u/px 5)
-             :white-space :nowrap}
+   [:.state-display {:font-family "monospace"
+                     :margin (u/rem 1.5)
+                     :padding (u/rem 1)
+                     :background-color "#343337"
+                     :border-radius (u/px 5)
+                     :white-space :nowrap}
 
     [:.nodes-container {:display :flex}
 
@@ -96,4 +96,4 @@
    html
    body
    root
-   event-state])
+   event-state-display])
