@@ -49,13 +49,18 @@
                   :top 0
                   :right 0}
 
-   [:.state {:font-family "monospace"}
+   [:.state {:font-family "monospace"
+             :margin (u/rem 1.5)
+             :padding (u/rem 1)
+             :background-color "#343337"
+             :border-radius (u/px 5)
+             :white-space :nowrap}
 
     [:.nodes-container {:display :flex}
 
      [:.node-key :.node-value {:background-color "#474C51"
                                :margin-bottom (u/rem 0.2)
-                               :padding-left (u/rem 0.2)
+                               :padding-left (u/rem 0.3)
                                :padding-right (u/rem 0.3)
                                :padding-bottom (u/rem 0.1)
                                :border-radius (u/px 3)}
@@ -72,12 +77,15 @@
 
        [:&.focused {:background-color "#3E6733"}]
 
-       [:.node-key-flag.cursored {:width (u/rem 0.9)
-                                  :height (u/rem 0.9)
-                                  :border-radius (u/rem 0.2)
-                                  :margin-left (u/rem 0.2)
-                                  :margin-right (u/rem 0.2)
-                                  :background-color "#F3C96E"}]]
+       [:.node-key-flags {:display :flex
+                          :margin-right (u/rem 0.1)}
+        [:.node-key-flag {:display :none
+                          :width (u/rem 0.9)
+                          :height (u/rem 0.9)
+                          :border-radius (u/rem 0.2)
+                          :margin-left (u/rem 0.2)}
+         [:&.cursored {:display :block
+                       :background-color "#F3C96E"}]]]]
 
       [:.node-value
        [:&.focused {:background-color "#2478BD"}]]]]]])

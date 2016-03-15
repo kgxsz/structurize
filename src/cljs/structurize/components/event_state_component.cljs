@@ -11,67 +11,88 @@
     :else (str x)))
 
 
-(defn classify [& classes]
-  (->> classes
-       (remove nil?)
-       (map name)
-       (interpose " ")
-       (apply str)))
+(declare nodes)
 
 
-(defn state-nodes
-  [{{:keys [emit-event!]} :side-effector {:keys [!core]} :state :as φ} node cursors path close-brace-depth]
+(defn node [φ k v cursors focused-node focus-node blur-node path braces]
+  [:div.node {:key k}
+   [:div.node-key-container
+    [:div.node-key
+     {:class (when (= path (take (count path) focused-node)) :focused)
+      :on-mouse-over (fn [e] (focus-node) (.stopPropagation e))
+      :on-mouse-out (fn [e] (blur-node) (.stopPropagation e))}
 
-  (let [num-keys (count node)
-        focused-node (get-in @!core [:tooling :focused-node])]
+     [:div.node-key-flags
+      [:div.node-key-flag {:class (when (get-in cursors path) :cursored)}]]
+
+     (stringify k)]]
+
+   (if (map? v)
+     [nodes φ path (str braces "}")]
+     [:div.node-value
+      {:class (when (= path focused-node) :focused)
+       :on-mouse-over (fn [e] (focus-node) (.stopPropagation e))
+       :on-mouse-out (fn [e] (blur-node) (.stopPropagation e))}
+      (stringify v)])
+
+   (when-not (map? v) [:div.node-braces braces])])
+
+
+(defn nodes [φ path braces]
+
+  (log/debug "mount/render nodes:" path)
+
+  (let [emit-event! (get-in φ [:side-effector :emit-event!])
+        core @(get-in φ [:state :!core])
+        current-nodes (get-in core path)
+        focused-node (get-in core [:tooling :focused-node])]
 
     [:div.nodes-container {:class (when (= path focused-node) :focused)}
+     [:div.nodes-braces "{"]
 
-     [:div.nodes-braces (str "{" (when (empty? node) (apply str (repeat close-brace-depth "}"))))]
+     (if (empty? current-nodes)
+       [:div.nodes-braces braces]
 
-     [:div.nodes
+       [:nodes
 
-      (map-indexed
-       (fn [i [k v]]
-         (let [close-brace? (= (inc i) num-keys)
-               path (conj path k)
-               focus-node #(emit-event! [:focus-node {:Δ (fn [core] (assoc-in core [:tooling :focused-node] path))}])
-               blur-node #(emit-event! [:blur-node {:Δ (fn [core] (assoc-in core [:tooling :focused-node] nil))}])]
-           [:div.node {:key k}
-            [:div.node-key-container
-             [:div.node-key
-              {:class (when (= path (take (count path) focused-node)) :focused)
-               :on-mouse-over (fn [e] (focus-node) (.stopPropagation e))
-               :on-mouse-out (fn [e] (blur-node) (.stopPropagation e))}
+        (for [[k v] (drop-last current-nodes)]
+          (let [braces ""
+                path (conj path k)
+                cursors (get-in core [:tooling :cursors])
+                focused-node (get-in core [:tooling :focused-node])
+                focus-node #(emit-event! [:focus-node {:Δ (fn [core] (assoc-in core [:tooling :focused-node] path))}])
+                blur-node #(emit-event! [:blur-node {:Δ (fn [core] (assoc-in core [:tooling :focused-node] nil))}])]
 
-              [:div.node-key-flag {:class (when (contains? cursors path) :cursored)}]
+            (node φ k v cursors focused-node focus-node blur-node path braces)))
 
-              (stringify k)]]
-            (if (map? v)
-              [state-nodes φ v cursors path (if close-brace? (inc close-brace-depth) close-brace-depth)]
-              [:div.node-value
-               {:class (when (= path focused-node) :focused)
-                :on-mouse-over (fn [e] (focus-node) (.stopPropagation e))
-                :on-mouse-out (fn [e] (blur-node) (.stopPropagation e))}
-               (stringify v)])
-            (when (and close-brace? (not (map? v)))
-              [:div.node-braces (apply str (repeat close-brace-depth "}"))])]))
-       node)]]))
+        (let [[k v] (last current-nodes)
+              path (conj path k)
+              cursors (get-in core [:tooling :cursors])
+              focused-node (get-in core [:tooling :focused-node])
+              focus-node #(emit-event! [:focus-node {:Δ (fn [core] (assoc-in core [:tooling :focused-node] path))}])
+              blur-node #(emit-event! [:blur-node {:Δ (fn [core] (assoc-in core [:tooling :focused-node] nil))}])]
+
+          (node φ k v cursors focused-node focus-node blur-node path braces))])]))
 
 
-(defn state-root-nodes
-  [{:keys [state] :as φ}]
-  (let [node @(:!core state)
-        cursors (->> (vals state)
-                     (filter (partial instance? rr/RCursor))
-                     (map #(.-path %))
-                     set)]
-    [state-nodes φ node cursors [] 1]))
+(defn root-nodes [φ]
+
+  (log/debug "mount/render root-nodes")
+
+  (let [emit-event! (get-in φ [:side-effector :emit-event!])
+        cursor-paths (for [c (-> φ :state vals) :when (instance? rr/RCursor c)] (.-path c))
+        cursors (reduce #(assoc-in %1 %2 :cursored) {} cursor-paths)
+        path []
+        braces "}"]
+
+    (emit-event! [:setup-tooling-cursors {:Δ (fn [core] (assoc-in core [:tooling :cursors] cursors))}])
+
+    [nodes φ path braces]))
 
 
 (defn event-state [φ]
   (log/debug "mount/render event-state")
   [:div.event-state
    [:div.state
-    [state-root-nodes φ]]])
+    [root-nodes φ]]])
 
