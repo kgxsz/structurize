@@ -1,5 +1,5 @@
 (ns structurize.components.root-component
-  (:require [structurize.components.event-state-component :refer [event-state-display]]
+  (:require [structurize.components.tooling-component :refer [tooling]]
             [structurize.routes :refer [routes]]
             [bidi.bidi :as b]
             [reagent.core :as r]
@@ -113,7 +113,7 @@
     (send! [:users/me]))
 
   [:div
-   [event-state-display Φ]
+   [tooling Φ]
 
    (case @!handler
      :home [home-page Φ]

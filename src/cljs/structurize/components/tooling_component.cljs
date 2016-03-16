@@ -1,4 +1,4 @@
-(ns structurize.components.event-state-component
+(ns structurize.components.tooling-component
   (:require [taoensso.timbre :as log]
             [reagent.ratom :as rr]
             [clojure.string :as string]))
@@ -74,9 +74,9 @@
         (node φ core (last node-paths) braces))]]))
 
 
-(defn state-display [φ]
+(defn state-browser [φ]
 
-  (log/debug "mount state-display")
+  (log/debug "mount state-browser")
 
   (let [emit-event! (get-in φ [:side-effector :emit-event!])
         !core (get-in φ [:state :!core])
@@ -90,13 +90,13 @@
                                                 cursor-paths))}])
 
     (fn []
-      (log/debug "render state-display")
-      [:div.state-display
+      (log/debug "render state-browser")
+      [:div.state-browser
        (nodes φ @!core [] "}")])))
 
 
-(defn event-state-display [φ]
-  (log/debug "mount/render event-state")
-  [:div.event-state-display
-   [state-display φ]])
+(defn tooling [φ]
+  (log/debug "mount/render tooling")
+  [:div.tooling
+   [state-browser φ]])
 
