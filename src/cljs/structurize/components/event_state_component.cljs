@@ -17,16 +17,11 @@
     :else (str x)))
 
 
-(defn add-property [value property]
-  (if value
-    (conj value property)
-    #{property}))
-
-
-(defn remove-property [value property]
-  (if value
-    (disj value property)
-    #{}))
+(defn toggle-property [s property]
+  (cond
+    (contains? s property) (disj s property)
+    s (conj s property)
+    :else #{property}))
 
 
 (defn node [φ core emit-event! node-path braces]
@@ -35,25 +30,19 @@
         node-properties (get-in core [:tooling :node-properties node-path])
         trail-nodes-paths (-> (reductions conj [] node-path) rest drop-last)
         !node-properties (get-in φ [:state :!node-properties])
-        focus-node (fn [] (emit-event! [:focus-node {:cursor !node-properties
-                                                    :Δ (fn [node-properties]
-                                                         (reduce
-                                                          (fn [a v] (update a v add-property :trail-focused))
-                                                          (update node-properties node-path add-property :node-focused)
-                                                          trail-nodes-paths))}]))
-        blur-node (fn [] (emit-event! [:blur-node {:cursor !node-properties
-                                                  :Δ (fn [node-properties]
-                                                       (reduce
-                                                        (fn [a v] (update a v remove-property :trail-focused))
-                                                        (update node-properties node-path remove-property :node-focused)
-                                                        trail-nodes-paths))}]))]
+        toggle-node-focus (fn [] (emit-event! [:focus-node {:cursor !node-properties
+                                                       :Δ (fn [node-properties]
+                                                            (reduce
+                                                             (fn [a v] (update a v toggle-property :trail-focused))
+                                                             (update node-properties node-path toggle-property :node-focused)
+                                                             trail-nodes-paths))}]))]
 
     [:div.node {:key k}
      [:div.node-key-container
       [:div.node-key
        {:class (when (some #{:node-focused :trail-focused} node-properties) :focused)
-        :on-mouse-over (fn [e] (focus-node) (.stopPropagation e))
-        :on-mouse-out (fn [e] (blur-node) (.stopPropagation e))}
+        :on-mouse-over (fn [e] (toggle-node-focus) (.stopPropagation e))
+        :on-mouse-out (fn [e] (toggle-node-focus) (.stopPropagation e))}
 
        [:div.node-key-flags
         [:div.node-key-flag {:class (when (contains? node-properties :cursored) :cursored)}]]
@@ -64,8 +53,8 @@
        [nodes φ core emit-event! node-path (str braces "}")]
        [:div.node-value
         {:class (when (contains? node-properties :node-focused) :focused)
-         :on-mouse-over (fn [e] (focus-node) (.stopPropagation e))
-         :on-mouse-out (fn [e] (blur-node) (.stopPropagation e))}
+         :on-mouse-over (fn [e] (toggle-node-focus) (.stopPropagation e))
+         :on-mouse-out (fn [e] (toggle-node-focus) (.stopPropagation e))}
         (stringify v)])
 
      (when-not (map? v) [:div braces])]))
@@ -95,7 +84,7 @@
 
     (emit-event! [:setup-node-properties {:cursor !node-properties
                                           :Δ (fn [node-properties]
-                                               (reduce (fn [a v] (update a v add-property :cursored))
+                                               (reduce (fn [a v] (update a v toggle-property :cursored))
                                                 node-properties
                                                 cursor-paths))}])
 
