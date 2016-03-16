@@ -4,8 +4,8 @@
             [clojure.string :as string]))
 
 ;; TODO rename to tooling-component
-;; TODO use a path-keyed map for the properties
 ;; TODO use cursors to update only the things that need updating
+
 
 (declare nodes)
 
@@ -24,12 +24,13 @@
     :else #{property}))
 
 
-(defn node [φ core emit-event! node-path braces]
+(defn node [φ core node-path braces]
   (let [k (last node-path)
         v (get-in core node-path)
         node-properties (get-in core [:tooling :node-properties node-path])
         trail-nodes-paths (-> (reductions conj [] node-path) rest drop-last)
         !node-properties (get-in φ [:state :!node-properties])
+        emit-event! (get-in φ [:side-effector :emit-event!])
         toggle-node-focus (fn [] (emit-event! [:focus-node {:cursor !node-properties
                                                        :Δ (fn [node-properties]
                                                             (reduce
@@ -50,7 +51,7 @@
        (stringify k)]]
 
      (if (map? v)
-       [nodes φ core emit-event! node-path (str braces "}")]
+       [nodes φ core node-path (str braces "}")]
        [:div.node-value
         {:class (when (contains? node-properties :node-focused) :focused)
          :on-mouse-over (fn [e] (toggle-node-focus) (.stopPropagation e))
@@ -60,7 +61,7 @@
      (when-not (map? v) [:div braces])]))
 
 
-(defn nodes [φ core emit-event! nodes-path braces]
+(defn nodes [φ core nodes-path braces]
   (let [node-paths (map (partial conj nodes-path) (keys (get-in core nodes-path)))
         node-properties (get-in core [:tooling :node-properties nodes-path])]
 
@@ -68,9 +69,9 @@
      [:div (str "{" (when (empty? node-paths) braces))]
      [:nodes
       (for [node-path (drop-last node-paths)]
-        (node φ core emit-event! node-path ""))
+        (node φ core node-path ""))
       (when (seq node-paths)
-        (node φ core emit-event! (last node-paths) braces))]]))
+        (node φ core (last node-paths) braces))]]))
 
 
 (defn state-display [φ]
@@ -91,10 +92,10 @@
     (fn []
       (log/debug "render state-display")
       [:div.state-display
-       (nodes φ @!core emit-event! [] "}")])))
+       (nodes φ @!core [] "}")])))
 
 
-(defn event-state [φ]
+(defn event-state-display [φ]
   (log/debug "mount/render event-state")
   [:div.event-state-display
    [state-display φ]])

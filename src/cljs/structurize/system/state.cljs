@@ -12,8 +12,7 @@
            :location {:path nil
                       :handler :init
                       :query nil}
-           :chsk-status :init
-           :tooling {:node-properties {}}}))
+           :chsk-status :init}))
 
 
 (defrecord State [config-opts]
