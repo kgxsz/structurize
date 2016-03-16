@@ -16,11 +16,10 @@
   [[id {:keys [cursor Δ]}] {:keys [!core] :as state}]
 
   (log/debug "processing event:" id)
-  (if-let [cursor-or-core (and Δ (or (get state cursor) !core))]
+  (if-let [cursor-or-core (and Δ (or cursor !core))]
     (do (swap! !core assoc-in [:tooling :latest-event] id)
         (swap! cursor-or-core Δ))
     (log/error "failed to process event:" id)))
-
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; component setup

@@ -12,7 +12,8 @@
            :location {:path nil
                       :handler :init
                       :query nil}
-           :chsk-status :init}))
+           :chsk-status :init
+           :tooling {:node-properties {}}}))
 
 
 (defrecord State [config-opts]
@@ -25,6 +26,7 @@
              :!core !core
              :!handler (r/cursor !core [:location :handler])
              :!query (r/cursor !core [:location :query])
-             :!chsk-status (r/cursor !core [:chsk-status]))))
+             :!chsk-status (r/cursor !core [:chsk-status])
+             :!node-properties (r/cursor !core [:tooling :node-properties]))))
 
   (stop [component] component))
