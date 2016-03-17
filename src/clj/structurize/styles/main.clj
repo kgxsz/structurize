@@ -56,6 +56,15 @@
                      :border-radius (u/px 5)
                      :white-space :nowrap}
 
+    [:.collapsed-value {:display :flex}
+     [:div {:width (u/rem 0.4)
+            :height (u/rem 0.4)
+            :margin-top (u/rem 0.1)
+            :margin-left (u/rem 0.1)
+            :margin-right (u/rem 0.1)
+            :border-radius (u/rem 0.2)
+            :background-color "#DDD"}]]
+
     [:.nodes-container {:display :flex}
 
      [:.node-key :.node-value {:background-color "#474C51"
@@ -87,7 +96,8 @@
          [:&.cursored {:display :block
                        :background-color "#F3C96E"}]]]]
 
-      [:.node-value
+      [:.node-value {:display :flex
+                     :align-items :center}
        [:&.focused {:background-color "#2478BD"}]]]]]])
 
 
