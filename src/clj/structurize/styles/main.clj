@@ -76,7 +76,11 @@
       [:&:hover {:cursor :default}]]
 
      [:&.focused
-      [:.node-key :.node-value {:background-color "#2478BD"}]]
+      [:.collapsed-value
+       [:div {:background-color "#73962E"}]]
+
+      [:.node-key :.node-value {:background-color "#C7E09A"
+                                :color "#73962E"}]]
 
      [:.node {:display :flex}
 
@@ -84,7 +88,8 @@
                    :display :flex
                    :align-items :center}
 
-       [:&.focused {:background-color "#3E6733"}]
+       [:&.focused {:background-color "#D1E0E8"
+                    :color "#5992AA"}]
 
        [:.node-key-flags {:display :flex
                           :margin-right (u/rem 0.1)}
@@ -94,11 +99,14 @@
                           :border-radius (u/rem 0.2)
                           :margin-left (u/rem 0.2)}
          [:&.cursored {:display :block
-                       :background-color "#F3C96E"}]]]]
+                       :background-color "#DDAEFF"}]]]]
 
       [:.node-value {:display :flex
                      :align-items :center}
-       [:&.focused {:background-color "#2478BD"}]]]]]])
+       [:&.focused {:background-color "#C7E09A"
+                    :color "#73962E"}
+        [:.collapsed-value
+         [:div {:background-color "#73962E"}]]]]]]]])
 
 
 (def main
