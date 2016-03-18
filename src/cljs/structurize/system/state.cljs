@@ -12,7 +12,9 @@
            :location {:path nil
                       :handler :init
                       :query nil}
-           :chsk-status :init}))
+           :chsk-status :init
+           :tooling {:tooling-collapsed? true
+                     :node-properties {[:tooling :node-properties] #{:node-collapsed}}}}))
 
 
 (defrecord State [config-opts]

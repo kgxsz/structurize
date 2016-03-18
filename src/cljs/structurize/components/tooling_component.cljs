@@ -1,14 +1,12 @@
 (ns structurize.components.tooling-component
   (:require [taoensso.timbre :as log]
             [reagent.ratom :as rr]
+            [reagent.core :as r]
             [clojure.string :as string]))
-
 
 (declare nodes)
 
-
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; utils
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; util
 
 
 (defn stringify [x]
@@ -46,9 +44,9 @@
         v (get-in core node-path)
         node-properties (get-in core [:tooling :node-properties node-path])
         focused? (= (take (count node-path) (get-in core [:tooling :focused-node])) node-path)
-        toggle-collapsed (fn [] (emit-event! [:toggle-collapses {:cursor (get-in φ [:state :!node-properties])
+        toggle-node-collapsed (fn [] (emit-event! [:toggle-collapses {:cursor (get-in φ [:state :!node-properties])
                                                                 :Δ (fn [node-properties]
-                                                                     (update node-properties node-path toggle-property :collapsed))}]))
+                                                                     (update node-properties node-path toggle-property :node-collapsed))}]))
         set-focused-node (fn [] (emit-event! [:set-focused-node {:Δ (fn [core]
                                                                      (assoc-in core [:tooling :focused-node] node-path))}]))
         clear-focused-node (fn [] (emit-event! [:clear-focused-node {:Δ (fn [core]
@@ -59,7 +57,7 @@
       [:div.node-key {:class (when focused? :focused)
                       :on-mouse-over (fn [e] (set-focused-node) (.stopPropagation e))
                       :on-mouse-out (fn [e] (clear-focused-node) (.stopPropagation e))
-                      :on-click (fn [e] (toggle-collapsed) (.stopPropagation e))}
+                      :on-click (fn [e] (toggle-node-collapsed) (.stopPropagation e))}
 
        [:div.node-key-flags
         [:div.node-key-flag {:class (when (contains? node-properties :cursored) :cursored)}]]
@@ -71,9 +69,9 @@
        [:div.node-value {:class (when focused? :focused)
                          :on-mouse-over (fn [e] (set-focused-node) (.stopPropagation e))
                          :on-mouse-out (fn [e] (clear-focused-node) (.stopPropagation e))
-                         :on-click (fn [e] (toggle-collapsed) (.stopPropagation e))}
+                         :on-click (fn [e] (toggle-node-collapsed) (.stopPropagation e))}
 
-        (if (contains? node-properties :collapsed)
+        (if (contains? node-properties :node-collapsed)
           [:div.collapsed-value [:div] [:div] [:div]]
           (stringify v))])
 
@@ -84,21 +82,21 @@
   (let [emit-event! (get-in φ [:side-effector :emit-event!])
         node-paths (map (partial conj nodes-path) (keys (get-in core nodes-path)))
         node-properties (get-in core [:tooling :node-properties nodes-path])
-        collapsed? (and (seq node-paths) (contains? node-properties :collapsed))
+        node-collapsed? (and (seq node-paths) (contains? node-properties :node-collapsed))
         focused? (= nodes-path (get-in core [:tooling :focused-node]))
-        toggle-collapsed (fn [] (emit-event! [:toggle-collapses {:cursor (get-in φ [:state :!node-properties])
+        toggle-node-collapsed (fn [] (emit-event! [:toggle-collapses {:cursor (get-in φ [:state :!node-properties])
                                                                  :Δ (fn [node-properties]
-                                                                      (update node-properties nodes-path toggle-property :collapsed))}]))
+                                                                      (update node-properties nodes-path toggle-property :node-collapsed))}]))
         set-focused-node (fn [] (emit-event! [:set-focused-node {:Δ (fn [core]
                                                                      (assoc-in core [:tooling :focused-node] nodes-path))}]))
         clear-focused-node (fn [] (emit-event! [:clear-focused-node {:Δ (fn [core]
                                                                          (assoc-in core [:tooling :focused-node] nil))}]))]
 
-    (if collapsed?
+    (if node-collapsed?
       [:div.nodes-container {:class (when focused? :focused)
                              :on-mouse-over (fn [e] (set-focused-node) (.stopPropagation e))
                              :on-mouse-out (fn [e] (clear-focused-node) (.stopPropagation e))
-                             :on-click (fn [e] (toggle-collapsed) (.stopPropagation e))}
+                             :on-click (fn [e] (toggle-node-collapsed) (.stopPropagation e))}
        "{" [:div.node-value [:div.collapsed-value [:div] [:div] [:div]]] braces]
       [:div.nodes-container {:class (when focused? :focused)}
        [:div (str "{" (when (empty? node-paths) braces))]
@@ -128,10 +126,6 @@
                                                       node-properties
                                                       cursor-paths))}])
 
-    (emit-event! [:setup-collapsed-nodes {:cursor !node-properties
-                                          :Δ (fn [node-properties]
-                                               (update node-properties [:tooling :node-properties] add-property :collapsed))}])
-
     (fn []
       (log/debug "render state-browser")
       [:div.state-browser
@@ -140,10 +134,22 @@
 
 (defn tooling [φ]
   (log/debug "mount/render tooling")
-  [:div.tooling
-   [:div.browsers-backing
-    [:div.state-browser-backing]
-    [:div.event-browser-backing]]
-   [:div.browsers
-    [state-browser φ]
-    [:div.event-browser]]])
+  (let [emit-event! (get-in φ [:side-effector :emit-event!])
+        !tooling (r/cursor (get-in φ [:state :!core]) [:tooling])
+        tooling-collapsed? (:tooling-collapsed? @!tooling)
+        toggle-tooling-collapsed #(emit-event! [:toggle-tooling-collapsed {:cursor !tooling
+                                                                           :Δ (fn [tooling] (update tooling :tooling-collapsed? not))}])]
+
+    [:div.tooling {:class (when tooling-collapsed? :collapsed)}
+
+     [:div.tooling-tab {:on-click (fn [e] (toggle-tooling-collapsed) (.stopPropagation e))}
+      [:span.lnr.lnr-cog]]
+
+     (when-not tooling-collapsed?
+       (list
+        [:div.browsers-backing {:key "browsers-backing"}
+         [:div.state-browser-backing]
+         [:div.event-browser-backing]]
+        [:div.browsers {:key "browsers"}
+         [state-browser φ]
+         [:div.event-browser]]))]))
