@@ -39,74 +39,138 @@
            :height (u/vh 100)
            :position :relative}])
 
+(def colours
+  {:tinted-black-a "#000204"
+   :tinted-black-b "#101214"
+   :white-a "#DDDDDD"
+   :grey-a "#272B30"
+   :grey-b "#343337"
+   :grey-c "#474C51"
+   :light-green "#D3EDA3"
+   :green "#5EB95E"
+   :dark-green "#73962E"
+   :light-purple "#DDAEFF"
+   :purple "#8058A5"
+   :dark-purple "#8156A7"
+   :light-yellow "#FCEBBD"
+   :yellow "#FAD232"
+   :dark-yellow "#AF9540"
+   :light-red "#F5AB9E"
+   :red "#DD514C"
+   :dark-red "#8C3A2B"
+   :light-orange "#E77400"
+   :orange "#F37B1D"
+   :dark-orange "#FEC58D"
+   :light-blue "#E1F2FA"
+   :blue "#1F8DD6"
+   :dark-blue "#5992AA"})
+
+
 (def tooling
-  [:.tooling {:width (u/vw 50)
+  [:.tooling {:width (u/rem 90)
               :height (u/vh 100)
-              :background-color "#272B30"
-              :color "#DDD"
-              :font-size (u/rem 1.2)
               :position :fixed
               :top 0
               :right 0}
 
-   [:.state-browser {:font-family "monospace"
+   [:.browsers-backing {:display :flex
+                        :flex-direction :column
+                        :width (u/percent 100)
+                        :height (u/percent 100)
+                        :background-color (:tinted-black-a colours)
+                        :opacity 0.8
+                        :position :absolute
+                        :top 0
+                        :right 0}
+
+    [:.state-browser-backing {:flex-grow 1
+                              :height 0
+                              :margin (u/rem 1.5)
+                              :padding (u/rem 1)
+                              :background-color (:tinted-black-b colours)
+                              :border-radius (u/px 5)}]
+
+    [:.event-browser-backing {:height (u/rem 15)
+                              :margin (u/rem 1.5)
+                              :margin-top 0
+                              :background-color (:tinted-black-b colours)
+                              :border-radius (u/px 5)}]]
+
+   [:.browsers {:display :flex
+                :flex-direction :column
+                :width (u/rem 90)
+                :height (u/vh 100)
+                :color (:white-a colours)
+                :font-size (u/rem 1.2)
+                :position :relative}
+
+    [:.state-browser {:flex-grow 1
+                      :height 0
+                      :margin (u/rem 1.5)
+                      :font-family "monospace"
+                      :overflow :auto
+                      :padding (u/rem 1)
+                      :border-radius (u/px 5)
+                      :white-space :nowrap}
+
+     [:.nodes-container {:display :flex}
+
+      [:.collapsed-value {:display :flex}
+       [:div {:width (u/rem 0.4)
+              :height (u/rem 0.4)
+              :margin-top (u/rem 0.1)
+              :margin-left (u/rem 0.1)
+              :margin-right (u/rem 0.1)
+              :border-radius (u/rem 0.2)
+              :background-color (:white-a colours)}]]
+
+      [:.node-key :.node-value {:background-color (:grey-c colours)
+                                :margin-bottom (u/rem 0.2)
+                                :padding-left (u/rem 0.3)
+                                :padding-right (u/rem 0.3)
+                                :padding-bottom (u/rem 0.1)
+                                :border-radius (u/px 3)}
+       [:&:hover {:cursor :pointer}]]
+
+      [:&.focused
+       [:.collapsed-value
+        [:div {:background-color (:dark-green colours)}]]
+
+       [:.node-key :.node-value {:background-color (:light-green colours)
+                                 :color (:dark-green colours)}]]
+
+      [:.node {:display :flex}
+
+       [:.node-key {:margin-right (u/rem 0.2)
+                    :display :flex
+                    :align-items :center}
+
+        [:&.focused {:background-color (:light-blue colours)
+                     :color (:dark-blue colours)}]
+
+        [:.node-key-flags {:display :flex
+                           :margin-right (u/rem 0.1)}
+
+         [:.node-key-flag {:display :none
+                           :width (u/rem 0.9)
+                           :height (u/rem 0.9)
+                           :border-radius (u/rem 0.2)
+                           :margin-left (u/rem 0.2)}
+          [:&.cursored {:display :block
+                        :background-color (:light-purple colours)}]]]]
+
+       [:.node-value {:display :flex
+                      :align-items :center}
+
+        [:&.focused {:background-color (:light-green colours)
+                     :color (:dark-green colours)}
+         [:.collapsed-value
+          [:div {:background-color (:dark-green colours)}]]]]]]]]
+
+   [:.event-browser {:height (u/rem 15)
                      :margin (u/rem 1.5)
-                     :padding (u/rem 1)
-                     :background-color "#343337"
-                     :border-radius (u/px 5)
-                     :white-space :nowrap}
-
-    [:.collapsed-value {:display :flex}
-     [:div {:width (u/rem 0.4)
-            :height (u/rem 0.4)
-            :margin-top (u/rem 0.1)
-            :margin-left (u/rem 0.1)
-            :margin-right (u/rem 0.1)
-            :border-radius (u/rem 0.2)
-            :background-color "#DDD"}]]
-
-    [:.nodes-container {:display :flex}
-
-     [:.node-key :.node-value {:background-color "#474C51"
-                               :margin-bottom (u/rem 0.2)
-                               :padding-left (u/rem 0.3)
-                               :padding-right (u/rem 0.3)
-                               :padding-bottom (u/rem 0.1)
-                               :border-radius (u/px 3)}
-      [:&:hover {:cursor :default}]]
-
-     [:&.focused
-      [:.collapsed-value
-       [:div {:background-color "#73962E"}]]
-
-      [:.node-key :.node-value {:background-color "#C7E09A"
-                                :color "#73962E"}]]
-
-     [:.node {:display :flex}
-
-      [:.node-key {:margin-right (u/rem 0.2)
-                   :display :flex
-                   :align-items :center}
-
-       [:&.focused {:background-color "#D1E0E8"
-                    :color "#5992AA"}]
-
-       [:.node-key-flags {:display :flex
-                          :margin-right (u/rem 0.1)}
-        [:.node-key-flag {:display :none
-                          :width (u/rem 0.9)
-                          :height (u/rem 0.9)
-                          :border-radius (u/rem 0.2)
-                          :margin-left (u/rem 0.2)}
-         [:&.cursored {:display :block
-                       :background-color "#DDAEFF"}]]]]
-
-      [:.node-value {:display :flex
-                     :align-items :center}
-       [:&.focused {:background-color "#C7E09A"
-                    :color "#73962E"}
-        [:.collapsed-value
-         [:div {:background-color "#73962E"}]]]]]]]])
+                     :margin-top 0
+                     :border-radius (u/px 5)}]])
 
 
 (def main

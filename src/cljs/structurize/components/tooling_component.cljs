@@ -141,4 +141,9 @@
 (defn tooling [φ]
   (log/debug "mount/render tooling")
   [:div.tooling
-   [state-browser φ]])
+   [:div.browsers-backing
+    [:div.state-browser-backing]
+    [:div.event-browser-backing]]
+   [:div.browsers
+    [state-browser φ]
+    [:div.event-browser]]])
