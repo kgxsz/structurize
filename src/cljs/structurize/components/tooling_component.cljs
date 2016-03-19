@@ -75,7 +75,7 @@
           [:div.collapsed-value [:div] [:div] [:div]]
           (stringify v))])
 
-     (when-not (map? v) [:div braces])]))
+     (when-not (map? v) [:div.braces braces])]))
 
 
 (defn nodes [φ core nodes-path braces]
@@ -97,9 +97,11 @@
                              :on-mouse-over (fn [e] (set-focused-node) (.stopPropagation e))
                              :on-mouse-out (fn [e] (clear-focused-node) (.stopPropagation e))
                              :on-click (fn [e] (toggle-node-collapsed) (.stopPropagation e))}
-       "{" [:div.node-value [:div.collapsed-value [:div] [:div] [:div]]] braces]
+       [:div.braces "{"]
+       [:div.node-value [:div.collapsed-value [:div] [:div] [:div]]]
+       [:div.braces braces]]
       [:div.nodes-container {:class (when focused? :focused)}
-       [:div (str "{" (when (empty? node-paths) braces))]
+       [:div.braces (str "{" (when (empty? node-paths) braces))]
        [:nodes
         (for [node-path (drop-last node-paths)]
           (node φ core node-path ""))

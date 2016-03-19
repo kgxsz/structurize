@@ -127,20 +127,22 @@
                   :width (u/rem 90)
                   :height (u/vh 100)
                   :color (:white-b colours)
-                  :font-size (u/rem 1.2)
                   :position :relative}
 
       [:.state-browser (merge state-browser
-                              {:font-family "monospace"
+                              {:font-family "'Fira Mono', monospace"
+                               :font-size (u/rem 1.2)
+                               :line-height (u/rem 1.7)
                                :overflow :auto
                                :white-space :nowrap})
 
        [:.nodes-container {:display :flex}
 
+        [:.braces {:padding-top (u/rem 0.2)}]
+
         [:.collapsed-value {:display :flex}
          [:div {:width (u/rem 0.4)
                 :height (u/rem 0.4)
-                :margin-top (u/rem 0.1)
                 :margin-left (u/rem 0.1)
                 :margin-right (u/rem 0.1)
                 :border-radius (u/rem 0.2)
@@ -148,6 +150,7 @@
 
         [:.node-key :.node-value {:background-color (:grey-c colours)
                                   :margin-bottom (u/rem 0.2)
+                                  :padding-top (u/rem 0.1)
                                   :padding-left (u/rem 0.3)
                                   :padding-right (u/rem 0.3)
                                   :padding-bottom (u/rem 0.1)
@@ -171,7 +174,7 @@
                        :color (:dark-blue colours)}]
 
           [:.node-key-flags {:display :flex
-                             :margin-right (u/rem 0.1)}
+                             :margin-right (u/rem 0.2)}
 
            [:.node-key-flag {:display :none
                              :width (u/rem 0.9)

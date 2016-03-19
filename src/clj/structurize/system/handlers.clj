@@ -14,6 +14,7 @@
                    [:head
                     [:title "Structurize"]
                     [:meta {:name "viewport" :content "width = device-width, initial-scale = 1.0, user-scalable = no"}]
+                    (include-css "https://fonts.googleapis.com/css?family=Fira+Mono")
                     (include-css "https://cdn.linearicons.com/free/1.0.0/icon-font.min.css")
                     (include-css "/css/style.css")]
                    [:body
