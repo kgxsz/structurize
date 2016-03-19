@@ -18,7 +18,7 @@
 
   :clean-targets ^{:protect false} ["target/"
                                     "dev-resources/public/js/"
-                                    "dev-resources/public/css/"]
+                                    "dev-resources/public/css/style.css"]
 
   :profiles {:dev {:source-paths ["src/clj" "env/dev"]
 

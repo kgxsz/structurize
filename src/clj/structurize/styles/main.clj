@@ -1,6 +1,10 @@
 (ns structurize.styles.main
   (:require [garden.units :as u]
-            [garden.color :as c]))
+            [garden.color :as c]
+            [garden.stylesheet :as s]))
+
+
+
 
 (def meyer-reset
   [[:html :body :div :span :applet :object :iframe :h1 :h2 :h3 :h4 :h5 :h6 :p
@@ -34,18 +38,12 @@
           :background-size :cover}])
 
 
-(def root
-  [:#root {:width (u/vw 100)
-           :height (u/vh 100)
-           :position :relative
-           :min-width (u/px 320)
-           :min-height (u/px 320)}])
-
 (def colours
   {:tinted-black-a "#000204"
    :tinted-black-b "#101214"
    :white-a "#FFFFFF"
-   :white-b "#DDDDDD"
+   :white-b "#F6F9FC"
+   :white-c "#DDDDDD"
    :grey-a "#272B30"
    :grey-b "#343337"
    :grey-c "#474C51"
@@ -69,130 +67,167 @@
    :dark-blue "#5992AA"})
 
 
+(def root
+  [:#root {:width (u/vw 100)
+           :height (u/vh 100)
+           :position :relative
+           :min-width (u/px 320)
+           :min-height (u/px 320)
+           :font-size (u/rem 1.2)
+           :line-height (u/rem 1.7)
+           :overflow :auto
+           :white-space :nowrap}
+
+   [:.button {:display :flex
+              :justify-content :center
+              :align-items :center
+              :min-width (u/rem 12)
+              :height (u/rem 4.5)
+              :padding-left (u/rem 1)
+              :padding-right (u/rem 1)
+              :border-width (u/rem 0.3)
+              :color (:white-b colours)
+              :border-style :solid
+              :border-radius (u/px 7)
+              :font-family "sans-serif"
+              :font-size (u/rem 1.5)
+              :background-color (c/rgba [0 10 20 0.2])
+              :line-height (u/rem 1.7)}
+
+    [:&:hover {:cursor :pointer
+               :background-color (c/rgba [0 10 20 0.4])}]
+
+    [:.button-icon {:font-size (u/rem 2.2)
+                    :margin-right (u/rem 0.7)}]]])
+
+
+(def home-page
+  [:.home-page {:width (u/vw 100)
+                :height (u/vh 100)
+                :display :flex
+                :flex-direction :column
+                :justify-content :center
+                :align-items :center}
+   [:.icon-mustache {:font-size (u/rem 8)
+                     :color (:white-b colours)}]
+   [:.hero {:font-family "'Raleway', Arial"
+            :color (:white-b colours)
+            :font-size (u/rem 4)
+            :margin-top (u/rem 2)
+            :margin-bottom (u/rem 1)}]
+   [:.sign-in-with-github {:margin-top (u/rem 3)}]
+   [:.sign-out {:margin-top (u/rem 2)}]])
+
+
 (def tooling
-  (let [state-browser {:flex-grow 1
-                       :height 0
-                       :margin (u/rem 1.5)
-                       :padding (u/rem 1)
-                       :border-radius (u/px 5)}
-        event-browser {:height (u/rem 15)
-                       :margin (u/rem 1.5)
-                       :margin-top 0
-                       :border-radius (u/px 5)}]
+  [:.tooling {:width (u/rem 90)
+              :height (u/percent 100)
+              :min-width (u/px 320)
+              :min-height (u/px 320)
+              :background-color (c/rgba [0 10 20 0.7])
+              :position :fixed
+              :top 0
+              :right 0}
 
-    [:.tooling {:width (u/rem 90)
-                :height (u/percent 100)
-                :min-width (u/px 320)
-                :min-height (u/px 320)
-                :position :fixed
-                :top 0
-                :right 0}
+   [:&.collapsed {:right (u/rem -90)}]
 
-     [:&.collapsed {:right (u/rem -90)}]
+   [:.tooling-tab {:display :flex
+                   :justify-content :center
+                   :align-items :center
+                   :background-color (c/rgba [0 10 20 0.7])
+                   :width (u/rem 2.5)
+                   :height (u/rem 3.3)
+                   :border-top-left-radius (u/px 5)
+                   :border-bottom-left-radius (u/px 5)
+                   :position :absolute
+                   :top (u/rem 1.5)
+                   :left (u/rem -2.5)}
+    [:&:hover {:cursor :pointer}]
+    [:.icon-cog {:color (:white-a colours)
+                 :font-size (u/rem 1.5)
+                 :margin-bottom (u/rem 0.1)
+                 :margin-left (u/rem 0.2)}]]
 
-     [:.tooling-tab {:display :flex
-                     :justify-content :center
-                     :align-items :center
-                     :background-color (:tinted-black-a colours)
-                     :opacity 0.8
-                     :width (u/rem 2.5)
-                     :height (u/rem 3.3)
-                     :border-top-left-radius (u/px 5)
-                     :border-bottom-left-radius (u/px 5)
-                     :position :absolute
-                     :top (u/rem 1.5)
-                     :left (u/rem -2.5)}
-      [:&:hover {:cursor :pointer}]
-      [:.lnr-cog {:color (:white-a colours)
-                  :font-size (u/rem 1.5)
-                  :margin-bottom (u/rem 0.1)
-                  :margin-left (u/rem 0.2)}]]
+   [:.browsers {:display :flex
+                :flex-direction :column
+                :width (u/rem 90)
+                :height (u/vh 100)
+                :color (:white-b colours)
+                :position :relative}
 
-     [:.browsers-backing {:display :flex
-                          :flex-direction :column
-                          :width (u/percent 100)
-                          :height (u/percent 100)
-                          :background-color (:tinted-black-a colours)
-                          :opacity 0.8
-                          :position :absolute
-                          :top 0
-                          :right 0}
+    [:.state-browser {:flex-grow 1
+                      :height 0
+                      :background-color (c/rgba [80 90 100 0.3])
+                      :margin (u/rem 1.5)
+                      :padding (u/rem 1)
+                      :border-radius (u/px 5)
+                      :font-family "'Fira Mono', monospace"
+                      :font-size (u/rem 1.2)
+                      :line-height (u/rem 1.7)
+                      :overflow :auto
+                      :white-space :nowrap}
 
-      [:.state-browser-backing (assoc state-browser :background-color (:tinted-black-b colours))]
+     [:.nodes-container {:display :flex}
 
-      [:.event-browser-backing (assoc event-browser :background-color (:tinted-black-b colours))]]
+      [:.braces {:padding-top (u/rem 0.2)}]
 
-     [:.browsers {:display :flex
-                  :flex-direction :column
-                  :width (u/rem 90)
-                  :height (u/vh 100)
-                  :color (:white-b colours)
-                  :position :relative}
+      [:.collapsed-value {:display :flex}
+       [:div {:width (u/rem 0.4)
+              :height (u/rem 0.4)
+              :margin-left (u/rem 0.1)
+              :margin-right (u/rem 0.1)
+              :border-radius (u/rem 0.2)
+              :background-color (:white-c colours)}]]
 
-      [:.state-browser (merge state-browser
-                              {:font-family "'Fira Mono', monospace"
-                               :font-size (u/rem 1.2)
-                               :line-height (u/rem 1.7)
-                               :overflow :auto
-                               :white-space :nowrap})
+      [:.node-key :.node-value {:background-color (:grey-c colours)
+                                :margin-bottom (u/rem 0.2)
+                                :padding-top (u/rem 0.1)
+                                :padding-left (u/rem 0.3)
+                                :padding-right (u/rem 0.3)
+                                :padding-bottom (u/rem 0.1)
+                                :border-radius (u/px 3)}
+       [:&:hover {:cursor :pointer}]]
 
-       [:.nodes-container {:display :flex}
+      [:&.focused
+       [:.collapsed-value
+        [:div {:background-color (:dark-green colours)}]]
 
-        [:.braces {:padding-top (u/rem 0.2)}]
+       [:.node-key :.node-value {:background-color (:light-green colours)
+                                 :color (:dark-green colours)}]]
 
-        [:.collapsed-value {:display :flex}
-         [:div {:width (u/rem 0.4)
-                :height (u/rem 0.4)
-                :margin-left (u/rem 0.1)
-                :margin-right (u/rem 0.1)
-                :border-radius (u/rem 0.2)
-                :background-color (:white-b colours)}]]
+      [:.node {:display :flex}
 
-        [:.node-key :.node-value {:background-color (:grey-c colours)
-                                  :margin-bottom (u/rem 0.2)
-                                  :padding-top (u/rem 0.1)
-                                  :padding-left (u/rem 0.3)
-                                  :padding-right (u/rem 0.3)
-                                  :padding-bottom (u/rem 0.1)
-                                  :border-radius (u/px 3)}
-         [:&:hover {:cursor :pointer}]]
+       [:.node-key {:margin-right (u/rem 0.2)
+                    :display :flex
+                    :align-items :center}
 
-        [:&.focused
-         [:.collapsed-value
-          [:div {:background-color (:dark-green colours)}]]
+        [:&.focused {:background-color (:light-blue colours)
+                     :color (:dark-blue colours)}]
 
-         [:.node-key :.node-value {:background-color (:light-green colours)
-                                   :color (:dark-green colours)}]]
+        [:.node-key-flags {:display :flex
+                           :margin-right (u/rem 0.2)}
 
-        [:.node {:display :flex}
+         [:.node-key-flag {:display :none
+                           :width (u/rem 0.9)
+                           :height (u/rem 0.9)
+                           :border-radius (u/rem 0.2)
+                           :margin-left (u/rem 0.2)}
+          [:&.cursored {:display :block
+                        :background-color (:light-purple colours)}]]]]
 
-         [:.node-key {:margin-right (u/rem 0.2)
-                      :display :flex
+       [:.node-value {:display :flex
                       :align-items :center}
 
-          [:&.focused {:background-color (:light-blue colours)
-                       :color (:dark-blue colours)}]
+        [:&.focused {:background-color (:light-green colours)
+                     :color (:dark-green colours)}
+         [:.collapsed-value
+          [:div {:background-color (:dark-green colours)}]]]]]]]]
 
-          [:.node-key-flags {:display :flex
-                             :margin-right (u/rem 0.2)}
-
-           [:.node-key-flag {:display :none
-                             :width (u/rem 0.9)
-                             :height (u/rem 0.9)
-                             :border-radius (u/rem 0.2)
-                             :margin-left (u/rem 0.2)}
-            [:&.cursored {:display :block
-                          :background-color (:light-purple colours)}]]]]
-
-         [:.node-value {:display :flex
-                        :align-items :center}
-
-          [:&.focused {:background-color (:light-green colours)
-                       :color (:dark-green colours)}
-           [:.collapsed-value
-            [:div {:background-color (:dark-green colours)}]]]]]]]]
-
-     [:.event-browser (merge event-browser {})]]))
+   [:.event-browser {:height (u/rem 15)
+                     :margin (u/rem 1.5)
+                     :background-color (c/rgba [80 90 100 0.3])
+                     :margin-top 0
+                     :border-radius (u/px 5)}]])
 
 
 (def main
@@ -200,4 +235,5 @@
    html
    body
    root
+   home-page
    tooling])

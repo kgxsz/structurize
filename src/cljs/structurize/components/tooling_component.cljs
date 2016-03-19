@@ -145,13 +145,9 @@
     [:div.tooling {:class (when tooling-collapsed? :collapsed)}
 
      [:div.tooling-tab {:on-click (fn [e] (toggle-tooling-collapsed) (.stopPropagation e))}
-      [:span.lnr.lnr-cog]]
+      [:span.icon-cog]]
 
      (when-not tooling-collapsed?
-       (list
-        [:div.browsers-backing {:key "browsers-backing"}
-         [:div.state-browser-backing]
-         [:div.event-browser-backing]]
-        [:div.browsers {:key "browsers"}
-         [state-browser φ]
-         [:div.event-browser]]))]))
+       [:div.browsers
+        [state-browser φ]
+        [:div.event-browser]])]))
