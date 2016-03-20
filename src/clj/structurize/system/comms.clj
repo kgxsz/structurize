@@ -27,9 +27,8 @@
 
 (defmethod handler :users/me
   [{:keys [config-opts db]} {:keys [uid ?reply-fn] [id ?data] :event}]
-
-  (let [user (select-keys (get-in @db [:users uid]) [:name :email :login])]
-    (?reply-fn [id {:user user}])))
+  (let [user (some-> (get-in @db [:users uid]) (select-keys [:name :email :login :avatar-url]))]
+    (?reply-fn [id user])))
 
 
 (defmethod handler :chsk/ws-ping

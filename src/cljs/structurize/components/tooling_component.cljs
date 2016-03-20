@@ -71,8 +71,7 @@
        [nodes φ core node-path (str braces "}")]
        [:div.node-value {:class (when focused? :focused)
                          :on-mouse-over (fn [e] (set-focused-node) (.stopPropagation e))
-                         :on-mouse-out (fn [e] (clear-focused-node) (.stopPropagation e))
-                         :on-click (fn [e] (toggle-node-collapsed) (.stopPropagation e))}
+                         :on-mouse-out (fn [e] (clear-focused-node) (.stopPropagation e))}
 
         (if (contains? node-properties :node-collapsed)
           [:div.collapsed-value [:div] [:div] [:div]]
@@ -98,8 +97,7 @@
     (if node-collapsed?
       [:div.nodes-container {:class (when focused? :focused)
                              :on-mouse-over (fn [e] (set-focused-node) (.stopPropagation e))
-                             :on-mouse-out (fn [e] (clear-focused-node) (.stopPropagation e))
-                             :on-click (fn [e] (toggle-node-collapsed) (.stopPropagation e))}
+                             :on-mouse-out (fn [e] (clear-focused-node) (.stopPropagation e))}
        [:div.braces "{"]
        [:div.node-value [:div.collapsed-value [:div] [:div] [:div]]]
        [:div.braces braces]]

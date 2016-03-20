@@ -29,10 +29,7 @@
     [:div.sign-in-with-github
      [:div.button {:on-click (fn [e] (send! [:sign-in/init-sign-in-with-github {}]) (.stopPropagation e))}
       [:span.button-icon.icon-github]
-      [:span.button-text
-       (case @!message-status
-         :sent "signing in!"
-         "sign in with GitHub")]]]))
+      [:span.button-text "sign in with GitHub"]]]))
 
 
 (defn sign-out [{{:keys [!core]} :state
@@ -45,24 +42,29 @@
     [:div.sign-out
      [:div.button {:on-click (fn [e] (post! ["/sign-out" {}]) (.stopPropagation e))}
       [:span.button-icon.icon-exit]
-      [:span.button-text
-       (case @!post-status
-         :sent "signing out!"
-         "sign out")]]]))
+      [:span.button-text "sign out"]]]))
 
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; top level pages
 
 
-(defn home-page [{{:keys [change-location!]} :side-effector
+(defn home-page [{{:keys [!core]} :state
+                  {:keys [change-location!]} :side-effector
                   :as Φ}]
   (log/debug "mount/render home-page")
-  [:div.home-page
-   [:span.icon-mustache]
-   [:div.hero "Hello there"]
-   [sign-in-with-github Φ]
-   [sign-out Φ]])
+
+  (if-let [me (get-in @!core [:message-reply :users/me])]
+
+    [:div.home-page
+     [:img.avatar {:src (:avatar-url me)}]
+     [:div.hero "Hello @" (:login me)]
+     [sign-out Φ]]
+
+    [:div.home-page
+     [:span.icon-mustache]
+     [:div.hero "Hello there"]
+     [sign-in-with-github Φ]]))
 
 
 (defn sign-in-with-github-page [{{:keys [!core !query]} :state

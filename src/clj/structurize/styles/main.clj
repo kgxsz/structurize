@@ -86,8 +86,8 @@
               :height (u/rem 4.5)
               :padding-left (u/rem 1)
               :padding-right (u/rem 1)
-              :border-width (u/rem 0.3)
               :color (:white-b colours)
+              :border-width (u/rem 0.3)
               :border-style :solid
               :border-radius (u/px 7)
               :font-family "sans-serif"
@@ -119,12 +119,18 @@
                 :flex-direction :column
                 :justify-content :center
                 :align-items :center}
-   [:.icon-mustache {:font-size (u/rem 8)
+   [:.icon-mustache {:font-size (u/rem 10)
                      :color (:white-b colours)}]
+   [:.avatar {:width (u/rem 10)
+              :height (u/rem 10)
+              :border-width (u/rem 0.3)
+              :border-style :solid
+              :border-radius (u/rem 5)}]
    [:.hero {:font-family "'Raleway', Arial"
             :color (:white-b colours)
             :font-size (u/rem 4)
-            :margin-top (u/rem 2)
+            :line-height 1
+            :margin-top (u/rem 3)
             :margin-bottom (u/rem 1)}]
    [:.sign-in-with-github {:margin-top (u/rem 3)}]
    [:.sign-out {:margin-top (u/rem 2)}]])
