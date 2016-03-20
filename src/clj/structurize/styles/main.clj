@@ -60,7 +60,7 @@
           :font-size (u/rem 1.5)
           :line-height 1.5
           :color (:white-b colours)
-          :background-color "#8C8EBE"
+          :background-color (:white-b colours)
           :background-image "url(\"/images/blurred-background-b.jpg\")"
           :background-repeat :no-repeat
           :background-position [:center :center]
