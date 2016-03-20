@@ -84,7 +84,7 @@
        [:h1 "Sign in with GitHub failed "]
        [:h3 "Couldn't complete the sign in process with Github."]
 
-       [:button {:on-click  #(change-location! {:path (b/path-for routes :home)})}
+       [:button {:on-click #(change-location! {:path (b/path-for routes :home)})}
         "home"]]
 
       [:div
@@ -104,8 +104,9 @@
 
 (defn init-page []
   (log/debug "mount/render init-page")
-  [:div
-   [:h1 "Loading your stuff!"]])
+  [:div.init-page
+   [:span.icon.icon-coffee-cup]
+   [:div "loading"]])
 
 
 (defn root [{{:keys [!chsk-status !handler]} :state
@@ -119,7 +120,6 @@
 
   [:div
    [tooling Φ]
-
    (case @!handler
      :home [home-page Φ]
      :sign-in-with-github [sign-in-with-github-page Φ]

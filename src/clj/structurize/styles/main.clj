@@ -4,40 +4,6 @@
             [garden.stylesheet :as s]))
 
 
-
-
-(def meyer-reset
-  [[:html :body :div :span :applet :object :iframe :h1 :h2 :h3 :h4 :h5 :h6 :p
-    :blockquote :pre :a :abbr :acronym :address :big :cite :code :del :dfn :em
-    :img :ins :kbd :q :s :samp :small :strike :strong :sub :sup :tt :var :b :u
-    :i :center :dl :dt :dd :ol :ul :li :fieldset :form :label :legend :table
-    :caption :tbody :tfoot :thead :tr :th :td :article :aside :canvas :details
-    :embed :figure :figcaption :footer :header :hgroup :menu :nav :output :ruby
-    :section :summary :time :mark :audio :video
-    {:margin 0 :padding 0 :border 0 :font-size (u/percent 100) :font :inherit :vertical-align :baseline}]
-   [:article :aside :details :figcaption :figure :footer :header :hgroup :menu :nav :section
-    {:display :block}]
-   [:body {:line-height 1}]
-   [:ol :ul {:list-style :none}]
-   [:blockquote :q {:quotes :none}
-    [:&:before :&:after {:content :none}]]
-   [:table {:border-collapse :collapse :border-spacing 0}]])
-
-
-(def html
-  [:html {:font-size (u/px 10)}])
-
-
-(def body
-  [:body {:font-size (u/px 10)
-          :line-height 1.5
-          :background-image "url(\"/images/blurred-background.jpg\")"
-          :background-repeat :no-repeat
-          :background-position [:center :center]
-          :background-attachements :fixed
-          :background-size :cover}])
-
-
 (def colours
   {:tinted-black-a "#000204"
    :tinted-black-b "#101214"
@@ -65,6 +31,41 @@
    :light-blue "#E1F2FA"
    :blue "#1F8DD6"
    :dark-blue "#5992AA"})
+
+
+(def meyer-reset
+  [[:html :body :div :span :applet :object :iframe :h1 :h2 :h3 :h4 :h5 :h6 :p
+    :blockquote :pre :a :abbr :acronym :address :big :cite :code :del :dfn :em
+    :img :ins :kbd :q :s :samp :small :strike :strong :sub :sup :tt :var :b :u
+    :i :center :dl :dt :dd :ol :ul :li :fieldset :form :label :legend :table
+    :caption :tbody :tfoot :thead :tr :th :td :article :aside :canvas :details
+    :embed :figure :figcaption :footer :header :hgroup :menu :nav :output :ruby
+    :section :summary :time :mark :audio :video
+    {:margin 0 :padding 0 :border 0 :font-size (u/percent 100) :font :inherit :vertical-align :baseline}]
+   [:article :aside :details :figcaption :figure :footer :header :hgroup :menu :nav :section
+    {:display :block}]
+   [:body {:line-height 1}]
+   [:ol :ul {:list-style :none}]
+   [:blockquote :q {:quotes :none}
+    [:&:before :&:after {:content :none}]]
+   [:table {:border-collapse :collapse :border-spacing 0}]])
+
+
+(def html
+  [:html {:font-size (u/px 10)}])
+
+
+(def body
+  [:body {:font-family "sans-serif"
+          :font-size (u/rem 1.5)
+          :line-height 1.5
+          :color (:white-b colours)
+          :background-color "#A796C2"
+          :background-image "url(\"/images/blurred-background-b.jpg\")"
+          :background-repeat :no-repeat
+          :background-position [:center :center]
+          :background-attachements :fixed
+          :background-size :cover}])
 
 
 (def root
@@ -100,6 +101,15 @@
     [:.button-icon {:font-size (u/rem 2.2)
                     :margin-right (u/rem 0.7)}]]])
 
+(def init-page
+  [:.init-page {:width (u/vw 100)
+                :height (u/vh 100)
+                :display :flex
+                :flex-direction :column
+                :justify-content :center
+                :align-items :center}
+   [:.icon {:font-size (u/rem 6)
+            :margin-bottom (u/rem 1)}]])
 
 (def home-page
   [:.home-page {:width (u/vw 100)
@@ -235,5 +245,6 @@
    html
    body
    root
+   init-page
    home-page
    tooling])
