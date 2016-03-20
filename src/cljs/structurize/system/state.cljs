@@ -28,6 +28,6 @@
              :!handler (r/cursor !core [:location :handler])
              :!query (r/cursor !core [:location :query])
              :!chsk-status (r/cursor !core [:chsk-status])
-             :!node-properties (r/cursor !core [:tooling :node-properties]))))
+             :!focused-node (r/cursor !core [:tooling :focused-node]))))
 
   (stop [component] component))
