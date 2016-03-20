@@ -123,15 +123,15 @@
                      :color (:white-b colours)}]
    [:.avatar {:width (u/rem 10)
               :height (u/rem 10)
+              :background-color (c/rgba [0 10 20 0.2])
               :border-width (u/rem 0.3)
               :border-style :solid
-              :border-radius (u/rem 5)}]
+              :border-radius (u/rem 10)}]
    [:.hero {:font-family "'Raleway', Arial"
             :color (:white-b colours)
             :font-size (u/rem 4)
             :line-height 1
-            :margin-top (u/rem 3)
-            :margin-bottom (u/rem 1)}]
+            :margin-top (u/rem 2)}]
    [:.sign-in-with-github {:margin-top (u/rem 3)}]
    [:.sign-out {:margin-top (u/rem 2)}]])
 
