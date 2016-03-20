@@ -60,7 +60,10 @@
                       :on-click (fn [e] (toggle-node-collapsed) (.stopPropagation e))}
 
        [:div.node-key-flags
-        [:div.node-key-flag {:class (when (contains? node-properties :cursored) :cursored)}]]
+        (when (contains? node-properties :cursored)
+          [:div.node-key-flag.cursored [:span.icon.icon-pushpin]])
+        #_(when (contains? node-properties :cursored)
+          [:div.node-key-flag.mutated [:span.icon.icon-star]])]
 
        (stringify k)]]
 

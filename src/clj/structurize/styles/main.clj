@@ -60,7 +60,7 @@
           :font-size (u/rem 1.5)
           :line-height 1.5
           :color (:white-b colours)
-          :background-color "#A796C2"
+          :background-color "#8C8EBE"
           :background-image "url(\"/images/blurred-background-b.jpg\")"
           :background-repeat :no-repeat
           :background-position [:center :center]
@@ -107,6 +107,7 @@
                 :display :flex
                 :flex-direction :column
                 :justify-content :center
+                :font-size (u/rem 1.5)
                 :align-items :center}
    [:.icon {:font-size (u/rem 6)
             :margin-bottom (u/rem 1)}]])
@@ -214,16 +215,21 @@
         [:&.focused {:background-color (:light-blue colours)
                      :color (:dark-blue colours)}]
 
-        [:.node-key-flags {:display :flex
-                           :margin-right (u/rem 0.2)}
+        [:.node-key-flags {:display :flex}
 
-         [:.node-key-flag {:display :none
-                           :width (u/rem 0.9)
-                           :height (u/rem 0.9)
+         [:.node-key-flag {:display :flex
+                           :justify-content :center
+                           :align-items :center
+                           :width (u/rem 1.5)
+                           :height (u/rem 1.5)
+                           :font-size (u/rem 1.1)
                            :border-radius (u/rem 0.2)
-                           :margin-left (u/rem 0.2)}
-          [:&.cursored {:display :block
-                        :background-color (:light-purple colours)}]]]]
+                           :margin-left (u/rem 0.1)
+                           :margin-right (u/rem 0.2)}
+          [:&.cursored {:background-color (:dark-green colours)
+                        :color (:white-a colours)}]
+          [:&.mutated {:background-color (:dark-blue colours)
+                       :color (:white-a colours)}]]]]
 
        [:.node-value {:display :flex
                       :align-items :center}
