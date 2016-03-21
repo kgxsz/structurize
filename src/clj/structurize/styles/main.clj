@@ -202,8 +202,7 @@
                                 :padding-left (u/rem 0.3)
                                 :padding-right (u/rem 0.3)
                                 :padding-bottom (u/rem 0.1)
-                                :border-radius (u/px 3)}
-       [:&:hover {:cursor :pointer}]]
+                                :border-radius (u/px 3)}]
 
       [:&.focused
        [:.collapsed-value
@@ -217,6 +216,8 @@
        [:.node-key {:margin-right (u/rem 0.2)
                     :display :flex
                     :align-items :center}
+
+        [:&:hover {:cursor :pointer}]
 
         [:&.focused {:background-color (:light-blue colours)
                      :color (:dark-blue colours)}]
@@ -239,6 +240,8 @@
 
        [:.node-value {:display :flex
                       :align-items :center}
+ 
+        [:&:hover {:cursor :default}]
 
         [:&.focused {:background-color (:light-green colours)
                      :color (:dark-green colours)}
