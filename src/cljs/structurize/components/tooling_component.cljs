@@ -1,12 +1,11 @@
 (ns structurize.components.tooling-component
-  (:require [taoensso.timbre :as log]
+  (:require [reagent.core :as r]
             [reagent.ratom :as rr]
-            [reagent.core :as r]
-            [clojure.string :as string]))
+            [taoensso.timbre :as log]))
 
 (declare node-group)
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; util
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; helpers
 
 
 (defn add-prop [s prop]
@@ -35,6 +34,7 @@
 
 (defn without-propagation [& fs]
   (fn [e] (doseq [f fs] (f)) (.stopPropagation e)))
+
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; components

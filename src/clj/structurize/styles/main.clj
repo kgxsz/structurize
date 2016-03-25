@@ -1,7 +1,6 @@
 (ns structurize.styles.main
-  (:require [garden.units :as u]
-            [garden.color :as c]
-            [garden.selectors :as s]))
+  (:require [garden.color :as c]
+            [garden.units :as u]))
 
 
 (def colours
