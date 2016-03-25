@@ -97,21 +97,21 @@
          (cond
 
            collapsed-group-node? (list [:div.node-brace {:key :opening} "{"]
-                                       [:div.node-value.clickable {:key k
-                                                                   :class (when focused? :focused)
-                                                                   :on-mouse-over (without-propagation toggle-focus)
-                                                                   :on-mouse-out (without-propagation toggle-focus)
-                                                                   :on-click (without-propagation toggle-focus toggle-collapse)}
+                                       [:div.node-value {:key k
+                                                         :class (->class (cond-> #{:clickable} focused? (conj :focused)))
+                                                         :on-mouse-over (without-propagation toggle-focus)
+                                                         :on-mouse-out (without-propagation toggle-focus)
+                                                         :on-click (without-propagation toggle-focus toggle-collapse)}
                                         "~"]
                                        [:div.node-brace {:key :closing} "}"])
 
            empty-group-node? (list [:div.node-brace {:key :opening} "{"]
                                    [:div.node-brace {:key :closing} "}"])
 
-           collapsed? [:div.node-value.clickable {:class (when focused? :focused)
-                                                  :on-mouse-over (without-propagation toggle-focus)
-                                                  :on-mouse-out (without-propagation toggle-focus)
-                                                  :on-click (without-propagation toggle-collapse)}
+           collapsed? [:div.node-value {:class (->class (cond-> #{:clickable} focused? (conj :focused)))
+                                        :on-mouse-over (without-propagation toggle-focus)
+                                        :on-mouse-out (without-propagation toggle-focus)
+                                        :on-click (without-propagation toggle-collapse)}
                        "~"]
 
            node-value? [:div.node-value {:class (when focused? :focused)
@@ -129,7 +129,6 @@
 
 (defn node-group [φ path _ _]
   (log/debug "mount node-group:" path)
-
   (let [{:keys [!core]} (:state φ)
         !nodes (r/cursor !core path)]
 
@@ -182,7 +181,8 @@
       (let [tooling-collapsed? @!tooling-collapsed?]
         [:div.tooling {:class (when tooling-collapsed? :collapsed)}
 
-         [:div.tooling-tab {:on-click (without-propagation toggle-tooling-collapsed)}
+         [:div.tooling-tab {:class :clickable
+                            :on-click (without-propagation toggle-tooling-collapsed)}
           [:span.icon-cog]]
 
          (when-not tooling-collapsed?
