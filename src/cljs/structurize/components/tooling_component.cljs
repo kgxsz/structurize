@@ -1,6 +1,7 @@
 (ns structurize.components.tooling-component
   (:require [reagent.core :as r]
             [reagent.ratom :as rr]
+            [structurize.components.component-utils :as u]
             [taoensso.timbre :as log]))
 
 (declare node-group)
@@ -24,17 +25,6 @@
   (if (contains? s prop)
     (remove-prop s prop)
     (add-prop s prop)))
-
-
-(defn ->class [classes]
-  (->> (map name classes)
-       (interpose " ")
-       (apply str)))
-
-
-(defn without-propagation [& fs]
-  (fn [e] (doseq [f fs] (f)) (.stopPropagation e)))
-
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; components
@@ -78,7 +68,7 @@
           "{"]
 
 
-         [:div.node-key {:class (->class
+         [:div.node-key {:class (u/->class
                                  (cond-> #{:clickable}
                                    focused? (conj :focused)
                                    upstream-focused? (conj :upstream-focused)
@@ -99,9 +89,9 @@
            collapsed-group-node? (list [:div.node-brace {:key :opening} "{"]
                                        [:div.node-value.clickable {:key k
                                                                    :class (when focused? :focused)
-                                                                   :on-mouse-over (without-propagation toggle-focus)
-                                                                   :on-mouse-out (without-propagation toggle-focus)
-                                                                   :on-click (without-propagation toggle-focus toggle-collapse)}
+                                                                   :on-mouse-over (u/without-propagation toggle-focus)
+                                                                   :on-mouse-out (u/without-propagation toggle-focus)
+                                                                   :on-click (u/without-propagation toggle-focus toggle-collapse)}
                                         "~"]
                                        [:div.node-brace {:key :closing} "}"])
 
@@ -109,14 +99,14 @@
                                    [:div.node-brace {:key :closing} "}"])
 
            collapsed? [:div.node-value.clickable {:class (when focused? :focused)
-                                                  :on-mouse-over (without-propagation toggle-focus)
-                                                  :on-mouse-out (without-propagation toggle-focus)
-                                                  :on-click (without-propagation toggle-collapse)}
+                                                  :on-mouse-over (u/without-propagation toggle-focus)
+                                                  :on-mouse-out (u/without-propagation toggle-focus)
+                                                  :on-click (u/without-propagation toggle-collapse)}
                        "~"]
 
            node-value? [:div.node-value {:class (when focused? :focused)
-                                         :on-mouse-over (without-propagation toggle-focus)
-                                         :on-mouse-out (without-propagation toggle-focus)}
+                                         :on-mouse-over (u/without-propagation toggle-focus)
+                                         :on-mouse-out (u/without-propagation toggle-focus)}
                         (pr-str v)]
 
            last? [node-group φ path (when focused? {:class :focused}) {:tail-braces (str tail-braces "}")}]
@@ -181,7 +171,7 @@
       (let [tooling-collapsed? @!tooling-collapsed?]
         [:div.tooling {:class (when tooling-collapsed? :collapsed)}
 
-         [:div.tooling-tab.clickable {:on-click (without-propagation toggle-tooling-collapsed)}
+         [:div.tooling-tab.clickable {:on-click (u/without-propagation toggle-tooling-collapsed)}
           [:span.icon-cog]]
 
          (when-not tooling-collapsed?
