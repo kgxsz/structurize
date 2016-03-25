@@ -40,9 +40,8 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; components
 
 
-(defn node [φ path opts]
+(defn node [φ path _]
   (log/debug "mount node:" path)
-
   (let [{:keys [!core !state-browser-props]} (:state φ)
         {:keys [emit-event!]} (:side-effector φ)
         !node (r/cursor !core path)
@@ -57,9 +56,10 @@
                                                                                   c
                                                                                   (-> (reductions conj [] path) rest drop-last))))}])]
 
-    (fn [φ path {:keys [tail-braces first? last?]}]
+    (fn [_ _ opts]
       (log/debug "render node:" path)
-      (let [node @!node
+      (let [{:keys [tail-braces first? last?]} opts
+            node @!node
             node-props @!node-props
             k (last path)
             v @!node
@@ -121,23 +121,24 @@
 
            last? [node-group φ path (when focused? {:class :focused}) {:tail-braces (str tail-braces "}")}]
 
-           :else [node-group φ path (when focused? {:class :focused}) {}])
+           :else [node-group φ path (when focused? {:class :focused})])
 
          [:div.node-brace {:class (when-not show-tail-braces? :hidden)}
           tail-braces]]))))
 
 
-(defn node-group [φ path props opts]
+(defn node-group [φ path _ _]
   (log/debug "mount node-group:" path)
 
   (let [{:keys [!core]} (:state φ)
         !nodes (r/cursor !core path)]
 
-    (fn [φ path props {:keys [tail-braces] :or {tail-braces "}"}}]
+    (fn [_ _ props opts]
       (log/debug "render node-group:" path)
-
-      (let [nodes @!nodes
+      (let [{:keys [tail-braces] :or {tail-braces "}"}} opts
+            nodes @!nodes
             num-nodes (count nodes)]
+
         [:div.node-group props
          (doall
           (for [[i [k _]] (map-indexed vector nodes)
@@ -154,7 +155,7 @@
 
   (let [{:keys [emit-event!]} (:side-effector φ)
         {:keys [!state-browser-props]} (:state φ)
-        cursor-paths (for [c (-> φ :state vals) :when (instance? rr/RCursor c)] (.-path c))]
+        cursor-paths (for [c (vals (:state φ)) :when (instance? rr/RCursor c)] (.-path c))]
 
     (emit-event! [:state-browser/init-cursored {:cursor !state-browser-props
                                                 :Δ (fn [state-browser-props]
@@ -165,7 +166,7 @@
     (fn []
       (log/debug "render state-browser*")
       [:div.state-browser
-       [node-group φ [] {} {}]])))
+       [node-group φ []]])))
 
 
 (defn tooling [φ]
@@ -173,8 +174,8 @@
   (let [{:keys [emit-event!]} (:side-effector φ)
         {:keys [!core]} (:state φ)
         !tooling-collapsed? (r/cursor !core [:tooling :tooling-collapsed?])
-        toggle-tooling-collapsed #(emit-event! [:toggle-tooling-collapsed {:cursor !tooling-collapsed?
-                                                                           :Δ not}])]
+        toggle-tooling-collapsed #(emit-event! [:state-browser/toggle-tooling-collapsed {:cursor !tooling-collapsed?
+                                                                                         :Δ not}])]
 
     (fn []
       (log/debug "render tooling")
