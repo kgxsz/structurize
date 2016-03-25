@@ -170,8 +170,9 @@
 
 (defn tooling [φ]
   (log/debug "mount tooling")
-  (let [emit-event! (get-in φ [:side-effector :emit-event!])
-        !tooling-collapsed? (r/cursor (get-in φ [:state :!core]) [:tooling :tooling-collapsed?])
+  (let [{:keys [emit-event!]} (:side-effector φ)
+        {:keys [!core]} (:state φ)
+        !tooling-collapsed? (r/cursor !core [:tooling :tooling-collapsed?])
         toggle-tooling-collapsed #(emit-event! [:toggle-tooling-collapsed {:cursor !tooling-collapsed?
                                                                            :Δ not}])]
 
@@ -180,7 +181,7 @@
       (let [tooling-collapsed? @!tooling-collapsed?]
         [:div.tooling {:class (when tooling-collapsed? :collapsed)}
 
-         [:div.tooling-tab {:on-click (fn [e] (toggle-tooling-collapsed) (.stopPropagation e))}
+         [:div.tooling-tab {:on-click (without-propagation toggle-tooling-collapsed)}
           [:span.icon-cog]]
 
          (when-not tooling-collapsed?

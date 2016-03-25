@@ -201,6 +201,7 @@
                    :align-items :center
                    :margin-left (u/rem 0.7)
                    :margin-right (u/rem 0.2)}
+       [:span {:pointer-events :none}]
        [:&.first {:margin-left 0}]
        [:&.focused :&.upstream-focused {:background-color (:light-blue colours)
                                         :color (:dark-blue colours)}]]
