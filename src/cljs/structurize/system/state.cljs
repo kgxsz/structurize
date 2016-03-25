@@ -14,7 +14,7 @@
                       :query nil}
            :chsk-status :init
            :tooling {:tooling-collapsed? true
-                     :nodes-props {[:tooling :nodes-props] #{:node-collapsed}}}}))
+                     :state-browser-props {[:tooling :state-browser-props] #{:collapsed}}}}))
 
 
 (defrecord State [config-opts]
@@ -28,7 +28,6 @@
              :!handler (r/cursor !core [:location :handler])
              :!query (r/cursor !core [:location :query])
              :!chsk-status (r/cursor !core [:chsk-status])
-             :!nodes-props (r/cursor !core [:tooling :nodes-props])
-             :!focused-node (r/cursor !core [:tooling :focused-node]))))
+             :!state-browser-props (r/cursor !core [:tooling :state-browser-props]))))
 
   (stop [component] component))

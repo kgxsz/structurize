@@ -4,16 +4,9 @@
             [reagent.core :as r]
             [clojure.string :as string]))
 
-(declare nodes)
+(declare node-group)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; util
-
-
-(defn stringify [x]
-  (cond
-    (nil? x) "nil"
-    (string? x) (str "\"" x "\"")
-    :else (str x)))
 
 
 (defn add-prop [s prop]
@@ -34,124 +27,145 @@
     (add-prop s prop)))
 
 
-(defn make-toggle-prop [prop]
-  (fn [s]
-    (toggle-prop s prop)))
+(defn ->class [classes]
+  (->> (map name classes)
+       (interpose " ")
+       (apply str)))
 
 
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; component helpers
-
-
-(defn node [φ node-path braces]
-  (log/debug "mount node:" node-path)
-  (let [emit-event! (get-in φ [:side-effector :emit-event!])
-        {:keys [!core !focused-node]} (get-in φ [:state])
-        !node-props (r/cursor !core [:tooling :nodes-props node-path])
-        !node-value (r/cursor !core node-path)
-        lead-node-paths (-> (reductions conj [] node-path) rest drop-last)
-        toggle-node-collapsed #(emit-event! [:toggle-collapsed {:cursor !node-props
-                                                                :Δ (make-toggle-prop :node-collapsed)}])
-        toggle-node-focus #(emit-event! [:toggle-node-focus {:cursor (get-in φ [:state :!nodes-props])
-                                                             :Δ (fn [nodes-props]
-                                                                  (reduce (fn [a v] (update a v toggle-prop :lead-focused))
-                                                                          (update nodes-props node-path toggle-prop :focused)
-                                                                          lead-node-paths))}])]
-
-    (fn []
-      (log/debug "render node:" node-path)
-      (let [node-props @!node-props
-            v @!node-value]
-        [:div.node
-         [:div.node-key-container
-          [:div.node-key {:class (when (some #{:focused :lead-focused} node-props) :focused)
-                          :on-mouse-over (fn [e] (toggle-node-focus) (.stopPropagation e))
-                          :on-mouse-out (fn [e] (toggle-node-focus) (.stopPropagation e))
-                          :on-click (fn [e] (toggle-node-collapsed) (.stopPropagation e))}
-
-           [:div.node-key-flags
-            (when (contains? node-props :cursored)
-              [:div.node-key-flag.cursored [:span.icon.icon-pushpin]])
-            #_(when (contains? node-properties :cursored)
-                [:div.node-key-flag.mutated [:span.icon.icon-star]])]
-
-           (stringify (last node-path))]]
-
-         (if (map? v)
-           [nodes φ node-path (str braces "}")]
-           [:div.node-value {:class (when (contains? node-props :focused) :focused)
-                             :on-mouse-over (fn [e] (toggle-node-focus) (.stopPropagation e))
-                             :on-mouse-out (fn [e] (toggle-node-focus) (.stopPropagation e))}
-
-            (if (contains? node-props :node-collapsed)
-              [:div.collapsed-value [:div] [:div] [:div]]
-              (stringify v))])
-
-         (when-not (map? v) [:div.braces braces])]))))
-
-
-(defn nodes [φ nodes-path braces]
-  (log/debug "mount nodes:" nodes-path)
-  (let [emit-event! (get-in φ [:side-effector :emit-event!])
-        {:keys [!core !nodes-props !focused-node]} (get-in φ [:state])
-        !node-props (r/cursor !core [:tooling :nodes-props nodes-path])
-        !nodes (r/cursor !core nodes-path)
-        lead-node-paths (-> (reductions conj [] nodes-path) rest drop-last)
-        toggle-node-collapsed #(emit-event! [:toggle-collapsed {:cursor !nodes-props
-                                                                :Δ (make-toggle-prop :node-collapsed)}])
-        toggle-node-focus #(emit-event! [:toggle-node-focus {:cursor (r/cursor !core [:tooling :nodes-props])
-                                                             :Δ (fn [nodes-props]
-                                                                  (reduce (fn [a v] (update a v toggle-prop :lead-focused))
-                                                                          (update nodes-props nodes-path toggle-prop :focused)
-                                                                          lead-node-paths))}])]
-
-    (fn []
-      (log/debug "render nodes:" nodes-path)
-      (let [node-props @!node-props
-            nodes @!nodes
-            node-paths (map (partial conj nodes-path) (keys nodes))
-            nodes-collapsed? (and (seq node-paths) (contains? node-props :node-collapsed))
-            focused? (contains? node-props :focused)]
-        (if nodes-collapsed?
-          [:div.nodes-container {:class (when focused? :focused)
-                                 :on-mouse-over (fn [e] (toggle-node-focus) (.stopPropagation e))
-                                 :on-mouse-out (fn [e] (toggle-node-focus) (.stopPropagation e))}
-           [:div.braces "{"]
-           [:div.node-value [:div.collapsed-value [:div] [:div] [:div]]]
-           [:div.braces braces]]
-          [:div.nodes-container {:class (when focused? :focused)}
-           [:div.braces (str "{" (when (empty? node-paths) braces))]
-           [:nodes
-            (doall
-             (for [node-path (drop-last node-paths)]
-               [:div.node-container {:key (str node-path)}
-                [node φ node-path ""]]))
-            (when-let [node-path (last node-paths)]
-              [:div.node-container {:key (str node-path)}
-               [node φ (last node-paths) braces]])]])))))
-
+(defn without-propagation [& fs]
+  (fn [e] (doseq [f fs] (f)) (.stopPropagation e)))
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; components
 
 
+(defn node [φ path opts]
+  (log/debug "mount node:" path)
+
+  (let [{:keys [!core !state-browser-props]} (:state φ)
+        {:keys [emit-event!]} (:side-effector φ)
+        !node (r/cursor !core path)
+        !node-props (r/cursor !state-browser-props [path])
+        toggle-collapse #(emit-event! [:state-browser/toggle-collapsed {:cursor !node-props
+                                                                        :Δ (fn [c] (toggle-prop c :collapsed))}])
+        toggle-focus #(emit-event! [:state-browser/toggle-focused {:cursor !state-browser-props
+                                                                   :Δ (fn [c]
+                                                                        (as-> c c
+                                                                          (update c path toggle-prop :focused)
+                                                                          (reduce (fn [a v] (update a v toggle-prop :upstream-focused))
+                                                                                  c
+                                                                                  (-> (reductions conj [] path) rest drop-last))))}])]
+
+    (fn [φ path {:keys [tail-braces first? last?]}]
+      (log/debug "render node:" path)
+      (let [node @!node
+            node-props @!node-props
+            k (last path)
+            v @!node
+            upstream-focused? (contains? node-props :upstream-focused)
+            focused? (contains? node-props :focused)
+            collapsed? (contains? node-props :collapsed)
+            collapsed-group-node? (and collapsed?
+                                       (map? v)
+                                       (not (empty? node)))
+            empty-group-node? (and (map? v) (empty? node))
+            node-value? (not (map? v))
+            show-tail-braces? (and last? (or collapsed? empty-group-node? node-value?))]
+
+        [:div.node
+         [:div.node-brace {:class (when-not first? :hidden)}
+          "{"]
+
+
+         [:div.node-key {:class (->class
+                                 (cond-> #{:clickable}
+                                   focused? (conj :focused)
+                                   upstream-focused? (conj :upstream-focused)
+                                   first? (conj :first)))
+                         :on-mouse-over (fn [e] (toggle-focus) (.stopPropagation e))
+                         :on-mouse-out (fn [e] (toggle-focus) (.stopPropagation e))
+                         :on-click (fn [e] (toggle-collapse) (.stopPropagation e))}
+
+          (when (contains? node-props :cursored)
+            [:div.node-key-flag.cursored [:span.icon.icon-pushpin]])
+          (when (contains? node-props :mutated)
+            [:div.node-key-flag.mutated [:span.icon.icon-star]])
+
+          (pr-str k)]
+
+         (cond
+
+           collapsed-group-node? (list [:div.node-brace {:key :opening} "{"]
+                                       [:div.node-value.clickable {:key k
+                                                                   :class (when focused? :focused)
+                                                                   :on-mouse-over (without-propagation toggle-focus)
+                                                                   :on-mouse-out (without-propagation toggle-focus)
+                                                                   :on-click (without-propagation toggle-focus toggle-collapse)}
+                                        "~"]
+                                       [:div.node-brace {:key :closing} "}"])
+
+           empty-group-node? (list [:div.node-brace {:key :opening} "{"]
+                                   [:div.node-brace {:key :closing} "}"])
+
+           collapsed? [:div.node-value.clickable {:class (when focused? :focused)
+                                                  :on-mouse-over (without-propagation toggle-focus)
+                                                  :on-mouse-out (without-propagation toggle-focus)
+                                                  :on-click (without-propagation toggle-collapse)}
+                       "~"]
+
+           node-value? [:div.node-value {:class (when focused? :focused)
+                                         :on-mouse-over (without-propagation toggle-focus)
+                                         :on-mouse-out (without-propagation toggle-focus)}
+                        (pr-str v)]
+
+           last? [node-group φ path (when focused? {:class :focused}) {:tail-braces (str tail-braces "}")}]
+
+           :else [node-group φ path (when focused? {:class :focused}) {}])
+
+         [:div.node-brace {:class (when-not show-tail-braces? :hidden)}
+          tail-braces]]))))
+
+
+(defn node-group [φ path props opts]
+  (log/debug "mount node-group:" path)
+
+  (let [{:keys [!core]} (:state φ)
+        !nodes (r/cursor !core path)]
+
+    (fn [φ path props {:keys [tail-braces] :or {tail-braces "}"}}]
+      (log/debug "render node-group:" path)
+
+      (let [nodes @!nodes
+            num-nodes (count nodes)]
+        [:div.node-group props
+         (doall
+          (for [[i [k _]] (map-indexed vector nodes)
+                :let [first? (zero? i)
+                      last? (= num-nodes (inc i))
+                      path (conj path k)]]
+            [:div {:key (pr-str k)}
+             [node φ path {:tail-braces tail-braces :first? first? :last? last?}]]))]))))
+
+
 (defn state-browser [φ]
 
-  (log/debug "mount state-browser")
+  (log/debug "mount state-browser*")
 
-  (let [emit-event! (get-in φ [:side-effector :emit-event!])
+  (let [{:keys [emit-event!]} (:side-effector φ)
+        {:keys [!state-browser-props]} (:state φ)
         cursor-paths (for [c (-> φ :state vals) :when (instance? rr/RCursor c)] (.-path c))]
 
-    (emit-event! [:setup-cursored-nodes {:cursor (get-in φ [:state :!nodes-props])
-                                         :Δ (fn [nodes-props]
-                                              (reduce (fn [a v] (update a v add-prop :cursored))
-                                                      nodes-props
-                                                      cursor-paths))}])
+    (emit-event! [:state-browser/init-cursored {:cursor !state-browser-props
+                                                :Δ (fn [state-browser-props]
+                                                     (reduce (fn [a v] (update a v add-prop :cursored))
+                                                             state-browser-props
+                                                             cursor-paths))}])
 
     (fn []
-      (log/debug "render state-browser")
+      (log/debug "render state-browser*")
       [:div.state-browser
-       [nodes φ [] "}"]])))
+       [node-group φ [] {} {}]])))
 
 
 (defn tooling [φ]
