@@ -54,7 +54,7 @@
   [:html {:font-size (u/px 10)}
 
    [:body {:font-family "sans-serif"
-           :font-size (u/rem 1.5)
+           :font-size "1.5rem"
            :line-height 1.5
            :color (:white-b colours)
            :background-color (:white-b colours)
@@ -74,8 +74,8 @@
            :position :relative
            :min-width (u/px 320)
            :min-height (u/px 320)
-           :font-size (u/rem 1.2)
-           :line-height (u/rem 1.7)
+           :font-size "1.2rem"
+           :line-height "1.7rem"
            :overflow :auto
            :white-space :nowrap}
 
@@ -84,10 +84,10 @@
                  :display :flex
                  :flex-direction :column
                  :justify-content :center
-                 :font-size (u/rem 1.5)
+                 :font-size "1.5rem"
                  :align-items :center}
-    [:.icon {:font-size (u/rem 6)
-             :margin-bottom (u/rem 1)}]]
+    [:.icon {:font-size "6rem"
+             :margin-bottom "10px"}]]
 
 
    [:.home-page {:width (u/vw 100)
@@ -96,106 +96,103 @@
                  :flex-direction :column
                  :justify-content :center
                  :align-items :center}
-    [:.icon-mustache {:font-size (u/rem 10)
+    [:.icon-mustache {:font-size "10rem"
                       :color (:white-b colours)}]
-    [:.avatar {:width (u/rem 10)
-               :height (u/rem 10)
+    [:.avatar {:width "100px"
+               :height "100px"
                :background-color (c/rgba [0 10 20 0.2])
-               :border-width (u/rem 0.3)
+               :border-width "3px"
                :border-style :solid
-               :border-radius (u/rem 10)}]
+               :border-radius "100px"}]
     [:.hero {:font-family "'Raleway', Arial"
              :color (:white-b colours)
-             :font-size (u/rem 4)
+             :font-size "4rem"
              :line-height 1
-             :margin-top (u/rem 2)}]
-    [:.sign-in-with-github {:margin-top (u/rem 3)}]
-    [:.sign-out {:margin-top (u/rem 2)}]]
+             :margin-top "20px"}]
+    [:.sign-in-with-github {:margin-top "30px"}]
+    [:.sign-out {:margin-top "20px"}]]
 
 
    [:.button {:display :flex
               :justify-content :center
               :align-items :center
-              :min-width (u/rem 12)
-              :height (u/rem 4.5)
-              :padding-left (u/rem 1)
-              :padding-right (u/rem 1)
+              :min-width "120px"
+              :height "45px"
+              :padding "0 10px"
               :color (:white-b colours)
-              :border-width (u/rem 0.3)
+              :border-width "3px"
               :border-style :solid
-              :border-radius (u/px 7)
+              :border-radius "7px"
               :font-family "sans-serif"
-              :font-size (u/rem 1.5)
+              :font-size "1.5rem"
               :background-color (c/rgba [0 10 20 0.2])
-              :line-height (u/rem 1.7)}
+              :line-height "1.7rem"}
 
     [:&:hover {:background-color (c/rgba [0 10 20 0.4])}]
 
-    [:.button-icon {:font-size (u/rem 2.2)
-                    :margin-right (u/rem 0.7)}]]
+    [:.button-icon {:font-size "2.2rem"
+                    :margin-right "7px"}]]
 
-   [:.tooling {:width (u/rem 90)
-               :height (u/percent 100)
-               :min-width (u/px 320)
-               :min-height (u/px 320)
+   [:.tooling {:width "900px"
+               :height "100%"
+               :min-width "320px"
+               :min-height "320px"
                :background-color (c/rgba [0 10 20 0.7])
                :position :fixed
                :top 0
                :right 0}
 
-    [:&.collapsed {:right (u/rem -90)}]
+    [:&.collapsed {:right "-900px"}]
 
     [:.tooling-tab {:display :flex
                     :justify-content :center
                     :align-items :center
                     :background-color (c/rgba [0 10 20 0.7])
-                    :width (u/rem 2.5)
-                    :height (u/rem 3.3)
-                    :border-top-left-radius (u/px 5)
-                    :border-bottom-left-radius (u/px 5)
+                    :width "25px"
+                    :height "33px"
+                    :border-top-left-radius "5px"
+                    :border-bottom-left-radius "5px"
                     :position :absolute
-                    :top (u/rem 1.5)
-                    :left (u/rem -2.5)}
+                    :top "15px"
+                    :left "-25px"}
      [:.icon-cog {:color (:white-a colours)
-                  :font-size (u/rem 1.5)
-                  :margin-bottom (u/rem 0.1)
-                  :margin-left (u/rem 0.2)}]]
+                  :font-size "1.5rem"
+                  :margin "0 0 1px 2px"}]]
 
     [:.browsers {:display :flex
                  :flex-direction :column
-                 :width (u/rem 90)
-                 :height (u/vh 100)
+                 :width "900px"
+                 :height "100vh"
                  :font-family "'Fira Mono', monospace"
-                 :font-size (u/rem 1.2)
+                 :font-size "1.2rem"
                  :color (:white-b colours)
-                 :line-height (u/rem 1.7)
+                 :line-height "1.7rem"
                  :white-space :nowrap}
 
+     [:.browser {:background-color (c/rgba [80 90 100 0.3])
+                 :margin "15px 15px 0 15px"
+                 :padding "10px"
+                 :border-radius "5px"
+                 :overflow :auto}
+      [:&:last-child {:margin-bottom "15px"}]]
+
      [:.state-browser {:flex-grow 1
-                       :height 0
-                       :background-color (c/rgba [80 90 100 0.3])
-                       :margin (u/rem 1.5)
-                       :padding (u/rem 1)
-                       :border-radius (u/px 5)
-                       :overflow :auto}
+                       :height 0}
 
       [:.node {:display :flex}
 
-       [:.node-brace {:padding-top (u/rem 0.2)}]
+       [:.node-brace {:padding-top "2px"}]
 
-       [:.node-value :.node-key {:height (u/percent 100)
-                                 :margin-bottom (u/rem 0.2)
-                                 :padding-top (u/rem 0.2)
-                                 :padding-bottom (u/rem 0.1)
-                                 :padding-right (u/rem 0.3)
-                                 :padding-left (u/rem 0.3)
-                                 :border-radius (u/px 3)
+       [:.node-value :.node-key {:height "100%"
+                                 :margin-bottom "2px"
+                                 :padding "2px 3px 1px 3px"
+                                 :border-radius "3px"
                                  :background-color (:grey-c colours)}]
 
        [:.node-key {:display :flex
                     :align-items :center
-                    :margin-left (u/rem 0.7)
-                    :margin-right (u/rem 0.2)}
+                    :margin-left "7px"
+                    :margin-right "2px"}
         [:span {:pointer-events :none}]
         [:&.first {:margin-left 0}]
         [:&.focused :&.upstream-focused {:background-color (:light-blue colours)
@@ -213,24 +210,19 @@
        [:.node-key-flag {:display :flex
                          :justify-content :center
                          :align-items :center
-                         :width (u/rem 1.5)
-                         :height (u/rem 1.5)
-                         :font-size (u/rem 1.3)
-                         :margin-left (u/rem 0.1)
-                         :margin-right (u/rem 0.1)
-                         :border-radius (u/rem 0.3)}
-        [:.icon {:padding-left (u/rem 0.1)}]
+                         :width "15px"
+                         :height "15px"
+                         :font-size "1.3rem"
+                         :margin "0 1px"
+                         :border-radius "3px"}
+        [:.icon {:padding-left "1px"}]
 
         [:&.cursored {:background-color (:dark-green colours)
                       :color (:white-a colours)}]
         [:&.mutated {:background-color (:dark-blue colours)
                      :color (:white-a colours)}]]]]]
 
-    [:.event-browser {:height (u/rem 15)
-                      :margin (u/rem 1.5)
-                      :background-color (c/rgba [80 90 100 0.3])
-                      :margin-top 0
-                      :border-radius (u/px 5)}]]])
+    [:.event-browser {:height "150px"}]]])
 
 (def main
   [meyer-reset

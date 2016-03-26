@@ -154,7 +154,7 @@
 
     (fn []
       (log/debug "render state-browser*")
-      [:div.state-browser
+      [:div.browser.state-browser
        [node-group φ []]])))
 
 
@@ -177,4 +177,4 @@
          (when-not tooling-collapsed?
            [:div.browsers
             [state-browser φ]
-            [:div.event-browser]])]))))
+            [:div.browser.event-browser]])]))))
