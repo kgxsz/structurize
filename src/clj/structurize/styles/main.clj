@@ -90,35 +90,48 @@
              :margin-bottom "10px"}]]
 
 
-   [:.home-page {:width (u/vw 100)
-                 :height (u/vh 100)
-                 :display :flex
+   [:.home-page {:display :flex
                  :flex-direction :column
                  :justify-content :center
-                 :align-items :center}
-    [:.icon-mustache {:font-size "10rem"
-                      :color (:white-b colours)}]
-    [:.avatar {:width "100px"
-               :height "100px"
-               :background-color (c/rgba [0 10 20 0.2])
-               :border-width "3px"
-               :border-style :solid
-               :border-radius "100px"}]
-    [:.hero {:font-family "'Raleway', Arial"
-             :color (:white-b colours)
-             :font-size "4rem"
-             :line-height 1
-             :margin-top "20px"}]
-    [:.sign-in-with-github {:margin-top "30px"}]
-    [:.sign-out {:margin-top "20px"}]]
+                 :height "100vh"}
+    [:.me-context {:display :flex
+                   :flex-direction :column
+                   :justify-content :center
+                   :align-items :center
+                   :margin-bottom "20px"}
+
+     [:.icon-mustache {:font-size "10rem"
+                       :color (:white-b colours)}]
+     [:.avatar {:width "100px"
+                :height "100px"
+                :background-color (c/rgba [0 10 20 0.2])
+                :border-width "3px"
+                :border-style :solid
+                :border-radius "100px"}]
+     [:.hero {:font-family "'Raleway', Arial"
+              :color (:white-b colours)
+              :font-size "4rem"
+              :line-height 1
+              :margin-top "20px"}]
+     [:.sign-in-with-github {:margin-top "30px"}]
+     [:.sign-out {:margin-top "20px"}]]
+
+    [:.playground {:display :flex
+                   :flex-direction :row
+                   :justify-content :center
+                   :align-items :center}
+     [:.button {:margin "0 10px"}
+      [:.button-icon {:margin-bottom "5px"}]
+      [:.button-text {:font-size "1.7rem"
+                      :font-weight :bold}]]]]
 
 
    [:.button {:display :flex
               :justify-content :center
               :align-items :center
-              :min-width "120px"
+              :min-width "50px"
               :height "45px"
-              :padding "0 10px"
+              :padding "0 30px"
               :color (:white-b colours)
               :border-width "3px"
               :border-style :solid
@@ -133,7 +146,7 @@
     [:.button-icon {:font-size "2.2rem"
                     :margin-right "7px"}]]
 
-   [:.tooling {:width "900px"
+   [:.tooling {:width "40vw"
                :height "100%"
                :min-width "320px"
                :min-height "320px"
@@ -142,7 +155,7 @@
                :top 0
                :right 0}
 
-    [:&.collapsed {:right "-900px"}]
+    [:&.collapsed {:left "100vw"}]
 
     [:.tooling-tab {:display :flex
                     :justify-content :center
@@ -161,8 +174,8 @@
 
     [:.browsers {:display :flex
                  :flex-direction :column
-                 :width "900px"
-                 :height "100vh"
+                 :width "100%"
+                 :height "100%"
                  :font-family "'Fira Mono', monospace"
                  :font-size "1.2rem"
                  :color (:white-b colours)
@@ -215,6 +228,9 @@
                          :font-size "1.3rem"
                          :margin "0 1px"
                          :border-radius "3px"}
+
+        [:&:first-child {:margin-left 0}]
+
         [:.icon {:padding-left "1px"}]
 
         [:&.cursored {:background-color (:dark-green colours)
@@ -222,9 +238,32 @@
         [:&.mutated {:background-color (:dark-blue colours)
                      :color (:white-a colours)}]]]]]
 
-    [:.event-browser {:height "150px"}]]])
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; construction zone
+
+
+    [:.event-browser {:height "150px"
+                      :display :flex
+                      :align-items :center}
+
+     [:.events {:display :flex}]
+     [:.event {:font-size "1.6rem"
+               :line-height "2.2rem"
+               :margin-right "5px"
+               :padding "3px 5px"
+               :border-radius "3px"
+               :height "100%"
+               :color (:dark-purple colours)
+               :background-color (:light-purple colours)}]
+     ]
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+    ]])
+
 
 (def main
-  [meyer-reset
+  [["::-webkit-scrollbar" {:display :none}]
+   meyer-reset
    general
    components])

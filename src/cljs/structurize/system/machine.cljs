@@ -13,13 +13,18 @@
    cursor - if included, will operate on the cursor into the state, if not, will operate on the core
    Δ - a function that takes the core or the cursor and produces the desired change in state."
 
-  [[id {:keys [cursor Δ]}] {:keys [!core] :as state}]
+  [event state]
 
-  (log/debug "processing event:" id)
-  (if-let [cursor-or-core (and Δ (or cursor !core))]
-    (do (swap! !core assoc-in [:tooling :latest-event] id)
+  (let [[id {:keys [cursor Δ priviledged?]}] event
+        {:keys [!core !events]} state]
+
+    (log/debug "processing event:" id)
+    (if-let [cursor-or-core (and Δ (or cursor !core))]
+      (do
+        (when-not priviledged?
+          (swap! !events (comp (partial cons {:id id}) (partial take 3))))
         (swap! cursor-or-core Δ))
-    (log/error "failed to process event:" id)))
+      (log/error "failed to process event:" id))))
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; component setup

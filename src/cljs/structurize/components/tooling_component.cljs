@@ -27,7 +27,7 @@
     (add-prop s prop)))
 
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; components
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; state-browser components
 
 
 (defn node [φ path _]
@@ -39,6 +39,7 @@
         toggle-collapse #(emit-event! [:state-browser/toggle-collapsed {:cursor !node-props
                                                                         :Δ (fn [c] (toggle-prop c :collapsed))}])
         toggle-focus #(emit-event! [:state-browser/toggle-focused {:cursor !state-browser-props
+                                                                   :priviledged? true
                                                                    :Δ (fn [c]
                                                                         (as-> c c
                                                                           (update c path toggle-prop :focused)
@@ -138,22 +139,44 @@
              [node φ path {:tail-braces tail-braces :first? first? :last? last?}]]))]))))
 
 
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; state-browser components
+
+
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; top-level components
+
+
+(defn event-browser [φ]
+  (log/debug "mount event-browser")
+  (let [{:keys [!events]} (:state φ)]
+
+    (fn []
+      (log/debug "render event-browser")
+      [:div.browser.event-browser
+       [:div.events
+        (doall
+         (for [[i {:keys [id]}] (map-indexed vector @!events)]
+           [:div.event.clickable {:key i}
+            (pr-str id)]))]])))
+
+
 (defn state-browser [φ]
-
-  (log/debug "mount state-browser*")
-
+  (log/debug "mount state-browser")
   (let [{:keys [emit-event!]} (:side-effector φ)
         {:keys [!state-browser-props]} (:state φ)
         cursor-paths (for [c (vals (:state φ)) :when (instance? rr/RCursor c)] (.-path c))]
 
     (emit-event! [:state-browser/init-cursored {:cursor !state-browser-props
+                                                :priviledged? true
                                                 :Δ (fn [state-browser-props]
                                                      (reduce (fn [a v] (update a v add-prop :cursored))
                                                              state-browser-props
                                                              cursor-paths))}])
 
     (fn []
-      (log/debug "render state-browser*")
+      (log/debug "render state-browser")
       [:div.browser.state-browser
        [node-group φ []]])))
 
@@ -163,8 +186,9 @@
   (let [{:keys [emit-event!]} (:side-effector φ)
         {:keys [!core]} (:state φ)
         !tooling-collapsed? (r/cursor !core [:tooling :tooling-collapsed?])
-        toggle-tooling-collapsed #(emit-event! [:state-browser/toggle-tooling-collapsed {:cursor !tooling-collapsed?
-                                                                                         :Δ not}])]
+        toggle-tooling-collapsed #(emit-event! [:tooling/toggle-tooling-collapsed {:cursor !tooling-collapsed?
+                                                                                   :priviledged? true
+                                                                                   :Δ not}])]
 
     (fn []
       (log/debug "render tooling")
@@ -176,5 +200,5 @@
 
          (when-not tooling-collapsed?
            [:div.browsers
-            [state-browser φ]
-            [:div.browser.event-browser]])]))))
+            [event-browser φ]
+            [state-browser φ]])]))))

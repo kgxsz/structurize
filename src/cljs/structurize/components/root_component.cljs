@@ -1,5 +1,6 @@
 (ns structurize.components.root-component
-  (:require [structurize.components.tooling-component :refer [tooling]]
+  (:require [structurize.components.component-utils :as u]
+            [structurize.components.tooling-component :refer [tooling]]
             [structurize.routes :refer [routes]]
             [bidi.bidi :as b]
             [reagent.core :as r]
@@ -27,7 +28,7 @@
                                    :redirect_uri redirect-uri}})))
 
     [:div.sign-in-with-github
-     [:div.button {:on-click (fn [e] (send! [:sign-in/init-sign-in-with-github {}]) (.stopPropagation e))}
+     [:div.button.clickable {:on-click (fn [e] (send! [:sign-in/init-sign-in-with-github {}]) (.stopPropagation e))}
       [:span.button-icon.icon-github]
       [:span.button-text "sign in with GitHub"]]]))
 
@@ -40,7 +41,7 @@
   (let [!post-status (r/cursor !core [:post-status "/sign-out"])]
 
     [:div.sign-out
-     [:div.button {:on-click (fn [e] (post! ["/sign-out" {}]) (.stopPropagation e))}
+     [:div.button.clickable {:on-click (fn [e] (post! ["/sign-out" {}]) (.stopPropagation e))}
       [:span.button-icon.icon-exit]
       [:span.button-text "sign out"]]]))
 
@@ -50,21 +51,31 @@
 
 
 (defn home-page [{{:keys [!core]} :state
-                  {:keys [change-location!]} :side-effector
+                  {:keys [change-location! emit-event!]} :side-effector
                   :as Φ}]
   (log/debug "mount/render home-page")
 
-  (if-let [me (get-in @!core [:message-reply :users/me])]
+  [:div.home-page
 
-    [:div.home-page
-     [:img.avatar {:src (:avatar-url me)}]
-     [:div.hero "Hello @" (:login me)]
-     [sign-out Φ]]
+   (if-let [me (get-in @!core [:message-reply :users/me])]
 
-    [:div.home-page
-     [:span.icon-mustache]
-     [:div.hero "Hello there"]
-     [sign-in-with-github Φ]]))
+     [:div.me-context
+      [:img.avatar {:src (:avatar-url me)}]
+      [:div.hero "Hello @" (:login me)]
+      [sign-out Φ]]
+
+     [:div.me-context
+      [:span.icon-mustache]
+      [:div.hero "Hello there"]
+      [sign-in-with-github Φ]])
+
+   [:div.playground
+    [:div.button.clickable {:on-click (u/without-propagation #(emit-event! [:playground/inc-star {:Δ (fn [c] (update-in c [:playground :star] inc))}]))}
+     [:span.button-icon.icon-star]
+     [:span.button-text (get-in @!core [:playground :star])]]
+    [:div.button.clickable {:on-click (u/without-propagation #(emit-event! [:playground/inc-heart {:Δ (fn [c] (update-in c [:playground :heart] inc))}]))}
+     [:span.button-icon.icon-heart]
+     [:span.button-text (get-in @!core [:playground :heart])]]]])
 
 
 (defn sign-in-with-github-page [{{:keys [!core !query]} :state
