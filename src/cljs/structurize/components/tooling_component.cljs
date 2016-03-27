@@ -1,7 +1,8 @@
 (ns structurize.components.tooling-component
-  (:require [reagent.core :as r]
+  (:require [structurize.components.component-utils :as u]
+            [cljs-time.core :as t]
+            [reagent.core :as r]
             [reagent.ratom :as rr]
-            [structurize.components.component-utils :as u]
             [taoensso.timbre :as log]))
 
 (declare node-group)
@@ -37,9 +38,12 @@
         !node (r/cursor !core path)
         !node-props (r/cursor !state-browser-props [path])
         toggle-collapse #(emit-event! [:state-browser/toggle-collapsed {:cursor !node-props
+                                                                        :hidden-event? true
+                                                                        :no-throttle? true
                                                                         :Δ (fn [c] (toggle-prop c :collapsed))}])
         toggle-focus #(emit-event! [:state-browser/toggle-focused {:cursor !state-browser-props
-                                                                   :priviledged? true
+                                                                   :hidden-event? true
+                                                                   :no-throttle? true
                                                                    :Δ (fn [c]
                                                                         (as-> c c
                                                                           (update c path toggle-prop :focused)
@@ -150,16 +154,23 @@
 
 (defn event-browser [φ]
   (log/debug "mount event-browser")
-  (let [{:keys [!events]} (:state φ)]
+  (let [{:keys [!events]} (:state φ)
+        {:keys [admit-pending-event!]} (:side-effector φ)]
 
     (fn []
       (log/debug "render event-browser")
       [:div.browser.event-browser
+
+       [:div.throttle
+        [:div.button.clickable {:on-click (u/without-propagation admit-pending-event!)}
+         [:span.button-icon.icon-construction]
+         [:span.button-text "throttle"]]]
+
        [:div.events
         (doall
-         (for [[i {:keys [id]}] (map-indexed vector @!events)]
+         (for [[i [id {:keys [emitted-at processed-at n] :as props}]] (map-indexed vector @!events)]
            [:div.event.clickable {:key i}
-            (pr-str id)]))]])))
+            (pr-str id) " " n]))]])))
 
 
 (defn state-browser [φ]
@@ -169,7 +180,8 @@
         cursor-paths (for [c (vals (:state φ)) :when (instance? rr/RCursor c)] (.-path c))]
 
     (emit-event! [:state-browser/init-cursored {:cursor !state-browser-props
-                                                :priviledged? true
+                                                :hidden-event? true
+                                                :no-throttle? true
                                                 :Δ (fn [state-browser-props]
                                                      (reduce (fn [a v] (update a v add-prop :cursored))
                                                              state-browser-props
@@ -185,20 +197,21 @@
   (log/debug "mount tooling")
   (let [{:keys [emit-event!]} (:side-effector φ)
         {:keys [!core]} (:state φ)
-        !tooling-collapsed? (r/cursor !core [:tooling :tooling-collapsed?])
-        toggle-tooling-collapsed #(emit-event! [:tooling/toggle-tooling-collapsed {:cursor !tooling-collapsed?
-                                                                                   :priviledged? true
-                                                                                   :Δ not}])]
+        !tooling-active? (r/cursor !core [:tooling :tooling-active?])
+        toggle-tooling-active #(emit-event! [:tooling/toggle-tooling-active {:cursor !tooling-active?
+                                                                             :hidden-event? true
+                                                                             :no-throttle? true
+                                                                             :Δ not}])]
 
     (fn []
       (log/debug "render tooling")
-      (let [tooling-collapsed? @!tooling-collapsed?]
-        [:div.tooling {:class (when tooling-collapsed? :collapsed)}
+      (let [tooling-active? @!tooling-active?]
+        [:div.tooling {:class (when tooling-active? :collapsed)}
 
-         [:div.tooling-tab.clickable {:on-click (u/without-propagation toggle-tooling-collapsed)}
+         [:div.tooling-tab.clickable {:on-click (u/without-propagation toggle-tooling-active)}
           [:span.icon-cog]]
 
-         (when-not tooling-collapsed?
+         (when-not tooling-active?
            [:div.browsers
             [event-browser φ]
             [state-browser φ]])]))))

@@ -15,9 +15,9 @@
            :playground {:heart 0
                         :star 3}
            :chsk-status :init
-           :tooling {:tooling-collapsed? true
-                     :events [{:id :foo/bar}]
-                     :state-browser-props {[:tooling :state-browser-props] #{:collapsed}}}}))
+           :tooling {:tooling-active? true
+                     :events []
+                     :state-browser-props {[:tooling] #{:collapsed}}}}))
 
 
 (defrecord State [config-opts]

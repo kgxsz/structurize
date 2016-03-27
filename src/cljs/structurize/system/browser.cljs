@@ -86,7 +86,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; component setup
 
 
-(defrecord Browser [config-opts bus]
+(defrecord Browser [config-opts machine]
   component/Lifecycle
 
   (start [component]
@@ -94,7 +94,7 @@
     (let [history (make-history)]
 
       (log/info "begin listening for navigation from the browser")
-      (listen-for-navigation history (make-navigation-handler history (:emit-event! bus)))
+      (listen-for-navigation history (make-navigation-handler history (:emit-event! machine)))
 
       (assoc component
              :change-location! (make-change-location! history))))

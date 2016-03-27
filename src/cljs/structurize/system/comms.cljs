@@ -112,12 +112,12 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; component setup
 
 
-(defrecord Comms [config-opts bus]
+(defrecord Comms [config-opts machine]
   component/Lifecycle
 
   (start [component]
     (log/info "initialising comms")
-    (let [emit-event! (:emit-event! bus)
+    (let [emit-event! (:emit-event! machine)
           chsk-opts (get-in config-opts [:comms :chsk-opts])
           {:keys [chsk ch-recv send-fn] chsk-state :state} (sente/make-channel-socket! "/chsk" chsk-opts)]
 

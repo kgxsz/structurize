@@ -244,12 +244,12 @@
 
     [:.event-browser {:height "150px"
                       :display :flex
-                      :align-items :center}
+                      :flex-direction :column
+                      :justify-content :space-around
+                      :align-items :flex-start}
 
      [:.events {:display :flex}]
-     [:.event {:font-size "1.6rem"
-               :line-height "2.2rem"
-               :margin-right "5px"
+     [:.event {:margin-right "5px"
                :padding "3px 5px"
                :border-radius "3px"
                :height "100%"

@@ -1,6 +1,5 @@
 (ns structurize.system
-  (:require [structurize.system.bus :refer [map->Bus]]
-            [structurize.system.side-effector :refer [map->SideEffector]]
+  (:require [structurize.system.side-effector :refer [map->SideEffector]]
             [structurize.system.config-opts :refer [map->ConfigOpts]]
             [structurize.system.browser :refer [map->Browser]]
             [structurize.system.comms :refer [map->Comms]]
@@ -13,7 +12,6 @@
 (defn make-system []
   (-> (component/system-map
        :config-opts (map->ConfigOpts {})
-       :bus (map->Bus {})
        :browser (map->Browser {})
        :comms (map->Comms {})
        :side-effector (map->SideEffector {})
@@ -21,12 +19,11 @@
        :machine (map->Machine {})
        :renderer (map->Renderer {}))
       (component/system-using
-       {:bus [:config-opts]
-        :browser [:config-opts :bus]
-        :comms [:config-opts :bus]
-        :side-effector [:config-opts :bus :browser :comms]
-        :state [:config-opts]
-        :machine [:config-opts :state :bus]
+       {:state [:config-opts]
+        :machine [:config-opts :state]
+        :browser [:config-opts :machine]
+        :comms [:config-opts :machine]
+        :side-effector [:config-opts :browser :comms :machine]
         :renderer [:config-opts :state :side-effector]})))
 
 
