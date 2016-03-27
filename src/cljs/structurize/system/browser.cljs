@@ -57,7 +57,7 @@
     (.setEnabled true)))
 
 
-(defn make-change-location!
+(defn make-change-location
 
   "Returns a function that takes a map of options and updates the
    browser's location accordingly. The browser will fire a navigation
@@ -97,7 +97,7 @@
       (listen-for-navigation history (make-navigation-handler history (:emit-event! machine)))
 
       (assoc component
-             :change-location! (make-change-location! history))))
+             :change-location! (make-change-location history))))
 
   (stop [component] component))
 

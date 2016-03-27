@@ -39,11 +39,11 @@
         !node-props (r/cursor !state-browser-props [path])
         toggle-collapse #(emit-event! [:state-browser/toggle-collapsed {:cursor !node-props
                                                                         :hidden-event? true
-                                                                        :no-throttle? true
+                                                                        :ignore-throttle? true
                                                                         :Δ (fn [c] (toggle-prop c :collapsed))}])
         toggle-focus #(emit-event! [:state-browser/toggle-focused {:cursor !state-browser-props
                                                                    :hidden-event? true
-                                                                   :no-throttle? true
+                                                                   :ignore-throttle? true
                                                                    :Δ (fn [c]
                                                                         (as-> c c
                                                                           (update c path toggle-prop :focused)
@@ -154,22 +154,29 @@
 
 (defn event-browser [φ]
   (log/debug "mount event-browser")
-  (let [{:keys [!events]} (:state φ)
-        {:keys [admit-pending-event!]} (:side-effector φ)]
+  (let [{:keys [!processed-events]} (:state φ)
+        {:keys [emit-event! admit-throttled-event! flush-throttled-events!]} (:side-effector φ)]
 
     (fn []
       (log/debug "render event-browser")
       [:div.browser.event-browser
 
-       [:div.throttle
-        [:div.button.clickable {:on-click (u/without-propagation admit-pending-event!)}
-         [:span.button-icon.icon-construction]
-         [:span.button-text "throttle"]]]
+       [:div.button.clickable {:on-click (u/without-propagation
+                                          flush-throttled-events!
+                                          #(emit-event! [:tooling/toggle-throttle-events {:hidden-event? true
+                                                                                          :ignore-throttle? true
+                                                                                          :Δ (fn [c] (update-in c [:tooling :throttle-events?] not))}]))}
+        [:span.button-icon.icon-construction]
+        [:span.button-text "throttle"]]
+
+       [:div.button.clickable {:on-click (u/without-propagation admit-throttled-event!)}
+        [:span.button-icon.icon-arrow-right-circle]
+        [:span.button-text "admit throttled event"]]
 
        [:div.events
         (doall
-         (for [[i [id {:keys [emitted-at processed-at n] :as props}]] (map-indexed vector @!events)]
-           [:div.event.clickable {:key i}
+         (for [[id {:keys [emitted-at processed-at n] :as props}] @!processed-events]
+           [:div.event.clickable {:key n}
             (pr-str id) " " n]))]])))
 
 
@@ -181,7 +188,7 @@
 
     (emit-event! [:state-browser/init-cursored {:cursor !state-browser-props
                                                 :hidden-event? true
-                                                :no-throttle? true
+                                                :ignore-throttle? true
                                                 :Δ (fn [state-browser-props]
                                                      (reduce (fn [a v] (update a v add-prop :cursored))
                                                              state-browser-props
@@ -200,7 +207,7 @@
         !tooling-active? (r/cursor !core [:tooling :tooling-active?])
         toggle-tooling-active #(emit-event! [:tooling/toggle-tooling-active {:cursor !tooling-active?
                                                                              :hidden-event? true
-                                                                             :no-throttle? true
+                                                                             :ignore-throttle? true
                                                                              :Δ not}])]
 
     (fn []

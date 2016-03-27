@@ -37,7 +37,7 @@
     (handler emit-event! event-message)))
 
 
-(defn make-send!
+(defn make-send
 
   "Returns a function that takes a message to send, an event is emitted
    when the message is dispatched, and another when the message reply is received.
@@ -70,7 +70,7 @@
                                                             (assoc-in [:message-reply id] reply)))}])))))))
 
 
-(defn make-post!
+(defn make-post
 
   "Returns a function that makes an ajax post to the server. An event is emitted
    when the request is made, and another when the response is received.
@@ -125,8 +125,8 @@
       (sente/start-chsk-router! ch-recv (make-handler emit-event!))
 
       (assoc component
-             :send! (make-send! send-fn emit-event!)
-             :post! (make-post! chsk chsk-state emit-event!))))
+             :send! (make-send send-fn emit-event!)
+             :post! (make-post chsk chsk-state emit-event!))))
 
   (stop [component] component))
 

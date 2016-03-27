@@ -16,8 +16,11 @@
                         :star 3}
            :chsk-status :init
            :tooling {:tooling-active? true
-                     :events []
-                     :state-browser-props {[:tooling] #{:collapsed}}}}))
+                     :throttle-events? false
+                     :throttled-events '()
+                     :processed-events '()
+                     :state-browser-props {[:tooling :processed-events] #{:collapsed}
+                                           [:tooling :state-browser-props] #{:collapsed}}}}))
 
 
 (defrecord State [config-opts]
@@ -31,7 +34,9 @@
              :!handler (r/cursor !core [:location :handler])
              :!query (r/cursor !core [:location :query])
              :!chsk-status (r/cursor !core [:chsk-status])
-             :!events (r/cursor !core [:tooling :events])
+             :!throttle-events? (r/cursor !core [:tooling :throttle-events?])
+             :!throttled-events (r/cursor !core [:tooling :throttled-events])
+             :!processed-events (r/cursor !core [:tooling :processed-events])
              :!state-browser-props (r/cursor !core [:tooling :state-browser-props]))))
 
   (stop [component] component))
