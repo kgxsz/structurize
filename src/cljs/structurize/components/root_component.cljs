@@ -14,8 +14,8 @@
 
   (log/debug "mount/render sign-in-with-github")
 
-  (let [!message-status (r/cursor !core [:message-status :sign-in/init-sign-in-with-github])
-        !message-reply (r/cursor !core [:message-reply :sign-in/init-sign-in-with-github])]
+  (let [!message-status (r/cursor !core [:comms :message :sign-in/init-sign-in-with-github :status])
+        !message-reply (r/cursor !core [:comms :message :sign-in/init-sign-in-with-github :reply])]
 
     (when (= :reply-received @!message-status)
       (let [{:keys [client-id attempt-id scope]} @!message-reply
@@ -38,7 +38,7 @@
 
   (log/debug "mount/render sign-out-with-github")
 
-  (let [!post-status (r/cursor !core [:post-status "/sign-out"])]
+  (let [!post-status (r/cursor !core [:comms :post "/sign-out" :status])]
 
     [:div.sign-out
      [:div.button.clickable {:on-click (fn [e] (post! ["/sign-out" {}]) (.stopPropagation e))}
@@ -57,7 +57,7 @@
 
   [:div.home-page
 
-   (if-let [me (get-in @!core [:message-reply :users/me])]
+   (if-let [me (get-in @!core [:comms :message :users/me :reply])]
 
      [:div.me-context
       [:img.avatar {:src (:avatar-url me)}]
@@ -84,7 +84,7 @@
   (log/debug "mount/render sign-in-with-github-page")
 
   (let [{:keys [code error] attempt-id :state} @!query
-        !post-status (r/cursor !core [:post-status "/sign-in/github"])]
+        !post-status (r/cursor !core [:comms :post "/sign-in/github" :status])]
 
     (cond
       (and code attempt-id) (do (post! ["/sign-in/github" {:code code, :attempt-id attempt-id}])

@@ -29,7 +29,7 @@
                           (b/match-route routes path))]
       (log/debug "received navigation from browser:" token)
       (when-not (.-isNavigation g-event) (js/window.scrollTo 0 0))
-      (emit-event! [:location-change {:Δ (fn [core] (assoc core :location location))}]))))
+      (emit-event! [:navigation/location-change {:Δ (fn [core] (assoc core :location location))}]))))
 
 
 (defn make-transformer

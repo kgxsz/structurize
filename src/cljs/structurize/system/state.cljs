@@ -5,16 +5,15 @@
 
 
 (defn make-global-state [{:keys [general]}]
-  (r/atom {:message-status {}
-           :message-reply {}
-           :post-status {}
-           :post-response {}
+  (r/atom {:playground {:heart 0
+                        :star 3}
            :location {:path nil
                       :handler :init
                       :query nil}
-           :playground {:heart 0
-                        :star 3}
-           :chsk-status :init
+           :comms {:chsk-status :init
+                   :message {}
+                   :post {}}
+
            :tooling {:tooling-active? true
                      :throttle-events? false
                      :throttled-events '()
@@ -34,7 +33,7 @@
              :!core !core
              :!handler (r/cursor !core [:location :handler])
              :!query (r/cursor !core [:location :query])
-             :!chsk-status (r/cursor !core [:chsk-status])
+             :!chsk-status (r/cursor !core [:comms :chsk-status])
              :!throttle-events? (r/cursor !core [:tooling :throttle-events?])
              :!throttled-events (r/cursor !core [:tooling :throttled-events])
              :!processed-events (r/cursor !core [:tooling :processed-events])

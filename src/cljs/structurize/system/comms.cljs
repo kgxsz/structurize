@@ -14,7 +14,7 @@
 
 (defmethod handler :chsk/state
   [emit-event! {:keys [event id ?data send-fn] :as event-message}]
-  (emit-event! [:chsk-status-update {:Δ (fn [core] (assoc core :chsk-status (if (:open? ?data) :open :closed)))}]))
+  (emit-event! [:comms/chsk-status-update {:Δ (fn [c] (assoc-in c [:comms :chsk-status] (if (:open? ?data) :open :closed)))}]))
 
 
 (defmethod handler :chsk/handshake
@@ -51,7 +51,7 @@
 
   (fn [[id _ :as message] {:keys [timeout]}]
     (log/debug "dispatching message to server:" id)
-    (emit-event! [:message-sent {:Δ (fn [core] (assoc-in core [:message-status id] :sent))}])
+    (emit-event! [:comms/message-sent {:Δ (fn [c] (assoc-in c [:comms :message id :status] :sent))}])
 
     (send-fn
       message
@@ -60,14 +60,14 @@
         (if (sente/cb-success? reply)
           (let [[id ?payload] reply]
             (log/debug "received a reply message from server:" id)
-            (emit-event! [:message-reply-received {:Δ (fn [core] (-> core
-                                                                    (assoc-in [:message-status id] :reply-received)
-                                                                    (assoc-in [:message-reply id] ?payload)))}]))
+            (emit-event! [:comms/message-reply-received {:Δ (fn [c] (-> c
+                                                                 (assoc-in [:comms :message id :status] :reply-received)
+                                                                 (assoc-in [:comms :message id :reply] ?payload)))}]))
           (do
             (log/warn "message failed with:" reply)
-            (emit-event! [:message-failed {:Δ (fn [core] (-> core
-                                                            (assoc-in [:message-status id] :failed)
-                                                            (assoc-in [:message-reply id] reply)))}])))))))
+            (emit-event! [:comms/message-failed {:Δ (fn [c] (-> c
+                                                         (assoc-in [:comms :message id :status] :failed)
+                                                         (assoc-in [:comms :message id :reply] reply)))}])))))))
 
 
 (defn make-post
@@ -85,7 +85,7 @@
 
   (fn [[path params] {:keys [timeout]}]
     (log/debug "dispatching post to server:" path)
-    (emit-event! [:post-sent {:Δ (fn [core] (assoc-in core [:post-status path] :sent))}])
+    (emit-event! [:comms/post-sent {:Δ (fn [c] (assoc-in c [:comms :post path :status] :sent))}])
 
     (sente/ajax-lite
      path
@@ -96,17 +96,17 @@
        (if (:success? response)
          (do
            (log/debug "received a post response from server:" path)
-           (emit-event! [:post-response-received {:Δ (fn [core] (-> core
-                                                                   (assoc-in [:post-status path] :response-received)
-                                                                   (assoc-in [:post-response path] (:?content response))))}])
+           (emit-event! [:comms/post-response-received {:Δ (fn [c] (-> c
+                                                                (assoc-in [:comms :post path :status] :response-received)
+                                                                (assoc-in [:comms :post path :response] (:?content response))))}])
            ;; we reconnect the websocket connection here to pick up any changes
            ;; in the session that may have come about with the post request
            (sente/chsk-reconnect! chsk))
          (do
            (log/warn "post failed with:" response)
-           (emit-event! [:post-failed {:Δ (fn [core] (-> core
-                                                        (assoc-in [:post-status path] :failed)
-                                                        (assoc-in [:post-response path] response)))}])))))))
+           (emit-event! [:comms/post-failed {:Δ (fn [c] (-> c
+                                                     (assoc-in [:comms :post path :status] :failed)
+                                                     (assoc-in [:comms :post path :response] response)))}])))))))
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; component setup
