@@ -54,7 +54,6 @@
    is not defined, then all throttled events will be admitted."
   [<admit-throttled-events]
   (fn [n]
-    (log/debugf "attempting to admit %s throttled event(s)" (or n "all"))
     (go (a/>! <admit-throttled-events (or n :all)))))
 
 
@@ -69,10 +68,13 @@
  (defn listen-for-admit-throttled-events [<admit-throttled-events {:keys [!throttled-events] :as state}]
    (go-loop [n (a/<! <admit-throttled-events)]
      (let [events @!throttled-events
-           n-events (count events)
-           n (if (integer? n) n n-events)]
-       (when-not (zero? n-events) (swap! !throttled-events (partial drop-last n)))
-       (doseq [event (take n events)] (process-event event state)))
+           n-events (count events)]
+       (if (zero? n-events)
+         (log/debug "no throttled events to admit")
+         (let [n (if (integer? n) n n-events)]
+           (log/debugf "admitting %s throttled event(s)" n)
+           (swap! !throttled-events (partial drop-last n))
+           (doseq [event (reverse (take-last n events))] (process-event event state)))))
      (recur (a/<! <admit-throttled-events))))
 
 
