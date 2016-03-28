@@ -154,7 +154,7 @@
 
 (defn event-browser [φ]
   (log/debug "mount event-browser")
-  (let [{:keys [!processed-events]} (:state φ)
+  (let [{:keys [!throttled-events !processed-events]} (:state φ)
         {:keys [emit-event! admit-throttled-events!]} (:side-effector φ)]
 
     (fn []

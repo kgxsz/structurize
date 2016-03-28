@@ -6,7 +6,7 @@
   (:require-macros [cljs.core.async.macros :refer [go go-loop]]))
 
 
-(defn decorate-event [[id props] events]
+(defn decorate-event [events [id props]]
   (let [n (or (-> events first second :n) 0)
         event [id (assoc (select-keys props [:emitted-at])
                          :processed-at (t/now)
@@ -15,11 +15,13 @@
 
 
 (defn process-event
+
   "This function operates on state with the mutating functions provided in the events themselves.
 
    id - the id of the event
    cursor - if included, will operate on the cursor into the state, if not, will operate on the core
    Δ - a function that takes the core or the cursor and produces the desired change in state."
+
   [event state]
 
   (let [[id {:keys [cursor Δ hidden-event?]}] event
@@ -30,7 +32,7 @@
       (do
         (swap! cursor-or-core Δ)
         (when-not hidden-event?
-          (swap! !processed-events (partial decorate-event event))))
+          (swap! !processed-events decorate-event event)))
       (log/error "failed to process event:" id))))
 
 
