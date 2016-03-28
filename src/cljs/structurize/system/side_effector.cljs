@@ -10,8 +10,7 @@
     (log/info "initialising side-effector")
     (assoc component
            :emit-event! (:emit-event! machine)
-           :admit-throttled-event! (:admit-throttled-event! machine)
-           :flush-throttled-events! (:flush-throttled-events! machine)
+           :admit-throttled-events! (:admit-throttled-events! machine)
            :send! (:send! comms)
            :post! (:post! comms)
            :change-location! (:change-location! browser)))

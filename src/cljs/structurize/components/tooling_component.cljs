@@ -155,21 +155,21 @@
 (defn event-browser [φ]
   (log/debug "mount event-browser")
   (let [{:keys [!processed-events]} (:state φ)
-        {:keys [emit-event! admit-throttled-event! flush-throttled-events!]} (:side-effector φ)]
+        {:keys [emit-event! admit-throttled-events!]} (:side-effector φ)]
 
     (fn []
       (log/debug "render event-browser")
       [:div.browser.event-browser
 
        [:div.button.clickable {:on-click (u/without-propagation
-                                          flush-throttled-events!
+                                          admit-throttled-events!
                                           #(emit-event! [:tooling/toggle-throttle-events {:hidden-event? true
                                                                                           :ignore-throttle? true
                                                                                           :Δ (fn [c] (update-in c [:tooling :throttle-events?] not))}]))}
         [:span.button-icon.icon-construction]
         [:span.button-text "throttle"]]
 
-       [:div.button.clickable {:on-click (u/without-propagation admit-throttled-event!)}
+       [:div.button.clickable {:on-click (u/without-propagation #(admit-throttled-events! 1))}
         [:span.button-icon.icon-arrow-right-circle]
         [:span.button-text "admit throttled event"]]
 

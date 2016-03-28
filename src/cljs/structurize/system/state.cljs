@@ -20,6 +20,7 @@
                      :throttled-events '()
                      :processed-events '()
                      :state-browser-props {[:tooling :processed-events] #{:collapsed}
+                                           [:tooling :throttled-events] #{:collapsed}
                                            [:tooling :state-browser-props] #{:collapsed}}}}))
 
 
