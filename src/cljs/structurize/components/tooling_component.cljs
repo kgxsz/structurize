@@ -154,30 +154,52 @@
 
 (defn event-browser [φ]
   (log/debug "mount event-browser")
-  (let [{:keys [!throttled-events !processed-events]} (:state φ)
-        {:keys [emit-event! admit-throttled-events!]} (:side-effector φ)]
+  (let [{:keys [!throttle-events? !throttled-events !processed-events]} (:state φ)
+        {:keys [emit-event! admit-throttled-events!]} (:side-effector φ)
+        toggle-throttle-events #(emit-event! [:tooling/toggle-throttle-events {:hidden-event? true
+                                                                              :ignore-throttle? true
+                                                                              :Δ (fn [c] (update-in c [:tooling :throttle-events?] not))}])]
 
     (fn []
       (log/debug "render event-browser")
-      [:div.browser.event-browser
+      (let [throttle-events? @!throttle-events?
+            throttled-events @!throttled-events
+            no-throttled-events? (empty? throttled-events)]
+        [:div.browser.event-browser
 
-       [:div.button.clickable {:on-click (u/without-propagation
-                                          admit-throttled-events!
-                                          #(emit-event! [:tooling/toggle-throttle-events {:hidden-event? true
-                                                                                          :ignore-throttle? true
-                                                                                          :Δ (fn [c] (update-in c [:tooling :throttle-events?] not))}]))}
-        [:span.button-icon.icon-construction]
-        [:span.button-text "throttle"]]
+         [:div.throttle-controls
+          [:div.throttle-control.control-play {:class (if throttle-events? :clickable :active)
+                                               :on-click (when throttle-events?
+                                                           (u/without-propagation admit-throttled-events! toggle-throttle-events))}
+           [:span.icon.icon-control-play]]
 
-       [:div.button.clickable {:on-click (u/without-propagation #(admit-throttled-events! 1))}
-        [:span.button-icon.icon-arrow-right-circle]
-        [:span.button-text "admit throttled event"]]
+          [:div.throttle-control.control-pause {:class (if @!throttle-events? :active :clickable)
+                                                :on-click (when-not throttle-events? (u/without-propagation toggle-throttle-events))}
 
-       [:div.events
-        (doall
-         (for [[id {:keys [emitted-at processed-at n] :as props}] @!processed-events]
-           [:div.event.clickable {:key n}
-            (pr-str id) " " n]))]])))
+           [:span.icon.icon-control-pause]]
+          [:div.throttle-control.control-next.clickable {:class (when @!throttle-events? :active)
+                                                         :on-click (if throttle-events?
+                                                                     (u/without-propagation #(admit-throttled-events! 1))
+                                                                     (u/without-propagation toggle-throttle-events))}
+           [:span.icon.icon-control-next]]]
+
+         (when throttle-events?
+           [:div.next-throttled-event
+            [:div.event-shell
+             (if no-throttled-events?
+               [:div.event.no-throttled-event
+                "no throttled events"]
+               [:div.event.throttled-event
+                (pr-str (first (last throttled-events)))])]
+            [:div.throttle-indicator]])
+
+
+         [:div.processed-events
+          (doall
+           (for [[id {:keys [emitted-at processed-at n] :as props}] @!processed-events]
+             [:div.event-shell {:key n}
+              [:div.event.processed-event
+               (pr-str id)]]))]]))))
 
 
 (defn state-browser [φ]

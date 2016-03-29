@@ -13,7 +13,6 @@
            :comms {:chsk-status :init
                    :message {}
                    :post {}}
-
            :tooling {:tooling-active? true
                      :throttle-events? false
                      :throttled-events '()

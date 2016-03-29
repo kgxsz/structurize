@@ -105,8 +105,7 @@
      [:.avatar {:width "100px"
                 :height "100px"
                 :background-color (c/rgba [0 10 20 0.2])
-                :border-width "3px"
-                :border-style :solid
+                :border "3px solid"
                 :border-radius "100px"}]
      [:.hero {:font-family "'Raleway', Arial"
               :color (:white-b colours)
@@ -133,8 +132,7 @@
               :height "45px"
               :padding "0 30px"
               :color (:white-b colours)
-              :border-width "3px"
-              :border-style :solid
+              :border "3px solid"
               :border-radius "7px"
               :font-family "sans-serif"
               :font-size "1.5rem"
@@ -233,29 +231,79 @@
 
         [:.icon {:padding-left "1px"}]
 
-        [:&.cursored {:background-color (:dark-green colours)
+        [:&.cursored {:background-color (:purple colours)
                       :color (:white-a colours)}]
-        [:&.mutated {:background-color (:dark-blue colours)
+        [:&.mutated {:background-color (:red colours)
                      :color (:white-a colours)}]]]]]
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; construction zone
 
 
-    [:.event-browser {:height "150px"
-                      :display :flex
-                      :flex-direction :column
-                      :justify-content :space-around
-                      :align-items :flex-start}
+    [:.event-browser {:display :flex
+                      :align-items :center
+                      ::height "100px"}
 
-     [:.events {:display :flex}]
-     [:.event {:margin-right "5px"
-               :padding "3px 5px"
+     [:.throttle-controls {:display :flex
+                           :flex-direction :column
+                           :justify-content :center
+                           :align-items :center
+                           :border-radius "5px"
+                           :margin-right "15px"}
+      [:.throttle-control {:display :flex
+                           :align-items :center
+                           :justify-content :center
+                           :height "24px"
+                           :width "24px"
+                           :margin "3px 0"
+                           :border-radius "12px"
+                           :opacity 0.3}
+
+       [:&.active {:opacity 1}]
+
+       [:&.control-play {:background-color (:light-green colours)
+                         :color (:dark-green colours)}]
+       [:&.control-pause {:background-color (:light-red colours)
+                          :color (:dark-red colours)}]
+       [:&.control-next {:background-color (:light-yellow colours)
+                         :color (:dark-yellow  colours)}]]]
+
+     [:.event-shell {:padding "6px"
+                     :margin-right "8px"
+                     :border "dotted 2px"
+                     :border-radius "4px"}]
+
+     [:.event {:padding "3px 5px"
                :border-radius "3px"
                :height "100%"
-               :color (:dark-purple colours)
-               :background-color (:light-purple colours)}]
-     ]
+               }
+
+      [:&.throttled-event {:background-color (:light-yellow colours)
+                           :color (:dark-yellow colours)}]
+      [:&.no-throttled-event {:background-color :transparent
+                    :color (:white-b colours)}]
+      [:&.procesed-event {:background-color (:light-green colours)
+                          :color (:dark-green colours)}]]
+
+     [:.next-throttled-event {:display :flex
+                              :align-items :center}]
+
+     [:.throttle-indicator {:border "solid 1px"
+                            :border-radius "3px"
+                            :border-color (:white-c colours)
+                            :align-items :center
+                            :margin-right "8px"
+                            :width "0px"
+                            :height "75px"}]
+
+     [:.processed-events {:display :flex
+                          :align-items :center}
+      [:.processed-event {:padding "3px 5px"
+                          :border-radius "3px"
+                          :height "100%"
+                          :color (:dark-green colours)
+                          :background-color (:light-green colours)}]]]
+
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
