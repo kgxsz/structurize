@@ -246,7 +246,7 @@
                            :justify-content :center
                            :align-items :center
                            :border-radius "5px"
-                           :margin-right "10px"}
+}
       [:.throttle-control {:display :flex
                            :align-items :center
                            :justify-content :center
@@ -266,15 +266,15 @@
                          :color (:dark-yellow  colours)}]]]
 
      [:.event-container {:margin-top "5px"}
-      [:&.throttled-event {:margin "5px 5px 0 6px"}]]
+      [:&.throttled-event ]]
 
-     [:.event-caption {:margin-left "8px"}
+     [:.event-caption {:margin-left "18px"}
       [:.event-caption-symbol {:font-size "2.3rem"
                                :margin-right "2px"}]
       [:.event-caption-subscript {:font-size "1.1rem"}]]
 
      [:.event-shell {:padding "6px"
-                     :margin "0 6px"
+                     :margin-left "12px"
                      :border "dotted 2px"
                      :border-radius "4px"}]
 
@@ -290,15 +290,15 @@
                            :color (:dark-green colours)}]]
 
      [:.throttle-divider {:align-self :center
-                            :border "solid 1px"
-                            :border-radius "4px"
-                            :border-color (:grey-a colours)
-                            :align-items :center
-                            :width "0px"
-                            :height "82px"}]
+                          :margin-left "12px"
+                          :border "solid 1px"
+                          :border-radius "4px"
+                          :border-color (:grey-a colours)
+                          :align-items :center
+                          :width "0px"
+                          :height "82px"}]
 
-     [:.processed-events {:display :flex}
-      :&:first-child {:margin-left "4px"}]]]])
+     [:.processed-events {:display :flex}]]]])
 
 
 (def main

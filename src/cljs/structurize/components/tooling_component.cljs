@@ -179,6 +179,9 @@
            [:span.icon.icon-control-next]]]
 
          (when throttle-events?
+           [:div.throttle-divider])
+
+         (when throttle-events?
            [:div.event-container.throttled-event
             [:div.event-caption
              [:span.event-caption-symbol "ε"]
