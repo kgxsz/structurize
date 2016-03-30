@@ -245,8 +245,8 @@
                            :flex-direction :column
                            :justify-content :center
                            :align-items :center
-                           :border-radius "5px"
-}
+                           :border-radius "5px"}
+
       [:.throttle-control {:display :flex
                            :align-items :center
                            :justify-content :center
@@ -298,7 +298,8 @@
                           :width "0px"
                           :height "82px"}]
 
-     [:.processed-events {:display :flex}]]]])
+     [:.processed-events {:display :flex
+                          :padding-right "15px"}]]]])
 
 
 (def main
