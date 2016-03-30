@@ -91,14 +91,12 @@
 
 
    [:.home-page {:display :flex
-                 :flex-direction :column
-                 :justify-content :center
-                 :height "100vh"}
+                 :flex-direction :column}
     [:.me-context {:display :flex
                    :flex-direction :column
                    :justify-content :center
                    :align-items :center
-                   :margin-bottom "20px"}
+                   :margin "140px 0 20px 0"}
 
      [:.icon-mustache {:font-size "10rem"
                        :color (:white-b colours)}]
@@ -153,6 +151,8 @@
                :top 0
                :right 0}
 
+    [".browser::-webkit-scrollbar" {:display :none}]
+
     [:&.collapsed {:left "100vw"}]
 
     [:.tooling-tab {:display :flex
@@ -185,6 +185,7 @@
                  :padding "10px"
                  :border-radius "5px"
                  :overflow :auto}
+
       [:&:last-child {:margin-bottom "15px"}]]
 
      [:.state-browser {:flex-grow 1
@@ -236,9 +237,9 @@
         [:&.mutated {:background-color (:red colours)
                      :color (:white-a colours)}]]]]]
 
-
     [:.event-browser {:display :flex
-                      ::height "90px"}
+                      :height "90px"}
+
 
      [:.throttle-controls {:align-self :center
                            :display :flex
@@ -303,7 +304,6 @@
 
 
 (def main
-  [["::-webkit-scrollbar" {:display :none}]
-   meyer-reset
+  [meyer-reset
    general
    components])
