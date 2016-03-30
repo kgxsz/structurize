@@ -206,24 +206,24 @@
                     :margin-right "2px"}
         [:span {:pointer-events :none}]
         [:&.first {:margin-left 0}]
-        [:&.focused :&.upstream-focused {:background-color (:light-blue colours)
-                                         :color (:dark-blue colours)}]]
+        [:&.focused :&.upstream-focused {:background-color (:light-purple colours)
+                                         :color (:dark-purple colours)}]]
 
        [:.node-value
-        [:&.focused {:background-color (:light-green colours)
-                     :color (:dark-green colours)}]]
+        [:&.focused {:background-color (:light-blue colours)
+                     :color (:dark-blue colours)}]]
 
        [:.node-group
         [:&.focused
-         [:.node-key :.node-value {:background-color (:light-green colours)
-                                   :color (:dark-green colours)}]]]
+         [:.node-key :.node-value {:background-color (:light-blue colours)
+                                   :color (:dark-blue colours)}]]]
 
        [:.node-key-flag {:display :flex
                          :justify-content :center
                          :align-items :center
-                         :width "15px"
-                         :height "15px"
-                         :font-size "1.3rem"
+                         :width "13px"
+                         :height "13px"
+                         :font-size "1rem"
                          :margin "0 1px"
                          :border-radius "3px"}
 
@@ -237,19 +237,16 @@
                      :color (:white-a colours)}]]]]]
 
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; construction zone
-
-
     [:.event-browser {:display :flex
-                      :align-items :center
-                      ::height "100px"}
+                      ::height "90px"}
 
-     [:.throttle-controls {:display :flex
+     [:.throttle-controls {:align-self :center
+                           :display :flex
                            :flex-direction :column
                            :justify-content :center
                            :align-items :center
                            :border-radius "5px"
-                           :margin-right "15px"}
+                           :margin-right "10px"}
       [:.throttle-control {:display :flex
                            :align-items :center
                            :justify-content :center
@@ -268,46 +265,40 @@
        [:&.control-next {:background-color (:light-yellow colours)
                          :color (:dark-yellow  colours)}]]]
 
+     [:.event-container {:margin-top "5px"}
+      [:&.throttled-event {:margin "5px 5px 0 6px"}]]
+
+     [:.event-caption {:margin-left "8px"}
+      [:.event-caption-symbol {:font-size "2.3rem"
+                               :margin-right "2px"}]
+      [:.event-caption-subscript {:font-size "1.1rem"}]]
+
      [:.event-shell {:padding "6px"
-                     :margin-right "8px"
+                     :margin "0 6px"
                      :border "dotted 2px"
                      :border-radius "4px"}]
 
      [:.event {:padding "3px 5px"
                :border-radius "3px"
-               :height "100%"
-               }
+               :height "100%"}
 
       [:&.throttled-event {:background-color (:light-yellow colours)
                            :color (:dark-yellow colours)}]
       [:&.no-throttled-event {:background-color :transparent
-                    :color (:white-b colours)}]
-      [:&.procesed-event {:background-color (:light-green colours)
-                          :color (:dark-green colours)}]]
+                              :color (:white-b colours)}]
+      [:&.processed-event {:background-color (:light-green colours)
+                           :color (:dark-green colours)}]]
 
-     [:.next-throttled-event {:display :flex
-                              :align-items :center}]
-
-     [:.throttle-indicator {:border "solid 1px"
-                            :border-radius "3px"
-                            :border-color (:white-c colours)
+     [:.throttle-divider {:align-self :center
+                            :border "solid 1px"
+                            :border-radius "4px"
+                            :border-color (:grey-a colours)
                             :align-items :center
-                            :margin-right "8px"
                             :width "0px"
-                            :height "75px"}]
+                            :height "82px"}]
 
-     [:.processed-events {:display :flex
-                          :align-items :center}
-      [:.processed-event {:padding "3px 5px"
-                          :border-radius "3px"
-                          :height "100%"
-                          :color (:dark-green colours)
-                          :background-color (:light-green colours)}]]]
-
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-    ]])
+     [:.processed-events {:display :flex}
+      :&:first-child {:margin-left "4px"}]]]])
 
 
 (def main

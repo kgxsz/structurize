@@ -144,11 +144,6 @@
 
 
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; state-browser components
-
-
-
-
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; top-level components
 
 
@@ -184,22 +179,29 @@
            [:span.icon.icon-control-next]]]
 
          (when throttle-events?
-           [:div.next-throttled-event
+           [:div.event-container.throttled-event
+            [:div.event-caption
+             [:span.event-caption-symbol "ε"]
+             [:span.event-caption-subscript "next"]]
             [:div.event-shell
              (if no-throttled-events?
                [:div.event.no-throttled-event
                 "no throttled events"]
                [:div.event.throttled-event
-                (pr-str (first (last throttled-events)))])]
-            [:div.throttle-indicator]])
+                (pr-str (first (last throttled-events)))])]])
 
+         [:div.throttle-divider]
 
          [:div.processed-events
           (doall
            (for [[id {:keys [emitted-at processed-at n] :as props}] @!processed-events]
-             [:div.event-shell {:key n}
-              [:div.event.processed-event
-               (pr-str id)]]))]]))))
+             [:div.event-container {:key n}
+              [:div.event-caption
+               [:span.event-caption-symbol "ε"]
+               [:span.event-caption-subscript "n=" n]]
+              [:div.event-shell {:key n}
+               [:div.event.processed-event
+                (pr-str id)]]]))]]))))
 
 
 (defn state-browser [φ]
