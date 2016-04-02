@@ -7,12 +7,12 @@
 
 
 (defn decorate-event [config-opts [id props] events]
-  (let [max-past-events (get-in config-opts [:machine :max-past-events])
+  (let [max-processed-events (get-in config-opts [:machine :max-processed-events])
         n (or (-> events first second :n) 0)
         event [id (assoc (select-keys props [:emitted-at])
                          :processed-at (t/now)
                          :n (inc n))]]
-    (take max-past-events (cons event events))))
+    (take max-processed-events (cons event events))))
 
 
 (defn process-event

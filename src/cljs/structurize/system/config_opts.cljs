@@ -23,7 +23,7 @@
 
 
 (defonce machine-config-opts
-  {:max-past-events 30})
+  {:max-processed-events 30})
 
 
 (defonce renderer-config-opts

@@ -12,7 +12,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; component setup
 
 
-(defrecord Renderer [config-opts state bus side-effector]
+(defrecord Renderer [config-opts state side-effector]
   component/Lifecycle
 
   (start [component]
