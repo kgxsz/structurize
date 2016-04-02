@@ -4,7 +4,7 @@
             [taoensso.timbre :as log]))
 
 
-(defn make-db [{:keys [general]}]
+(defn make-db [config-opts]
   (r/atom {:playground {:heart 0
                         :star 3}
            :location {:path nil
@@ -14,7 +14,7 @@
                    :message {}
                    :post {}}
            :tooling {:tooling-active? true
-                     :throttle-events? false
+                     :throttle-events? true
                      :throttled-events '()
                      :processed-events '()
                      :state-browser-props {[:tooling :processed-events] #{:collapsed}

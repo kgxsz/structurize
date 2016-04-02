@@ -122,7 +122,8 @@
    [:div "loading"]])
 
 
-(defn root [{{:keys [!chsk-status !handler]} :state
+(defn root [{{:keys [renderer]} :config-opts
+             {:keys [!chsk-status !handler]} :state
              {:keys [send!]} :side-effector
              :as Φ}]
 
@@ -132,7 +133,8 @@
     (send! [:users/me]))
 
   [:div
-   [tooling Φ]
+   (when (:tooling-enabled? renderer)
+     [tooling Φ])
    (case @!handler
      :home [home-page Φ]
      :sign-in-with-github [sign-in-with-github-page Φ]

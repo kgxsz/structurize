@@ -23,11 +23,11 @@
 
 
 (defonce machine-config-opts
-  {})
+  {:max-past-events 30})
 
 
 (defonce renderer-config-opts
-  {})
+  {:tooling-enabled? true})
 
 
 

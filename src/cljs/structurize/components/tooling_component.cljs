@@ -240,12 +240,12 @@
     (fn []
       (log/debug "render tooling")
       (let [tooling-active? @!tooling-active?]
-        [:div.tooling {:class (when tooling-active? :collapsed)}
+        [:div.tooling {:class (when-not tooling-active? :collapsed)}
 
          [:div.tooling-tab.clickable {:on-click (u/without-propagation toggle-tooling-active)}
           [:span.icon-cog]]
 
-         (when-not tooling-active?
+         (when tooling-active?
            [:div.browsers
             [event-browser φ]
             [state-browser φ]])]))))

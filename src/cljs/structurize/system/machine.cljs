@@ -6,12 +6,13 @@
   (:require-macros [cljs.core.async.macros :refer [go go-loop]]))
 
 
-(defn decorate-event [events [id props]]
-  (let [n (or (-> events first second :n) 0)
+(defn decorate-event [config-opts [id props] events]
+  (let [max-past-events (get-in config-opts [:machine :max-past-events])
+        n (or (-> events first second :n) 0)
         event [id (assoc (select-keys props [:emitted-at])
                          :processed-at (t/now)
                          :n (inc n))]]
-    (take 10 (cons event events))))
+    (take max-past-events (cons event events))))
 
 
 (defn process-event
@@ -22,7 +23,7 @@
    cursor - if included, will operate on the cursor into the state, if not, will operate on the db
    Δ - a function that takes the db or the cursor and produces the desired change in state."
 
-  [event state]
+  [config-opts event state]
 
   (let [[id {:keys [cursor Δ hidden-event?]}] event
         {:keys [!db !processed-events]} state]
@@ -32,7 +33,7 @@
       (do
         (swap! cursor-or-db Δ)
         (when-not hidden-event?
-          (swap! !processed-events decorate-event event)))
+          (swap! !processed-events (partial decorate-event config-opts event))))
       (log/error "failed to process event:" id))))
 
 
@@ -59,15 +60,15 @@
     (go (a/>! <admit-throttled-events (or n :all)))))
 
 
-(defn listen-for-emit-event [<event {:keys [!throttle-events?] :as state}]
+(defn listen-for-emit-event [config-opts <event {:keys [!throttle-events?] :as state}]
   (go-loop [[id {:keys [ignore-throttle?]} :as event] (a/<! <event)]
     (if (and @!throttle-events? (not ignore-throttle?))
       (throttle-event event state)
-      (process-event event state))
+      (process-event config-opts event state))
     (recur (a/<! <event))))
 
 
- (defn listen-for-admit-throttled-events [<admit-throttled-events {:keys [!throttled-events] :as state}]
+ (defn listen-for-admit-throttled-events [config-opts <admit-throttled-events {:keys [!throttled-events] :as state}]
    (go-loop [n (a/<! <admit-throttled-events)]
      (let [events @!throttled-events
            n-events (count events)]
@@ -76,7 +77,7 @@
          (let [n (if (integer? n) n n-events)]
            (log/debugf "admitting %s throttled event(s)" n)
            (swap! !throttled-events (partial drop-last n))
-           (doseq [event (reverse (take-last n events))] (process-event event state)))))
+           (doseq [event (reverse (take-last n events))] (process-event config-opts event state)))))
      (recur (a/<! <admit-throttled-events))))
 
 
@@ -93,10 +94,10 @@
           <admit-throttled-events (a/chan)]
 
       (log/info "begin listening for emitted events")
-      (listen-for-emit-event <event state)
+      (listen-for-emit-event config-opts <event state)
 
       (log/info "begin listening for admittance of throttled events")
-      (listen-for-admit-throttled-events <admit-throttled-events state)
+      (listen-for-admit-throttled-events config-opts <admit-throttled-events state)
 
       (assoc component
              :emit-event! (make-emit-event <event)
