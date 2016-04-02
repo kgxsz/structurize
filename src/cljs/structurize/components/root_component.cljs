@@ -123,24 +123,21 @@
 
 
 (defn root [{:keys [config-opts state side-effector] :as Φ}]
-  (log/debug "mount root-component")
+  (log/debug "mount/render root-component")
   (let [{:keys [renderer]} config-opts
         {:keys [!chsk-status !handler]} state
-        {:keys [send!]} side-effector]
+        {:keys [send!]} side-effector
+        chsk-status-open? (= :open @!chsk-status)
+        tooling-enabled? (:tooling-enabled? renderer)
+        handler @!handler]
 
-    (fn []
-      (log/debug "render root-component")
-      (let [chsk-status-open? (= :open @!chsk-status)
-            tooling-enabled? (:tooling-enabled? renderer)
-            handler @!handler]
+    (when chsk-status-open?
+      (send! [:users/me]))
 
-        (when chsk-status-open?
-          (send! [:users/me]))
-
-        [:div
-         (when tooling-enabled? [tooling Φ])
-         (case handler
-           :home [home-page Φ]
-           :sign-in-with-github [sign-in-with-github-page Φ]
-           :init [init-page Φ]
-           :unknown [unknown-page Φ])]))))
+    [:div
+     (when tooling-enabled? [tooling Φ])
+     (case handler
+       :home [home-page Φ]
+       :sign-in-with-github [sign-in-with-github-page Φ]
+       :init [init-page Φ]
+       :unknown [unknown-page Φ])]))
