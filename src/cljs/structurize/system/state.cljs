@@ -4,7 +4,7 @@
             [taoensso.timbre :as log]))
 
 
-(defn make-global-state [{:keys [general]}]
+(defn make-db [{:keys [general]}]
   (r/atom {:playground {:heart 0
                         :star 3}
            :location {:path nil
@@ -27,15 +27,15 @@
 
   (start [component]
     (log/info "initialising state")
-    (let [!core (make-global-state config-opts)]
+    (let [!db (make-db config-opts)]
       (assoc component
-             :!core !core
-             :!handler (r/cursor !core [:location :handler])
-             :!query (r/cursor !core [:location :query])
-             :!chsk-status (r/cursor !core [:comms :chsk-status])
-             :!throttle-events? (r/cursor !core [:tooling :throttle-events?])
-             :!throttled-events (r/cursor !core [:tooling :throttled-events])
-             :!processed-events (r/cursor !core [:tooling :processed-events])
-             :!state-browser-props (r/cursor !core [:tooling :state-browser-props]))))
+             :!db !db
+             :!handler (r/cursor !db [:location :handler])
+             :!query (r/cursor !db [:location :query])
+             :!chsk-status (r/cursor !db [:comms :chsk-status])
+             :!throttle-events? (r/cursor !db [:tooling :throttle-events?])
+             :!throttled-events (r/cursor !db [:tooling :throttled-events])
+             :!processed-events (r/cursor !db [:tooling :processed-events])
+             :!state-browser-props (r/cursor !db [:tooling :state-browser-props]))))
 
   (stop [component] component))

@@ -9,13 +9,13 @@
 
 
 (defn sign-in-with-github [{{:keys [general]} :config-opts
-                            {:keys [!core]} :state
+                            {:keys [!db]} :state
                             {:keys [send! change-location!]} :side-effector}]
 
   (log/debug "mount/render sign-in-with-github")
 
-  (let [!message-status (r/cursor !core [:comms :message :sign-in/init-sign-in-with-github :status])
-        !message-reply (r/cursor !core [:comms :message :sign-in/init-sign-in-with-github :reply])]
+  (let [!message-status (r/cursor !db [:comms :message :sign-in/init-sign-in-with-github :status])
+        !message-reply (r/cursor !db [:comms :message :sign-in/init-sign-in-with-github :reply])]
 
     (when (= :reply-received @!message-status)
       (let [{:keys [client-id attempt-id scope]} @!message-reply
@@ -33,12 +33,12 @@
       [:span.button-text "sign in with GitHub"]]]))
 
 
-(defn sign-out [{{:keys [!core]} :state
+(defn sign-out [{{:keys [!db]} :state
                  {:keys [post!]} :side-effector}]
 
   (log/debug "mount/render sign-out-with-github")
 
-  (let [!post-status (r/cursor !core [:comms :post "/sign-out" :status])]
+  (let [!post-status (r/cursor !db [:comms :post "/sign-out" :status])]
 
     [:div.sign-out
      [:div.button.clickable {:on-click (fn [e] (post! ["/sign-out" {}]) (.stopPropagation e))}
@@ -50,14 +50,14 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; top level pages
 
 
-(defn home-page [{{:keys [!core]} :state
+(defn home-page [{{:keys [!db]} :state
                   {:keys [change-location! emit-event!]} :side-effector
                   :as Φ}]
   (log/debug "mount/render home-page")
 
   [:div.home-page
 
-   (if-let [me (get-in @!core [:comms :message :users/me :reply])]
+   (if-let [me (get-in @!db [:comms :message :users/me :reply])]
 
      [:div.me-context
       [:img.avatar {:src (:avatar-url me)}]
@@ -72,19 +72,19 @@
    [:div.playground
     [:div.button.clickable {:on-click (u/without-propagation #(emit-event! [:playground/inc-star {:Δ (fn [c] (update-in c [:playground :star] inc))}]))}
      [:span.button-icon.icon-star]
-     [:span.button-text (get-in @!core [:playground :star])]]
+     [:span.button-text (get-in @!db [:playground :star])]]
     [:div.button.clickable {:on-click (u/without-propagation #(emit-event! [:playground/inc-heart {:Δ (fn [c] (update-in c [:playground :heart] inc))}]))}
      [:span.button-icon.icon-heart]
-     [:span.button-text (get-in @!core [:playground :heart])]]]])
+     [:span.button-text (get-in @!db [:playground :heart])]]]])
 
 
-(defn sign-in-with-github-page [{{:keys [!core !query]} :state
+(defn sign-in-with-github-page [{{:keys [!db !query]} :state
                                  {:keys [post! change-location!]} :side-effector
                                  :as Φ}]
   (log/debug "mount/render sign-in-with-github-page")
 
   (let [{:keys [code error] attempt-id :state} @!query
-        !post-status (r/cursor !core [:comms :post "/sign-in/github" :status])]
+        !post-status (r/cursor !db [:comms :post "/sign-in/github" :status])]
 
     (cond
       (and code attempt-id) (do (post! ["/sign-in/github" {:code code, :attempt-id attempt-id}])

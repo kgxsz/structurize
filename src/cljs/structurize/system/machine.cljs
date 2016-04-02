@@ -19,18 +19,18 @@
   "This function operates on state with the mutating functions provided in the events themselves.
 
    id - the id of the event
-   cursor - if included, will operate on the cursor into the state, if not, will operate on the core
-   Δ - a function that takes the core or the cursor and produces the desired change in state."
+   cursor - if included, will operate on the cursor into the state, if not, will operate on the db
+   Δ - a function that takes the db or the cursor and produces the desired change in state."
 
   [event state]
 
   (let [[id {:keys [cursor Δ hidden-event?]}] event
-        {:keys [!core !processed-events]} state]
+        {:keys [!db !processed-events]} state]
 
     (log/debug "processing event:" id)
-    (if-let [cursor-or-core (and Δ (or cursor !core))]
+    (if-let [cursor-or-db (and Δ (or cursor !db))]
       (do
-        (swap! cursor-or-core Δ)
+        (swap! cursor-or-db Δ)
         (when-not hidden-event?
           (swap! !processed-events decorate-event event)))
       (log/error "failed to process event:" id))))

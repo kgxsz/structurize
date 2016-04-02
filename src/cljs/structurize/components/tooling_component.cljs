@@ -33,9 +33,9 @@
 
 (defn node [φ path _]
   (log/debug "mount node:" path)
-  (let [{:keys [!core !state-browser-props]} (:state φ)
+  (let [{:keys [!db !state-browser-props]} (:state φ)
         {:keys [emit-event!]} (:side-effector φ)
-        !node (r/cursor !core path)
+        !node (r/cursor !db path)
         !node-props (r/cursor !state-browser-props [path])
         toggle-collapse #(emit-event! [:state-browser/toggle-collapsed {:cursor !node-props
                                                                         :hidden-event? true
@@ -124,8 +124,8 @@
 
 (defn node-group [φ path _ _]
   (log/debug "mount node-group:" path)
-  (let [{:keys [!core]} (:state φ)
-        !nodes (r/cursor !core path)]
+  (let [{:keys [!db]} (:state φ)
+        !nodes (r/cursor !db path)]
 
     (fn [_ _ props opts]
       (log/debug "render node-group:" path)
@@ -230,8 +230,8 @@
 (defn tooling [φ]
   (log/debug "mount tooling")
   (let [{:keys [emit-event!]} (:side-effector φ)
-        {:keys [!core]} (:state φ)
-        !tooling-active? (r/cursor !core [:tooling :tooling-active?])
+        {:keys [!db]} (:state φ)
+        !tooling-active? (r/cursor !db [:tooling :tooling-active?])
         toggle-tooling-active #(emit-event! [:tooling/toggle-tooling-active {:cursor !tooling-active?
                                                                              :hidden-event? true
                                                                              :ignore-throttle? true
