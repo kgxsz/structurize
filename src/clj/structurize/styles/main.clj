@@ -54,7 +54,7 @@
   [:html {:font-size (u/px 10)}
 
    [:body {:font-family "sans-serif"
-           :font-size "1.5rem"
+           :font-size "1.4rem"
            :line-height 1.5
            :color (:white-b colours)
            :background-color (:white-b colours)
@@ -64,64 +64,51 @@
            :background-attachements :fixed
            :background-size :cover}]
 
+   [:h1 {:font-size "3rem"}]
+   [:h5 {:font-size "1.6rem"}]
+
    [:.clickable:hover {:cursor :pointer}]
    [:.hidden {:display :none}]])
 
 
+(def pages
+  [:#root
+
+   [:.page {:display :flex
+            :flex-direction :column
+            :align-items :center
+            :width (u/vw 100)
+            :height (u/vh 100)}]
+
+   [:.init-page {:justify-content :center}
+    [:.icon-coffee-cup {:height "60px"
+                        :font-size "6rem"}]
+    [:.loading-caption {:margin-top "10px"}]]])
+
+
 (def components
-  [:#root {:width (u/vw 100)
-           :height (u/vh 100)
-           :position :relative
-           :min-width (u/px 320)
-           :min-height (u/px 320)
-           :font-size "1.2rem"
-           :line-height "1.7rem"
-           :overflow :auto
-           :white-space :nowrap}
+  [:#root
 
-   [:.init-page {:width (u/vw 100)
-                 :height (u/vh 100)
-                 :display :flex
-                 :flex-direction :column
-                 :justify-content :center
-                 :font-size "1.5rem"
-                 :align-items :center}
-    [:.icon {:font-size "6rem"
-             :margin-bottom "10px"}]]
+   [:.hero {:margin-top "20vh"
+            :text-align :center}
+    [:.hero-visual {:display :flex
+                    :justify-content :center
+                    :align-items :center
+                    :min-height "120px"}
+     [:.hero-visual-divider {:font-size "4rem"
+                             :margin "0 15px"}]
+     [:.icon {:font-size "10rem"}]]
+    [:.hero-caption {:font-family "'Raleway', Arial"
+                     :margin "5px 0"}]]
 
+   [:.options-section {:margin-top "30px"}
+    [:.button {:margin-bottom "10px"}]]
 
-   [:.home-page {:display :flex
-                 :flex-direction :column}
-    [:.me-context {:display :flex
-                   :flex-direction :column
-                   :justify-content :center
-                   :align-items :center
-                   :margin "140px 0 20px 0"}
-
-     [:.icon-mustache {:font-size "10rem"
-                       :color (:white-b colours)}]
-     [:.avatar {:width "100px"
-                :height "100px"
-                :background-color (c/rgba [0 10 20 0.2])
-                :border "3px solid"
-                :border-radius "100px"}]
-     [:.hero {:font-family "'Raleway', Arial"
-              :color (:white-b colours)
-              :font-size "4rem"
-              :line-height 1
-              :margin-top "20px"}]
-     [:.sign-in-with-github {:margin-top "30px"}]
-     [:.sign-out {:margin-top "20px"}]]
-
-    [:.playground {:display :flex
-                   :flex-direction :row
-                   :justify-content :center
-                   :align-items :center}
-     [:.button {:margin "0 10px"}
-      [:.button-icon {:margin-bottom "5px"}]
-      [:.button-text {:font-size "1.7rem"
-                      :font-weight :bold}]]]]
-
+   [:.large-avatar {:width "100px"
+                    :height "100px"
+                    :background-color (c/rgba [0 10 20 0.2])
+                    :border "3px solid"
+                    :border-radius "100px"}]
 
    [:.button {:display :flex
               :justify-content :center
@@ -306,4 +293,5 @@
 (def main
   [meyer-reset
    general
+   pages
    components])

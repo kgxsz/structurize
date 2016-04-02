@@ -8,6 +8,10 @@
   (:require-macros [cljs.core.async.macros :refer [go]]))
 
 
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; components
+
+
 (defn sign-in-with-github [{{:keys [general]} :config-opts
                             {:keys [!db]} :state
                             {:keys [send! change-location!]} :side-effector}]
@@ -27,63 +31,72 @@
                                    :scope scope
                                    :redirect_uri redirect-uri}})))
 
-    [:div.sign-in-with-github
-     [:div.button.clickable {:on-click (fn [e] (send! [:sign-in/init-sign-in-with-github {}]) (.stopPropagation e))}
-      [:span.button-icon.icon-github]
-      [:span.button-text "sign in with GitHub"]]]))
+    [:div.button.clickable {:on-click (u/without-propagation (fn [e] (send! [:sign-in/init-sign-in-with-github {}]) (.stopPropagation e)))}
+     [:span.button-icon.icon-github]
+     [:span.button-text "sign in with GitHub"]]))
 
 
 (defn sign-out [{{:keys [!db]} :state
                  {:keys [post!]} :side-effector}]
 
-  (log/debug "mount/render sign-out-with-github")
+  (log/debug "mount/render sign-out")
 
   (let [!post-status (r/cursor !db [:comms :post "/sign-out" :status])]
 
-    [:div.sign-out
-     [:div.button.clickable {:on-click (fn [e] (post! ["/sign-out" {}]) (.stopPropagation e))}
-      [:span.button-icon.icon-exit]
-      [:span.button-text "sign out"]]]))
+    [:div.button.clickable {:on-click (u/without-propagation (fn [e] (post! ["/sign-out" {}]) (.stopPropagation e)))}
+     [:span.button-icon.icon-exit]
+     [:span.button-text "sign out"]]))
 
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; top level pages
 
 
-(defn home-page [{{:keys [!db]} :state
-                  {:keys [change-location! emit-event!]} :side-effector
-                  :as Φ}]
-  (log/debug "mount/render home-page")
+(defn home-page [{:keys [config-opts state side-effector] :as Φ}]
+  (log/debug "mount home-page")
+  (let [{:keys [!db]} state
+        {:keys [emit-event!]} side-effector
+        !me (r/cursor !db [:comms :message :users/me :reply])
+        !star (r/cursor !db [:playground :star])
+        !heart (r/cursor !db [:playground :heart])]
 
-  [:div.home-page
+    (fn []
+      (log/debug "render home-page")
+      (let [me @!me
+            star @!star
+            heart @!heart]
+        [:div.page.home-page
 
-   (if-let [me (get-in @!db [:comms :message :users/me :reply])]
+         (if me
+           [:div.hero
+            [:div.hero-visual
+             [:img.large-avatar {:src (:avatar-url me)}]]
+            [:h1.hero-caption "Hello @" (:login me)]]
 
-     [:div.me-context
-      [:img.avatar {:src (:avatar-url me)}]
-      [:div.hero "Hello @" (:login me)]
-      [sign-out Φ]]
+           [:div.hero
+           [:div.hero-visual
+            [:span.icon.icon-mustache]]
+           [:h1.hero-caption "Hello there"]])
 
-     [:div.me-context
-      [:span.icon-mustache]
-      [:div.hero "Hello there"]
-      [sign-in-with-github Φ]])
+         [:div.options-section
+          (if me
+            [sign-out Φ]
+            [sign-in-with-github Φ])
+          [:div.button.clickable {:on-click (u/without-propagation #(emit-event! [:playground/inc-star {:cursor !star
+                                                                                                        :Δ inc}]))}
+           [:span.button-icon.icon-star]
+           [:span.button-text star]]
+          [:div.button.clickable {:on-click (u/without-propagation #(emit-event! [:playground/inc-heart {:cursor !heart
+                                                                                                         :Δ inc}]))}
+           [:span.button-icon.icon-heart]
+           [:span.button-text heart]]]]))))
 
-   [:div.playground
-    [:div.button.clickable {:on-click (u/without-propagation #(emit-event! [:playground/inc-star {:Δ (fn [c] (update-in c [:playground :star] inc))}]))}
-     [:span.button-icon.icon-star]
-     [:span.button-text (get-in @!db [:playground :star])]]
-    [:div.button.clickable {:on-click (u/without-propagation #(emit-event! [:playground/inc-heart {:Δ (fn [c] (update-in c [:playground :heart] inc))}]))}
-     [:span.button-icon.icon-heart]
-     [:span.button-text (get-in @!db [:playground :heart])]]]])
 
-
-(defn sign-in-with-github-page [{{:keys [!db !query]} :state
-                                 {:keys [post! change-location!]} :side-effector
-                                 :as Φ}]
+(defn sign-in-with-github-page [{:keys [state side-effector] :as Φ}]
   (log/debug "mount/render sign-in-with-github-page")
-
-  (let [{:keys [code error] attempt-id :state} @!query
+  (let [{:keys [!db !query]} state
+        {:keys [post! change-location!]} side-effector
+        {:keys [code error] attempt-id :state} @!query
         !post-status (r/cursor !db [:comms :post "/sign-in/github" :status])]
 
     (cond
@@ -93,33 +106,48 @@
 
     (if (or error (= :failed @!post-status))
 
-      [:div
-       [:h1 "Sign in with GitHub failed "]
-       [:h3 "Couldn't complete the sign in process with Github."]
+      [:div.page.sign-in-with-github-page
+       [:div.hero
+        [:div.hero-visual
+         [:span.icon.icon-github]
+         [:span.hero-visual-divider "+"]
+         [:span.icon.icon-poop]]
+        [:h1.hero-caption "Sign in with GitHub failed"]]
 
-       [:button {:on-click #(change-location! {:path (b/path-for routes :home)})}
-        "home"]]
+       [:div.options-section
+        [:div.button.clickable {:on-click (u/without-propagation #(change-location! {:path (b/path-for routes :home)}))}
+         [:span.button-icon.icon-home]
+         [:span.button-text "go home"]]]]
 
-      [:div
-       [:h1 "We're signing you in with github!"]
-       [:button {:on-click  #(change-location! {:path (b/path-for routes :home)})}
-        "home"]])))
+      [:div.page.sign-in-with-github-page
+       [:div.hero
+        [:div.hero-visual
+         [:span.icon.icon-github]
+         [:span.hero-visual-divider "+"]
+         [:span.icon.icon-clock]]
+        [:h1.hero-caption "Signing you in with GitHub"]]])))
 
 
-(defn unknown-page [{{:keys [change-location!]} :side-effector
-                     :as Φ}]
+(defn unknown-page [{:keys [side-effector] :as Φ}]
   (log/debug "mount/render unkown-page")
-  [:div
-   [:h1 "What?! Where the hell am I?"]
-   [:button {:on-click #(change-location! {:path (b/path-for routes :home)})}
-    "Go home!"]])
+  (let [{:keys [change-location!]} side-effector]
+    [:div.page.unknown-page
+     [:div.hero
+      [:div.hero-visual
+       [:span.icon.icon-poop]]
+      [:h1.hero-caption "Looks like you're lost"]]
+
+     [:div.options-section
+      [:div.button.clickable {:on-click (u/without-propagation #(change-location! {:path (b/path-for routes :home)}))}
+       [:span.button-icon.icon-home]
+       [:span.button-text "go home"]]]]))
 
 
-(defn init-page []
+(defn init-page [Φ]
   (log/debug "mount/render init-page")
-  [:div.init-page
+  [:div.page.init-page
    [:span.icon.icon-coffee-cup]
-   [:div "loading"]])
+   [:h5.loading-caption "loading"]])
 
 
 (defn root [{:keys [config-opts state side-effector] :as Φ}]
@@ -134,7 +162,7 @@
     (when chsk-status-open?
       (send! [:users/me]))
 
-    [:div
+    [:div.page-container
      (when tooling-enabled? [tooling Φ])
      (case handler
        :home [home-page Φ]

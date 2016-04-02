@@ -32,9 +32,9 @@
                     (include-css "/css/style.css")]
                    [:body
                     [:div#root
-                     [:div.init-page
-                      [:span.icon coffee-cup-svg]
-                      [:div "loading"]]]
+                     [:div.page.init-page
+                      coffee-cup-svg
+                      [:h5.loading-caption "loading"]]]
                     (include-js "/js/structurize.js")
                     [:script {:type "text/javascript"} "structurize.runner.start();"]])]
     (-> root-page response (content-type "text/html"))))
