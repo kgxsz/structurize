@@ -7,10 +7,6 @@
 (defonce general-config-opts
   {:host (:host config)})
 
-
-(defonce bus-config-opts
-  {})
-
 (defonce browser-config-opts
   {})
 
@@ -45,7 +41,6 @@
     (log/info "initialising config-opts")
     (assoc component
            :general general-config-opts
-           :bus bus-config-opts
            :browser browser-config-opts
            :comms comms-config-opts
            :side-effector side-effector-config-opts
