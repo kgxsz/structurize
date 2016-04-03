@@ -45,7 +45,7 @@
 
 (defn make-emit-event
   "Returns a function that emits events onto the event channel."
-  [<event]
+  [config-opts <event]
   (fn [[id {:keys [hidden-event?] :as props}]]
     (let [event [id (assoc props :emitted-at (t/now))]
           log? (or (not hidden-event?) (get-in config-opts [:general :tooling :log?]))]
@@ -54,10 +54,13 @@
 
 
 (defn make-admit-throttled-events
+
   "Returns a function that puts onto the admit throttled events channel.
    If n is defined, then up to n throttled events will be admitted, if n
    is not defined, then all throttled events will be admitted."
+
   [<admit-throttled-events]
+
   (fn [n]
     (go (a/>! <admit-throttled-events (or n :all)))))
 
@@ -102,7 +105,7 @@
       (listen-for-admit-throttled-events config-opts <admit-throttled-events state)
 
       (assoc component
-             :emit-event! (make-emit-event <event)
+             :emit-event! (make-emit-event config-opts <event)
              :admit-throttled-events! (make-admit-throttled-events <admit-throttled-events))))
 
   (stop [component] component))
