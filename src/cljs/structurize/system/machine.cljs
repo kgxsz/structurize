@@ -28,7 +28,7 @@
   (let [[id {:keys [cursor Δ hidden-event?]}] event
         {:keys [!db !processed-events]} state]
 
-    (log/debug "processing event:" id)
+    (when-not hidden-event? (log/debug "processing event:" id))
     (if-let [cursor-or-db (and Δ (or cursor !db))]
       (do
         (swap! cursor-or-db Δ)
@@ -45,8 +45,8 @@
 (defn make-emit-event
   "Returns a function that emits events onto the event channel."
   [<event]
-  (fn [[id props]]
-    (log/debug "emitting event:" id)
+  (fn [[id {:keys [hidden-event?] :as props}]]
+    (when-not hidden-event? (log/debug "emitting event:" id))
     (let [event [id (assoc props :emitted-at (t/now))]]
       (go (a/>! <event event)))))
 

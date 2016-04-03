@@ -27,7 +27,8 @@
 
 
 (defonce renderer-config-opts
-  {:tooling-enabled? true})
+  {:tooling {:log? false
+             :enabled? true}})
 
 
 

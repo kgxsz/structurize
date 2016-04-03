@@ -182,7 +182,7 @@
     (fn []
       (let [chsk-status-open? (= :open @!chsk-status)
             initialising? (nil? @!message-reply)
-            tooling-enabled? (get-in config-opts [:renderer :tooling-enabled?])]
+            tooling-enabled? (get-in config-opts [:renderer :tooling :enabled?])]
 
         (log/debug "render root")
 
