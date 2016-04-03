@@ -103,8 +103,8 @@
     (log/debug "mount/render sign-in-with-github-page")
 
     (cond
-      (and code attempt-id) (do (post! ["/sign-in/github" {:code code, :attempt-id attempt-id}])
-                                (change-location! {:query {} :replace? true}))
+      (and code attempt-id) (do (change-location! {:query {} :replace? true})
+                                (post! ["/sign-in/github" {:code code, :attempt-id attempt-id}]))
       (= :response-received @!post-status) (change-location! {:path (b/path-for routes :home)}))
 
     (if (or error (= :failed @!post-status))

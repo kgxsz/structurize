@@ -14,7 +14,7 @@
                    :message {}
                    :post {}}
            :tooling {:tooling-active? true
-                     :throttle-events? true
+                     :throttle-events? false
                      :throttled-events '()
                      :processed-events '()
                      :state-browser-props {[:tooling :processed-events] #{:collapsed}

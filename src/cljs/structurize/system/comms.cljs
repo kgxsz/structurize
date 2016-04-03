@@ -73,7 +73,10 @@
 (defn make-post
 
   "Returns a function that makes an ajax post to the server. An event is emitted
-   when the request is made, and another when the response is received.
+   when the request is made, and another when the response is received, one subtelty
+   worth mentioning is that posting is only used to perform session mutating actions,
+   as such, we must remove the general/init message to trigger a re-fetch and then
+   we need to reconnect the chsk upon the successful receipt of a post response.
 
    The returned function expects:
 
@@ -98,7 +101,9 @@
            (log/debug "received a post response from server:" path)
            (emit-event! [:comms/post-response-received {:Δ (fn [c] (-> c
                                                                 (assoc-in [:comms :post path :status] :response-received)
-                                                                (assoc-in [:comms :post path :response] (:?content response))))}])
+                                                                (assoc-in [:comms :post path :response] (:?content response))
+                                                                (assoc-in [:comms :chsk-status] :closed)
+                                                                (assoc-in [:comms :message :general/init] nil)))}])
            ;; we reconnect the websocket connection here to pick up any changes
            ;; in the session that may have come about with the post request
            (sente/chsk-reconnect! chsk))
