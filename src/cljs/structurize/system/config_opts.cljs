@@ -5,7 +5,8 @@
 
 
 (defonce general-config-opts
-  {:host (:host config)})
+  {:host (:host config)
+   :tooling {:log? false}})
 
 (defonce browser-config-opts
   {})
@@ -27,8 +28,8 @@
 
 
 (defonce renderer-config-opts
-  {:tooling {:log? false
-             :enabled? true}})
+  {:tooling {:enabled? true
+             :show-in-state-browser? false}})
 
 
 

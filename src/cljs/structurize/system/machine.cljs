@@ -26,9 +26,10 @@
   [config-opts event state]
 
   (let [[id {:keys [cursor Δ hidden-event?]}] event
-        {:keys [!db !processed-events]} state]
+        {:keys [!db !processed-events]} state
+        log? (or (not hidden-event?) (get-in config-opts [:general :tooling :log?]))]
 
-    (when-not hidden-event? (log/debug "processing event:" id))
+    (when log? (log/debug "processing event:" id))
     (if-let [cursor-or-db (and Δ (or cursor !db))]
       (do
         (swap! cursor-or-db Δ)
@@ -46,8 +47,9 @@
   "Returns a function that emits events onto the event channel."
   [<event]
   (fn [[id {:keys [hidden-event?] :as props}]]
-    (when-not hidden-event? (log/debug "emitting event:" id))
-    (let [event [id (assoc props :emitted-at (t/now))]]
+    (let [event [id (assoc props :emitted-at (t/now))]
+          log? (or (not hidden-event?) (get-in config-opts [:general :tooling :log?]))]
+      (when log? (log/debug "emitting event:" id))
       (go (a/>! <event event)))))
 
 

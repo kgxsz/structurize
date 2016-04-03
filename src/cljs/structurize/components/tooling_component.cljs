@@ -34,7 +34,7 @@
 (defn node [{:keys [config-opts state side-effector] :as φ} path _]
   (let [{:keys [!db !state-browser-props]} state
         {:keys [emit-event!]} side-effector
-        log? (get-in config-opts [:renderer :tooling :log?])
+        log? (get-in config-opts [:general :tooling :log?])
         !node (r/cursor !db path)
         !node-props (r/cursor !state-browser-props [path])
         toggle-collapse #(emit-event! [:state-browser/toggle-collapsed {:cursor !node-props
@@ -127,7 +127,7 @@
 
 (defn node-group [{:keys [config-opts state] :as φ} path _ _]
   (let [{:keys [!db]} state
-        log? (get-in config-opts [:renderer :tooling :log?])
+        log? (get-in config-opts [:general :tooling :log?])
         !nodes (r/cursor !db path)]
 
     (when log? (log/debug "mount node-group:" path))
@@ -156,7 +156,7 @@
 (defn event-browser [{:keys [config-opts state side-effector] :as φ}]
   (let [{:keys [!throttle-events? !throttled-events !processed-events]} state
         {:keys [emit-event! admit-throttled-events!]} side-effector
-        log? (get-in config-opts [:renderer :tooling :log?])
+        log? (get-in config-opts [:general :tooling :log?])
         toggle-throttle-events #(emit-event! [:tooling/toggle-throttle-events {:hidden-event? true
                                                                               :ignore-throttle? true
                                                                               :Δ (fn [c] (update-in c [:tooling :throttle-events?] not))}])]
@@ -218,7 +218,7 @@
 (defn state-browser [{:keys [config-opts state side-effector] :as φ}]
   (let [{:keys [emit-event!]} side-effector
         {:keys [!state-browser-props]} state
-        log? (get-in config-opts [:renderer :tooling :log?])
+        log? (get-in config-opts [:general :tooling :log?])
         cursor-paths (for [c (vals state) :when (instance? rr/RCursor c)] (.-path c))]
 
     (when log? (log/debug "mount state-browser"))
@@ -240,7 +240,7 @@
 (defn tooling [{:keys [config-opts state side-effector] :as φ}]
   (let [{:keys [emit-event!]} side-effector
         {:keys [!db]} state
-        log? (get-in config-opts [:renderer :tooling :log?])
+        log? (get-in config-opts [:general :tooling :log?])
         !tooling-active? (r/cursor !db [:tooling :tooling-active?])
         toggle-tooling-active #(emit-event! [:tooling/toggle-tooling-active {:cursor !tooling-active?
                                                                              :hidden-event? true
