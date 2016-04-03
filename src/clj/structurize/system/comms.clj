@@ -25,10 +25,10 @@
     (?reply-fn [id {:attempt-id attempt-id :client-id client-id :scope scope}])))
 
 
-(defmethod handler :users/me
+(defmethod handler :general/init
   [{:keys [config-opts db]} {:keys [uid ?reply-fn] [id ?data] :event}]
   (let [user (some-> (get-in @db [:users uid]) (select-keys [:name :email :login :avatar-url]))]
-    (?reply-fn [id user])))
+    (?reply-fn [id {:me user}])))
 
 
 (defmethod handler :chsk/ws-ping

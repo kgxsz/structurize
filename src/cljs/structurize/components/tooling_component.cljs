@@ -32,7 +32,7 @@
 
 
 (defn node [φ path _]
-  (log/debug "mount node:" path)
+  #_(log/debug "mount node:" path)
   (let [{:keys [!db !state-browser-props]} (:state φ)
         {:keys [emit-event!]} (:side-effector φ)
         !node (r/cursor !db path)
@@ -52,7 +52,7 @@
                                                                                   (-> (reductions conj [] path) rest drop-last))))}])]
 
     (fn [_ _ opts]
-      (log/debug "render node:" path)
+      #_(log/debug "render node:" path)
       (let [{:keys [tail-braces first? last?]} opts
             node @!node
             node-props @!node-props
@@ -123,12 +123,12 @@
 
 
 (defn node-group [φ path _ _]
-  (log/debug "mount node-group:" path)
+  #_(log/debug "mount node-group:" path)
   (let [{:keys [!db]} (:state φ)
         !nodes (r/cursor !db path)]
 
     (fn [_ _ props opts]
-      (log/debug "render node-group:" path)
+      #_(log/debug "render node-group:" path)
       (let [{:keys [tail-braces] :or {tail-braces "}"}} opts
             nodes @!nodes
             num-nodes (count nodes)]
@@ -148,7 +148,7 @@
 
 
 (defn event-browser [φ]
-  (log/debug "mount event-browser")
+  #_(log/debug "mount event-browser")
   (let [{:keys [!throttle-events? !throttled-events !processed-events]} (:state φ)
         {:keys [emit-event! admit-throttled-events!]} (:side-effector φ)
         toggle-throttle-events #(emit-event! [:tooling/toggle-throttle-events {:hidden-event? true
@@ -156,7 +156,7 @@
                                                                               :Δ (fn [c] (update-in c [:tooling :throttle-events?] not))}])]
 
     (fn []
-      (log/debug "render event-browser")
+      #_(log/debug "render event-browser")
       (let [throttle-events? @!throttle-events?
             throttled-events @!throttled-events
             no-throttled-events? (empty? throttled-events)]
@@ -208,7 +208,7 @@
 
 
 (defn state-browser [φ]
-  (log/debug "mount state-browser")
+  #_(log/debug "mount state-browser")
   (let [{:keys [emit-event!]} (:side-effector φ)
         {:keys [!state-browser-props]} (:state φ)
         cursor-paths (for [c (vals (:state φ)) :when (instance? rr/RCursor c)] (.-path c))]
@@ -228,7 +228,7 @@
 
 
 (defn tooling [φ]
-  (log/debug "mount tooling")
+  #_(log/debug "mount tooling")
   (let [{:keys [emit-event!]} (:side-effector φ)
         {:keys [!db]} (:state φ)
         !tooling-active? (r/cursor !db [:tooling :tooling-active?])
@@ -238,7 +238,7 @@
                                                                              :Δ not}])]
 
     (fn []
-      (log/debug "render tooling")
+      #_(log/debug "render tooling")
       (let [tooling-active? @!tooling-active?]
         [:div.tooling {:class (when-not tooling-active? :collapsed)}
 

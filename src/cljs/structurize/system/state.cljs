@@ -8,13 +8,13 @@
   (r/atom {:playground {:heart 0
                         :star 3}
            :location {:path nil
-                      :handler :init
+                      :handler :unknown-page
                       :query nil}
            :comms {:chsk-status :init
                    :message {}
                    :post {}}
            :tooling {:tooling-active? true
-                     :throttle-events? false
+                     :throttle-events? true
                      :throttled-events '()
                      :processed-events '()
                      :state-browser-props {[:tooling :processed-events] #{:collapsed}

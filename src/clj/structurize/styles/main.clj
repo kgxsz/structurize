@@ -73,21 +73,24 @@
 
 (def pages
   [:#root
-
    [:.page {:display :flex
             :flex-direction :column
             :align-items :center
             :width (u/vw 100)
-            :height (u/vh 100)}]
-
-   [:.init-page {:justify-content :center}
-    [:.icon-coffee-cup {:height "60px"
-                        :font-size "6rem"}]
-    [:.loading-caption {:margin-top "10px"}]]])
+            :height (u/vh 100)}]])
 
 
 (def components
   [:#root
+   [:.loading {:display :flex
+               :flex-direction :column
+               :justify-content :center
+               :align-items :center
+               :width (u/vw 100)
+               :height (u/vh 100)}
+    [:.icon-coffee-cup {:height "60px"
+                        :font-size "6rem"}]
+    [:.loading-caption {:margin-top "10px"}]]
 
    [:.hero {:margin-top "20vh"
             :text-align :center}

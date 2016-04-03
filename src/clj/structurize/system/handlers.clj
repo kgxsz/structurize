@@ -32,7 +32,7 @@
                     (include-css "/css/style.css")]
                    [:body
                     [:div#root
-                     [:div.page.init-page
+                     [:div.loading
                       coffee-cup-svg
                       [:h5.loading-caption "loading"]]]
                     (include-js "/js/structurize.js")
