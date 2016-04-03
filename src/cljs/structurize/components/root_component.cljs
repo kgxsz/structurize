@@ -13,10 +13,11 @@
 
 
 (defn sign-in-with-github [{:keys [config-opts state side-effector] :as Φ}]
-  (log/debug "mount/render sign-in-with-github")
   (let [{:keys [!db]} state
         {:keys [send! change-location!]} side-effector
         host (get-in config-opts [:general :host])]
+
+    (log/debug "mount/render sign-in-with-github")
 
     (let [!message-status (r/cursor !db [:comms :message :sign-in/init-sign-in-with-github :status])
           !message-reply (r/cursor !db [:comms :message :sign-in/init-sign-in-with-github :reply])]
@@ -36,12 +37,12 @@
        [:span.button-text "sign in with GitHub"]])))
 
 
-(defn sign-out [{{:keys [!db]} :state
-                 {:keys [post!]} :side-effector}]
+(defn sign-out [{:keys [state side-effector] :as Φ}]
+  (let [{:keys [!db]} state
+        {:keys [post!]} side-effector
+        !post-status (r/cursor !db [:comms :post "/sign-out" :status])]
 
-  (log/debug "mount/render sign-out")
-
-  (let [!post-status (r/cursor !db [:comms :post "/sign-out" :status])]
+    (log/debug "mount/render sign-out")
 
     [:div.button.clickable {:on-click (u/without-propagation #(post! ["/sign-out" {}]))}
      [:span.button-icon.icon-exit]
@@ -53,18 +54,21 @@
 
 
 (defn home-page [{:keys [config-opts state side-effector] :as Φ}]
-  (log/debug "mount home-page")
   (let [{:keys [!db]} state
         {:keys [emit-event!]} side-effector
         !me (r/cursor !db [:comms :message :general/init :reply :me])
         !star (r/cursor !db [:playground :star])
         !heart (r/cursor !db [:playground :heart])]
 
+    (log/debug "mount home-page")
+
     (fn []
-      (log/debug "render home-page")
       (let [me @!me
             star @!star
             heart @!heart]
+
+        (log/debug "render home-page")
+
         [:div.page
 
          (if me
@@ -91,11 +95,12 @@
 
 
 (defn sign-in-with-github-page [{:keys [state side-effector] :as Φ}]
-  (log/debug "mount/render sign-in-with-github-page")
   (let [{:keys [!db !query]} state
         {:keys [post! change-location!]} side-effector
         {:keys [code error] attempt-id :state} @!query
         !post-status (r/cursor !db [:comms :post "/sign-in/github" :status])]
+
+    (log/debug "mount/render sign-in-with-github-page")
 
     (cond
       (and code attempt-id) (do (post! ["/sign-in/github" {:code code, :attempt-id attempt-id}])
@@ -127,8 +132,10 @@
 
 
 (defn unknown-page [{:keys [side-effector] :as Φ}]
-  (log/debug "mount/render unkown-page")
   (let [{:keys [change-location!]} side-effector]
+
+    (log/debug "mount/render unkown-page")
+
     [:div.page
      [:div.hero
       [:div.hero-visual
