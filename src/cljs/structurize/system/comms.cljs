@@ -13,15 +13,15 @@
 
 
 (defmethod handler :chsk/state
-  [emit-event! {:keys [event id ?data send-fn] :as event-message}]
-  (emit-event! [:comms/chsk-status-update {:Δ (fn [c] (assoc-in c [:comms :chsk-status] (if (:open? ?data) :open :closed)))}]))
+  [emit-mutation! {:keys [event id ?data send-fn] :as event-message}]
+  (emit-mutation! [:comms/chsk-status-update {:Δ (fn [c] (assoc-in c [:comms :chsk-status] (if (:open? ?data) :open :closed)))}]))
 
 
 (defmethod handler :chsk/handshake
   [])
 
 (defmethod handler :default
-  [emit-event! {:keys [event id ?data send-fn] :as event-message}]
+  [emit-mutation! {:keys [event id ?data send-fn] :as event-message}]
   (log/debug "unhandled event-message:" id))
 
 
@@ -30,11 +30,11 @@
 
 (defn make-handler
   "Returns a function that receives a message and handles it appropriately via multimethods"
-  [emit-event!]
+  [emit-mutation!]
 
   (fn [{:keys [event id ?data send-fn] :as event-message}]
     (log/debug "received message from server:" id)
-    (handler emit-event! event-message)))
+    (handler emit-mutation! event-message)))
 
 
 (defn make-send
@@ -47,11 +47,11 @@
    message - the sente message, in the form of a vector, with id
    timeout - in milliseconds"
 
-  [send-fn emit-event!]
+  [send-fn emit-mutation!]
 
   (fn [[id _ :as message] {:keys [timeout]}]
     (log/debug "dispatching message to server:" id)
-    (emit-event! [:comms/message-sent {:Δ (fn [c] (assoc-in c [:comms :message id :status] :sent))}])
+    (emit-mutation! [:comms/message-sent {:Δ (fn [c] (assoc-in c [:comms :message id :status] :sent))}])
 
     (send-fn
       message
@@ -60,12 +60,12 @@
         (if (sente/cb-success? reply)
           (let [[id ?payload] reply]
             (log/debug "received a reply message from server:" id)
-            (emit-event! [:comms/message-reply-received {:Δ (fn [c] (-> c
+            (emit-mutation! [:comms/message-reply-received {:Δ (fn [c] (-> c
                                                                  (assoc-in [:comms :message id :status] :reply-received)
                                                                  (assoc-in [:comms :message id :reply] ?payload)))}]))
           (do
             (log/warn "message failed with:" reply)
-            (emit-event! [:comms/message-failed {:Δ (fn [c] (-> c
+            (emit-mutation! [:comms/message-failed {:Δ (fn [c] (-> c
                                                          (assoc-in [:comms :message id :status] :failed)
                                                          (assoc-in [:comms :message id :reply] reply)))}])))))))
 
@@ -84,11 +84,11 @@
    params - map of params to post
    timeout - in milliseconds"
 
-  [chsk chsk-state emit-event!]
+  [chsk chsk-state emit-mutation!]
 
   (fn [[path params] {:keys [timeout]}]
     (log/debug "dispatching post to server:" path)
-    (emit-event! [:comms/post-sent {:Δ (fn [c] (assoc-in c [:comms :post path :status] :sent))}])
+    (emit-mutation! [:comms/post-sent {:Δ (fn [c] (assoc-in c [:comms :post path :status] :sent))}])
 
     (sente/ajax-lite
      path
@@ -99,7 +99,7 @@
        (if (:success? response)
          (do
            (log/debug "received a post response from server:" path)
-           (emit-event! [:comms/post-response-received {:Δ (fn [c] (-> c
+           (emit-mutation! [:comms/post-response-received {:Δ (fn [c] (-> c
                                                                 (assoc-in [:comms :post path :status] :response-received)
                                                                 (assoc-in [:comms :post path :response] (:?content response))
                                                                 (assoc-in [:comms :chsk-status] :closed)
@@ -109,7 +109,7 @@
            (sente/chsk-reconnect! chsk))
          (do
            (log/warn "post failed with:" response)
-           (emit-event! [:comms/post-failed {:Δ (fn [c] (-> c
+           (emit-mutation! [:comms/post-failed {:Δ (fn [c] (-> c
                                                      (assoc-in [:comms :post path :status] :failed)
                                                      (assoc-in [:comms :post path :response] response)))}])))))))
 
@@ -117,21 +117,21 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; component setup
 
 
-(defrecord Comms [config-opts machine]
+(defrecord Comms [config-opts state]
   component/Lifecycle
 
   (start [component]
     (log/info "initialising comms")
-    (let [emit-event! (:emit-event! machine)
+    (let [emit-mutation! (get-in state [:mutators :emit-mutation!])
           chsk-opts (get-in config-opts [:comms :chsk-opts])
           {:keys [chsk ch-recv send-fn] chsk-state :state} (sente/make-channel-socket! "/chsk" chsk-opts)]
 
       (log/info "begin listening for messages from server")
-      (sente/start-chsk-router! ch-recv (make-handler emit-event!))
+      (sente/start-chsk-router! ch-recv (make-handler emit-mutation!))
 
       (assoc component
-             :send! (make-send send-fn emit-event!)
-             :post! (make-post chsk chsk-state emit-event!))))
+             :send! (make-send send-fn emit-mutation!)
+             :post! (make-post chsk chsk-state emit-mutation!))))
 
   (stop [component] component))
 

@@ -3,7 +3,6 @@
             [structurize.system.config-opts :refer [map->ConfigOpts]]
             [structurize.system.browser :refer [map->Browser]]
             [structurize.system.comms :refer [map->Comms]]
-            [structurize.system.machine :refer [map->Machine]]
             [structurize.system.renderer :refer [map->Renderer]]
             [structurize.system.state :refer [map->State]]
             [com.stuartsierra.component :as component]))
@@ -16,14 +15,12 @@
        :comms (map->Comms {})
        :side-effector (map->SideEffector {})
        :state (map->State {})
-       :machine (map->Machine {})
        :renderer (map->Renderer {}))
       (component/system-using
        {:state [:config-opts]
-        :machine [:config-opts :state]
-        :browser [:config-opts :machine]
-        :comms [:config-opts :machine]
-        :side-effector [:config-opts :browser :comms :machine]
+        :browser [:config-opts :state]
+        :comms [:config-opts :state]
+        :side-effector [:config-opts :browser :comms :state]
         :renderer [:config-opts :state :side-effector]})))
 
 

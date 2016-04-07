@@ -55,7 +55,7 @@
 
 (defn home-page [{:keys [config-opts state side-effector] :as Φ}]
   (let [{:keys [!db]} state
-        {:keys [emit-event!]} side-effector
+        {:keys [emit-mutation!]} side-effector
         !me (r/cursor !db [:comms :message :general/init :reply :me])
         !star (r/cursor !db [:playground :star])
         !heart (r/cursor !db [:playground :heart])]
@@ -86,10 +86,10 @@
           (if me
             [sign-out Φ]
             [sign-in-with-github Φ])
-          [:div.button.clickable {:on-click (u/without-propagation #(emit-event! [:playground/inc-star {:cursor !star :Δ inc}]))}
+          [:div.button.clickable {:on-click (u/without-propagation #(emit-mutation! [:playground/inc-star {:cursor !star :Δ inc}]))}
            [:span.button-icon.icon-star]
            [:span.button-text star]]
-          [:div.button.clickable {:on-click (u/without-propagation #(emit-event! [:playground/inc-heart {:cursor !heart :Δ inc}]))}
+          [:div.button.clickable {:on-click (u/without-propagation #(emit-mutation! [:playground/inc-heart {:cursor !heart :Δ inc}]))}
            [:span.button-icon.icon-heart]
            [:span.button-text heart]]]]))))
 

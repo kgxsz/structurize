@@ -18,18 +18,12 @@
 (defonce side-effector-config-opts
   {})
 
-
 (defonce state-config-opts
-  {})
-
-
-(defonce machine-config-opts
-  {:max-processed-events 30})
-
+  {:max-processed-mutations 30})
 
 (defonce renderer-config-opts
   {:tooling {:enabled? true
-             :show-in-state-browser? false}})
+             :show-in-state-browser? true}})
 
 
 
@@ -47,7 +41,6 @@
            :comms comms-config-opts
            :side-effector side-effector-config-opts
            :state state-config-opts
-           :machine machine-config-opts
            :renderer renderer-config-opts))
 
   (stop [component] component))

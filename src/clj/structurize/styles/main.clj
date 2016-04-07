@@ -227,8 +227,8 @@
         [:&.mutated {:background-color (:red colours)
                      :color (:white-a colours)}]]]]]
 
-    [:.event-browser {:display :flex
-                      :height "90px"}
+    [:.mutation-browser {:display :flex
+                         :height "90px"}
 
 
      [:.throttle-controls {:align-self :center
@@ -256,29 +256,29 @@
        [:&.control-next {:background-color (:light-yellow colours)
                          :color (:dark-yellow  colours)}]]]
 
-     [:.event-container {:margin-top "5px"}
-      [:&.throttled-event ]]
+     [:.mutation-container {:margin-top "5px"}
+      [:&.throttled-mutation ]]
 
-     [:.event-caption {:margin-left "18px"}
-      [:.event-caption-symbol {:font-size "2.3rem"
-                               :margin-right "2px"}]
-      [:.event-caption-subscript {:font-size "1.1rem"}]]
+     [:.mutation-caption {:margin-left "18px"}
+      [:.mutation-caption-symbol {:font-size "1.6rem"
+                                  :margin-right "2px"}]
+      [:.mutation-caption-subscript {:font-size "1.1rem"}]]
 
-     [:.event-shell {:padding "6px"
-                     :margin-left "12px"
-                     :border "dotted 2px"
-                     :border-radius "4px"}]
+     [:.mutation-shell {:padding "6px"
+                        :margin-left "12px"
+                        :border "dotted 2px"
+                        :border-radius "4px"}]
 
-     [:.event {:padding "3px 5px"
-               :border-radius "3px"
-               :height "100%"}
+     [:.mutation {:padding "3px 5px"
+                  :border-radius "3px"
+                  :height "100%"}
 
-      [:&.throttled-event {:background-color (:light-yellow colours)
-                           :color (:dark-yellow colours)}]
-      [:&.no-throttled-event {:background-color :transparent
-                              :color (:white-b colours)}]
-      [:&.processed-event {:background-color (:light-green colours)
-                           :color (:dark-green colours)}]]
+      [:&.throttled-mutation {:background-color (:light-yellow colours)
+                              :color (:dark-yellow colours)}]
+      [:&.no-throttled-mutation {:background-color :transparent
+                                 :color (:white-b colours)}]
+      [:&.processed-mutation {:background-color (:light-green colours)
+                              :color (:dark-green colours)}]]
 
      [:.throttle-divider {:align-self :center
                           :margin-left "12px"
@@ -289,8 +289,8 @@
                           :width "0px"
                           :height "82px"}]
 
-     [:.processed-events {:display :flex
-                          :padding-right "15px"}]]]])
+     [:.processed-mutations {:display :flex
+                             :padding-right "15px"}]]]])
 
 
 (def main

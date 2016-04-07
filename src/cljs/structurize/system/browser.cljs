@@ -19,7 +19,7 @@
    events and emits the location-change event, which will
    cause an update to the location information in the state."
 
-  [history emit-event!]
+  [history emit-mutation!]
 
   (fn [g-event]
     (let [token (.getToken history)
@@ -29,7 +29,7 @@
                           (b/match-route routes path))]
       (log/debug "received navigation from browser:" token)
       (when-not (.-isNavigation g-event) (js/window.scrollTo 0 0))
-      (emit-event! [:navigation/location-change {:Δ (fn [core] (assoc core :location location))}]))))
+      (emit-mutation! [:navigation/location-change {:Δ (fn [core] (assoc core :location location))}]))))
 
 
 (defn make-transformer
@@ -86,15 +86,16 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; component setup
 
 
-(defrecord Browser [config-opts machine]
+(defrecord Browser [config-opts state]
   component/Lifecycle
 
   (start [component]
     (log/info "initialising browser")
-    (let [history (make-history)]
+    (let [emit-mutation! (get-in state [:mutators :emit-mutation!])
+          history (make-history)]
 
       (log/info "begin listening for navigation from the browser")
-      (listen-for-navigation history (make-navigation-handler history (:emit-event! machine)))
+      (listen-for-navigation history (make-navigation-handler history emit-mutation!))
 
       (assoc component
              :change-location! (make-change-location history))))

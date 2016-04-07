@@ -33,17 +33,15 @@
 
 (defn node [{:keys [config-opts state side-effector] :as φ} path _]
   (let [{:keys [!db !state-browser-props]} state
-        {:keys [emit-event!]} side-effector
+        {:keys [emit-mutation!]} side-effector
         log? (get-in config-opts [:general :tooling :log?])
         !node (r/cursor !db path)
         !node-props (r/cursor !state-browser-props [path])
-        toggle-collapse #(emit-event! [:state-browser/toggle-collapsed {:cursor !node-props
-                                                                        :hidden-event? true
-                                                                        :ignore-throttle? true
+        toggle-collapse #(emit-mutation! [:state-browser/toggle-collapsed {:cursor !node-props
+                                                                        :tooling? true
                                                                         :Δ (fn [c] (toggle-prop c :collapsed))}])
-        toggle-focus #(emit-event! [:state-browser/toggle-focused {:cursor !state-browser-props
-                                                                   :hidden-event? true
-                                                                   :ignore-throttle? true
+        toggle-focus #(emit-mutation! [:state-browser/toggle-focused {:cursor !state-browser-props
+                                                                   :tooling? true
                                                                    :Δ (fn [c]
                                                                         (as-> c c
                                                                           (update c path toggle-prop :focused)
@@ -127,6 +125,7 @@
 
 (defn node-group [{:keys [config-opts state] :as φ} path _ _]
   (let [{:keys [!db]} state
+        show-tooling? (get-in config-opts [:renderer :tooling :show-in-state-browser?])
         log? (get-in config-opts [:general :tooling :log?])
         !nodes (r/cursor !db path)]
 
@@ -134,7 +133,8 @@
 
     (fn [_ _ props opts]
       (let [{:keys [tail-braces] :or {tail-braces "}"}} opts
-            nodes @!nodes
+            nodes (cond->> @!nodes
+                    (not show-tooling?) (remove (fn [[k _]] (= :tooling k))))
             num-nodes (count nodes)]
 
         (when log? (log/debug "render node-group:" path))
@@ -153,79 +153,78 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; top-level components
 
 
-(defn event-browser [{:keys [config-opts state side-effector] :as φ}]
-  (let [{:keys [!throttle-events? !throttled-events !processed-events]} state
-        {:keys [emit-event! admit-throttled-events!]} side-effector
+(defn mutation-browser [{:keys [config-opts state side-effector] :as φ}]
+  (let [{:keys [!throttle-mutations? !throttled-mutations !processed-mutations]} state
+        {:keys [emit-mutation! admit-throttled-mutations!]} side-effector
         log? (get-in config-opts [:general :tooling :log?])
-        toggle-throttle-events #(emit-event! [:tooling/toggle-throttle-events {:hidden-event? true
-                                                                              :ignore-throttle? true
-                                                                              :Δ (fn [c] (update-in c [:tooling :throttle-events?] not))}])]
+        toggle-throttle-mutations #(emit-mutation! [:tooling/toggle-throttle-mutations {:cursor !throttle-mutations?
+                                                                               :tooling? true
+                                                                               :Δ not}])]
 
-    (when log? (log/debug "mount event-browser"))
+    (when log? (log/debug "mount mutation-browser"))
 
     (fn []
-      (when log? (log/debug "render event-browser"))
-      (let [throttle-events? @!throttle-events?
-            throttled-events @!throttled-events
-            no-throttled-events? (empty? throttled-events)]
-        [:div.browser.event-browser
+      (when log? (log/debug "render mutation-browser"))
+      (let [throttle-mutations? @!throttle-mutations?
+            throttled-mutations @!throttled-mutations
+            no-throttled-mutations? (empty? throttled-mutations)]
+        [:div.browser.mutation-browser
 
          [:div.throttle-controls
-          [:div.throttle-control.control-play {:class (if throttle-events? :clickable :active)
-                                               :on-click (when throttle-events?
-                                                           (u/without-propagation admit-throttled-events! toggle-throttle-events))}
+          [:div.throttle-control.control-play {:class (if throttle-mutations? :clickable :active)
+                                               :on-click (when throttle-mutations?
+                                                           (u/without-propagation admit-throttled-mutations! toggle-throttle-mutations))}
            [:span.icon.icon-control-play]]
 
-          [:div.throttle-control.control-pause {:class (if @!throttle-events? :active :clickable)
-                                                :on-click (when-not throttle-events? (u/without-propagation toggle-throttle-events))}
+          [:div.throttle-control.control-pause {:class (if @!throttle-mutations? :active :clickable)
+                                                :on-click (when-not throttle-mutations? (u/without-propagation toggle-throttle-mutations))}
 
            [:span.icon.icon-control-pause]]
-          [:div.throttle-control.control-next.clickable {:class (when @!throttle-events? :active)
-                                                         :on-click (if throttle-events?
-                                                                     (u/without-propagation #(admit-throttled-events! 1))
-                                                                     (u/without-propagation toggle-throttle-events))}
+          [:div.throttle-control.control-next.clickable {:class (when @!throttle-mutations? :active)
+                                                         :on-click (if throttle-mutations?
+                                                                     (u/without-propagation #(admit-throttled-mutations! 1))
+                                                                     (u/without-propagation toggle-throttle-mutations))}
            [:span.icon.icon-control-next]]]
 
-         (when throttle-events?
+         (when throttle-mutations?
            [:div.throttle-divider])
 
-         (when throttle-events?
-           [:div.event-container.throttled-event
-            [:div.event-caption
-             [:span.event-caption-symbol "ε"]
-             [:span.event-caption-subscript "next"]]
-            [:div.event-shell
-             (if no-throttled-events?
-               [:div.event.no-throttled-event
-                "no throttled events"]
-               [:div.event.throttled-event
-                (pr-str (first (last throttled-events)))])]])
+         (when throttle-mutations?
+           [:div.mutation-container.throttled-mutation
+            [:div.mutation-caption
+             [:span.mutation-caption-symbol "Δ"]
+             [:span.mutation-caption-subscript "next"]]
+            [:div.mutation-shell
+             (if no-throttled-mutations?
+               [:div.mutation.no-throttled-mutation
+                "no throttled mutations"]
+               [:div.mutation.throttled-mutation
+                (pr-str (first (last throttled-mutations)))])]])
 
          [:div.throttle-divider]
 
-         [:div.processed-events
+         [:div.processed-mutations
           (doall
-           (for [[id {:keys [emitted-at processed-at n] :as props}] @!processed-events]
-             [:div.event-container {:key n}
-              [:div.event-caption
-               [:span.event-caption-symbol "ε"]
-               [:span.event-caption-subscript "n=" n]]
-              [:div.event-shell {:key n}
-               [:div.event.processed-event
+           (for [[id {:keys [emitted-at processed-at n] :as props}] @!processed-mutations]
+             [:div.mutation-container {:key n}
+              [:div.mutation-caption
+               [:span.mutation-caption-symbol "Δ"]
+               [:span.mutation-caption-subscript n]]
+              [:div.mutation-shell {:key n}
+               [:div.mutation.processed-mutation
                 (pr-str id)]]]))]]))))
 
 
 (defn state-browser [{:keys [config-opts state side-effector] :as φ}]
-  (let [{:keys [emit-event!]} side-effector
+  (let [{:keys [emit-mutation!]} side-effector
         {:keys [!state-browser-props]} state
         log? (get-in config-opts [:general :tooling :log?])
         cursor-paths (for [c (vals state) :when (instance? rr/RCursor c)] (.-path c))]
 
     (when log? (log/debug "mount state-browser"))
 
-    (emit-event! [:state-browser/init-cursored {:cursor !state-browser-props
-                                                :hidden-event? true
-                                                :ignore-throttle? true
+    (emit-mutation! [:state-browser/init-cursored {:cursor !state-browser-props
+                                                :tooling? true
                                                 :Δ (fn [state-browser-props]
                                                      (reduce (fn [a v] (update a v add-prop :cursored))
                                                              state-browser-props
@@ -238,13 +237,12 @@
 
 
 (defn tooling [{:keys [config-opts state side-effector] :as φ}]
-  (let [{:keys [emit-event!]} side-effector
+  (let [{:keys [emit-mutation!]} side-effector
         {:keys [!db]} state
         log? (get-in config-opts [:general :tooling :log?])
         !tooling-active? (r/cursor !db [:tooling :tooling-active?])
-        toggle-tooling-active #(emit-event! [:tooling/toggle-tooling-active {:cursor !tooling-active?
-                                                                             :hidden-event? true
-                                                                             :ignore-throttle? true
+        toggle-tooling-active #(emit-mutation! [:tooling/toggle-tooling-active {:cursor !tooling-active?
+                                                                             :tooling? true
                                                                              :Δ not}])]
     (when log? (log/debug "mount tooling"))
     (fn []
@@ -257,5 +255,5 @@
 
          (when tooling-active?
            [:div.browsers
-            [event-browser φ]
+            [mutation-browser φ]
             [state-browser φ]])]))))
