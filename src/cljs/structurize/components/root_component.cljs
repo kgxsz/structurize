@@ -15,7 +15,7 @@
 (defn sign-in-with-github [{:keys [config-opts state side-effector] :as Φ}]
   (let [{:keys [!db]} state
         {:keys [send! change-location!]} side-effector
-        host (get-in config-opts [:general :host])]
+        host (get-in config-opts [:host])]
 
     (log/debug "mount/render sign-in-with-github")
 
@@ -189,7 +189,7 @@
     (fn []
       (let [chsk-status-open? (= :open @!chsk-status)
             initialising? (nil? @!message-reply)
-            tooling-enabled? (get-in config-opts [:renderer :tooling :enabled?])]
+            tooling-enabled? (get-in config-opts [:tooling :enabled?])]
 
         (log/debug "render root")
 

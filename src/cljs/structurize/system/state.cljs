@@ -10,7 +10,7 @@
 
 (defn make-update-processed-mutations [config-opts mutation]
   (fn [mutations]
-    (let [max-processed-mutations (get-in config-opts [:state :max-processed-mutations])
+    (let [max-processed-mutations (get-in config-opts [:tooling :max-processed-mutations])
           n (or (-> mutations first second :n) 0)
           [id props] mutation
           props (assoc (select-keys props [:emitted-at])
@@ -52,7 +52,7 @@
   [config-opts <mutation]
   (fn [[id {:keys [tooling?] :as props}]]
     (let [mutation [id (assoc props :emitted-at (t/now))]
-          log? (or (not tooling?) (get-in config-opts [:general :tooling :log?]))]
+          log? (or (not tooling?) (get-in config-opts [:tooling :log?]))]
       (when log? (log/debug "emitting mutation:" id))
       (go (a/>! <mutation mutation)))))
 

@@ -34,7 +34,7 @@
 (defn node [{:keys [config-opts state side-effector] :as φ} path _]
   (let [{:keys [!db !state-browser-props]} state
         {:keys [emit-mutation!]} side-effector
-        log? (get-in config-opts [:general :tooling :log?])
+        log? (get-in config-opts [:tooling :log?])
         !node (r/cursor !db path)
         !node-props (r/cursor !state-browser-props [path])
         toggle-collapse #(emit-mutation! [:state-browser/toggle-collapsed {:cursor !node-props
@@ -125,8 +125,8 @@
 
 (defn node-group [{:keys [config-opts state] :as φ} path _ _]
   (let [{:keys [!db]} state
-        show-tooling? (get-in config-opts [:renderer :tooling :show-in-state-browser?])
-        log? (get-in config-opts [:general :tooling :log?])
+        show-tooling? (get-in config-opts [:tooling :show-in-state-browser?])
+        log? (get-in config-opts [:tooling :log?])
         !nodes (r/cursor !db path)]
 
     (when log? (log/debug "mount node-group:" path))
@@ -156,7 +156,7 @@
 (defn mutation-browser [{:keys [config-opts state side-effector] :as φ}]
   (let [{:keys [!throttle-mutations? !throttled-mutations !processed-mutations]} state
         {:keys [emit-mutation! admit-throttled-mutations!]} side-effector
-        log? (get-in config-opts [:general :tooling :log?])
+        log? (get-in config-opts [:tooling :log?])
         toggle-throttle-mutations #(emit-mutation! [:tooling/toggle-throttle-mutations {:cursor !throttle-mutations?
                                                                                :tooling? true
                                                                                :Δ not}])]
@@ -218,7 +218,7 @@
 (defn state-browser [{:keys [config-opts state side-effector] :as φ}]
   (let [{:keys [emit-mutation!]} side-effector
         {:keys [!state-browser-props]} state
-        log? (get-in config-opts [:general :tooling :log?])
+        log? (get-in config-opts [:tooling :log?])
         cursor-paths (for [c (vals state) :when (instance? rr/RCursor c)] (.-path c))]
 
     (when log? (log/debug "mount state-browser"))
@@ -239,7 +239,7 @@
 (defn tooling [{:keys [config-opts state side-effector] :as φ}]
   (let [{:keys [emit-mutation!]} side-effector
         {:keys [!db]} state
-        log? (get-in config-opts [:general :tooling :log?])
+        log? (get-in config-opts [:tooling :log?])
         !tooling-active? (r/cursor !db [:tooling :tooling-active?])
         toggle-tooling-active #(emit-mutation! [:tooling/toggle-tooling-active {:cursor !tooling-active?
                                                                              :tooling? true
