@@ -51,8 +51,8 @@
 
       (if attempt
 
-        (let [client-id (get-in config-opts [:general :github-auth-client-id])
-              client-secret (get-in config-opts [:general :github-auth-client-secret])
+        (let [client-id (get-in config-opts [:github-auth :client-id])
+              client-secret (get-in config-opts [:github-auth :client-secret])
               {:keys [status body error]} @(http/request {:url "https://github.com/login/oauth/access_token"
                                                           :method :post
                                                           :headers {"Accept" "application/json"}
@@ -71,7 +71,7 @@
                                                               :headers {"Accept" "application/json"}
                                                               :timeout 10000})]
 
-              (if (= scope (get-in config-opts [:general :github-auth-scope]))
+              (if (= scope (get-in config-opts [:github-auth :scope]))
 
                 (if (= 200 status)
 

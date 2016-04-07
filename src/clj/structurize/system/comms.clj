@@ -16,9 +16,9 @@
 (defmethod handler :sign-in/init-sign-in-with-github
   [{:keys [config-opts db]} {:keys [uid ?reply-fn] [id ?data] :event}]
 
-  (let [client-id (get-in config-opts [:general :github-auth-client-id])
+  (let [client-id (get-in config-opts [:github-auth :client-id])
         attempt-id (str (java.util.UUID/randomUUID))
-        scope (get-in config-opts [:general :github-auth-scope])]
+        scope (get-in config-opts [:github-auth :scope])]
 
     (log/debug "initialising GitHub sign in for attempt:" attempt-id)
     (swap! db assoc-in [:sign-in-with-github attempt-id] {:initialised-at (time/now) :client-id client-id})
