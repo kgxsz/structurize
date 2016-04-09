@@ -7,7 +7,6 @@
   (:require-macros [cljs.core.async.macros :refer [go go-loop]]))
 
 
-
 (defn make-update-processed-mutations [config-opts mutation]
   (fn [mutations]
     (let [max-processed-mutations (get-in config-opts [:tooling :max-processed-mutations])

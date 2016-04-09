@@ -237,13 +237,12 @@
 
 
 (defn tooling [{:keys [config-opts state side-effector] :as φ}]
-  (let [{:keys [emit-mutation!]} side-effector
+  (let [{:keys [emit-side-effect! emit-mutation!]} side-effector
         {:keys [!db]} state
         log? (get-in config-opts [:tooling :log?])
         !tooling-active? (r/cursor !db [:tooling :tooling-active?])
-        toggle-tooling-active #(emit-mutation! [:tooling/toggle-tooling-active {:cursor !tooling-active?
-                                                                             :tooling? true
-                                                                             :Δ not}])]
+        toggle-tooling-active #(emit-side-effect! [:tooling/toggle-tooling-active])]
+
     (when log? (log/debug "mount tooling"))
     (fn []
       (let [tooling-active? @!tooling-active?]

@@ -6,35 +6,35 @@
   (:import [goog.history Html5History EventType]))
 
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; multi-method handling
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; multi-method message handling
 
 
-(defmulti handler (fn [_ event-message] (:id event-message)))
+(defmulti process-received-message (fn [_ _ event-message] (:id event-message)))
 
 
-(defmethod handler :chsk/state
-  [emit-mutation! {:keys [event id ?data send-fn] :as event-message}]
+(defmethod process-received-message :chsk/state
+  [config-opts emit-mutation! {:keys [event id ?data send-fn] :as event-message}]
   (emit-mutation! [:comms/chsk-status-update {:Δ (fn [c] (assoc-in c [:comms :chsk-status] (if (:open? ?data) :open :closed)))}]))
 
 
-(defmethod handler :chsk/handshake
+(defmethod process-received-message :chsk/handshake
   [])
 
-(defmethod handler :default
-  [emit-mutation! {:keys [event id ?data send-fn] :as event-message}]
-  (log/debug "unhandled event-message:" id))
+(defmethod process-received-message :default
+  [_ _ {:keys [id]}]
+  (log/debug "failed to process received message:" id))
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; comms setup
 
 
-(defn make-handler
-  "Returns a function that receives a message and handles it appropriately via multimethods"
-  [emit-mutation!]
+(defn make-receive-message
+  "Returns a function that receives a message and processed it appropriately via multimethods"
+  [config-opts emit-mutation!]
 
   (fn [{:keys [event id ?data send-fn] :as event-message}]
     (log/debug "received message from server:" id)
-    (handler emit-mutation! event-message)))
+    (process-received-message config-opts emit-mutation! event-message)))
 
 
 (defn make-send
@@ -127,7 +127,7 @@
           {:keys [chsk ch-recv send-fn] chsk-state :state} (sente/make-channel-socket! "/chsk" chsk-opts)]
 
       (log/info "begin listening for messages from server")
-      (sente/start-chsk-router! ch-recv (make-handler emit-mutation!))
+      (sente/start-chsk-router! ch-recv (make-receive-message config-opts emit-mutation!))
 
       (assoc component
              :send! (make-send send-fn emit-mutation!)
