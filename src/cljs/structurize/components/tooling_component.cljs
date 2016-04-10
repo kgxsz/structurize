@@ -1,8 +1,6 @@
 (ns structurize.components.tooling-component
   (:require [structurize.components.component-utils :as u]
-            [cljs-time.core :as t]
             [reagent.core :as r]
-            [reagent.ratom :as rr]
             [taoensso.timbre :as log]))
 
 (declare node-group)
@@ -215,20 +213,11 @@
                 (pr-str id)]]]))]]))))
 
 
-(defn state-browser [{:keys [config-opts state side-effector] :as φ}]
-  (let [{:keys [emit-mutation!]} side-effector
-        {:keys [!state-browser-props]} state
-        log? (get-in config-opts [:tooling :log?])
-        cursor-paths (for [c (vals state) :when (instance? rr/RCursor c)] (.-path c))]
+(defn state-browser [{:keys [config-opts state emit-side-effect!] :as φ}]
+  (let [log? (get-in config-opts [:tooling :log?])]
 
     (when log? (log/debug "mount state-browser"))
-
-    (emit-mutation! [:state-browser/init-cursored {:cursor !state-browser-props
-                                                :tooling? true
-                                                :Δ (fn [state-browser-props]
-                                                     (reduce (fn [a v] (update a v add-prop :cursored))
-                                                             state-browser-props
-                                                             cursor-paths))}])
+    (emit-side-effect! [:tooling/state-browser-init])
 
     (fn []
       (when log? (log/debug "render state-browser"))
@@ -236,12 +225,10 @@
        [node-group φ []]])))
 
 
-(defn tooling [{:keys [config-opts state side-effector] :as φ}]
-  (let [{:keys [emit-side-effect! emit-mutation!]} side-effector
-        {:keys [!db]} state
+(defn tooling [{:keys [config-opts state emit-side-effect!] :as φ}]
+  (let [{:keys [!db]} state
         log? (get-in config-opts [:tooling :log?])
-        !tooling-active? (r/cursor !db [:tooling :tooling-active?])
-        toggle-tooling-active #(emit-side-effect! [:tooling/toggle-tooling-active])]
+        !tooling-active? (r/cursor !db [:tooling :tooling-active?])]
 
     (when log? (log/debug "mount tooling"))
     (fn []
@@ -249,7 +236,7 @@
         (when log? (log/debug "render tooling"))
         [:div.tooling {:class (when-not tooling-active? :collapsed)}
 
-         [:div.tooling-tab.clickable {:on-click (u/without-propagation toggle-tooling-active)}
+         [:div.tooling-tab.clickable {:on-click (u/without-propagation #(emit-side-effect! [:tooling/toggle-tooling-active]))}
           [:span.icon-cog]]
 
          (when tooling-active?

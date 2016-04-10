@@ -17,7 +17,7 @@
 
   (start [component]
     (log/info "initialising renderer")
-    (render-root! {:config-opts config-opts :state state :side-effector side-effector})
+    (render-root! {:config-opts config-opts :state state :emit-side-effect! (:emit-side-effect! side-effector) :side-effector side-effector})
     component)
 
   (stop [component] component))
