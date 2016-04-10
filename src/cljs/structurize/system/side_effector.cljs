@@ -13,7 +13,9 @@
 
 (defmethod process-side-effect :tooling/toggle-tooling-active
   [config-opts state side-effects side-effect]
-  "Initialise the state browser by marking the cursored nodes."
+
+  "Collapse"
+
   (let [{:keys [emit-mutation!]} side-effects]
     (emit-mutation! [:tooling/toggle-tooling-active {:tooling? true
                                                      :Δ (fn [c] (update-in c [:tooling :tooling-active?] not))}])))
@@ -21,19 +23,52 @@
 
 (defmethod process-side-effect :tooling/state-browser-init
   [config-opts state side-effects side-effect]
+
   "Initialise the state browser by marking the cursored nodes."
+
   (let [{:keys [!state-browser-props]} state
         {:keys [emit-mutation!]} side-effects
-        [id _] side-effect
         cursor-paths (for [c (vals state) :when (instance? rr/RCursor c)] (.-path c))
         add-prop (fn [s prop] (if s (conj s prop) #{prop}))]
 
-    (emit-mutation! [:state-browser/init-cursored {:cursor !state-browser-props
-                                                   :tooling? true
-                                                   :Δ (fn [state-browser-props]
-                                                        (reduce (fn [a v] (update a v add-prop :cursored))
-                                                                state-browser-props
-                                                                cursor-paths))}])))
+    (emit-mutation! [:tooling/state-browser-init {:cursor !state-browser-props
+                                                  :tooling? true
+                                                  :Δ (fn [state-browser-props]
+                                                       (reduce (fn [a v] (update a v add-prop :cursored))
+                                                               state-browser-props
+                                                               cursor-paths))}])))
+
+
+(defmethod process-side-effect :tooling/disable-mutations-throttling
+  [config-opts state side-effects side-effect]
+
+  "Disables mutation throttling, ensure that
+   all outstanding mutations are flushed out."
+
+  (let [{:keys [!throttle-mutations?]} state
+        {:keys [emit-mutation! admit-throttled-mutations!]} side-effects]
+
+    (admit-throttled-mutations!)
+    (emit-mutation! [:tooling/disable-throttle-mutations {:cursor !throttle-mutations?
+                                                          :tooling? true
+                                                          :Δ (constantly false)}])))
+
+
+(defmethod process-side-effect :tooling/enable-mutations-throttling
+  [config-opts state side-effects side-effect]
+  (let [{:keys [!throttle-mutations?]} state
+        {:keys [emit-mutation!]} side-effects]
+
+    (emit-mutation! [:tooling/disable-throttle-mutations {:cursor !throttle-mutations?
+                                                          :tooling? true
+                                                          :Δ (constantly true)}])))
+
+
+(defmethod process-side-effect :tooling/admit-next-throttled-mutation
+  [config-opts state side-effects side-effect]
+  (let [{:keys [admit-throttled-mutations!]} side-effects]
+    (admit-throttled-mutations! 1)))
+
 
 (defmethod process-side-effect :default
   [_ _ _ [id _]]

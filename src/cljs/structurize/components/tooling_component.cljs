@@ -151,15 +151,12 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; top-level components
 
 
-(defn mutation-browser [{:keys [config-opts state side-effector] :as φ}]
+(defn mutation-browser [{:keys [config-opts state emit-side-effect!] :as φ}]
   (let [{:keys [!throttle-mutations? !throttled-mutations !processed-mutations]} state
-        {:keys [emit-mutation! admit-throttled-mutations!]} side-effector
-        log? (get-in config-opts [:tooling :log?])
-        toggle-throttle-mutations #(emit-mutation! [:tooling/toggle-throttle-mutations {:cursor !throttle-mutations?
-                                                                               :tooling? true
-                                                                               :Δ not}])]
+        log? (get-in config-opts [:tooling :log?])]
 
     (when log? (log/debug "mount mutation-browser"))
+
 
     (fn []
       (when log? (log/debug "render mutation-browser"))
@@ -171,17 +168,22 @@
          [:div.throttle-controls
           [:div.throttle-control.control-play {:class (if throttle-mutations? :clickable :active)
                                                :on-click (when throttle-mutations?
-                                                           (u/without-propagation admit-throttled-mutations! toggle-throttle-mutations))}
+                                                           (u/without-propagation
+                                                            #(emit-side-effect! [:tooling/disable-mutations-throttling])))}
            [:span.icon.icon-control-play]]
 
           [:div.throttle-control.control-pause {:class (if @!throttle-mutations? :active :clickable)
-                                                :on-click (when-not throttle-mutations? (u/without-propagation toggle-throttle-mutations))}
+                                                :on-click (when-not throttle-mutations?
+                                                            (u/without-propagation
+                                                             #(emit-side-effect! [:tooling/enable-mutations-throttling])))}
 
            [:span.icon.icon-control-pause]]
           [:div.throttle-control.control-next.clickable {:class (when @!throttle-mutations? :active)
                                                          :on-click (if throttle-mutations?
-                                                                     (u/without-propagation #(admit-throttled-mutations! 1))
-                                                                     (u/without-propagation toggle-throttle-mutations))}
+                                                                     (u/without-propagation
+                                                                      #(emit-side-effect! [:tooling/admit-next-throttled-mutation]))
+                                                                     (u/without-propagation
+                                                                      #(emit-side-effect! [:tooling/enable-mutations-throttling])))}
            [:span.icon.icon-control-next]]]
 
          (when throttle-mutations?
@@ -213,6 +215,7 @@
                 (pr-str id)]]]))]]))))
 
 
+
 (defn state-browser [{:keys [config-opts state emit-side-effect!] :as φ}]
   (let [log? (get-in config-opts [:tooling :log?])]
 
@@ -236,7 +239,8 @@
         (when log? (log/debug "render tooling"))
         [:div.tooling {:class (when-not tooling-active? :collapsed)}
 
-         [:div.tooling-tab.clickable {:on-click (u/without-propagation #(emit-side-effect! [:tooling/toggle-tooling-active]))}
+         [:div.tooling-tab.clickable {:on-click (u/without-propagation
+                                                 #(emit-side-effect! [:tooling/toggle-tooling-active]))}
           [:span.icon-cog]]
 
          (when tooling-active?

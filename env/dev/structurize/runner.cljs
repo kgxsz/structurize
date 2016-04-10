@@ -4,7 +4,9 @@
 
 
 (defn reload! []
-  (renderer/render-root! (select-keys system [:config-opts :state :side-effector])))
+  (renderer/render-root! (assoc
+                          (select-keys system [:config-opts :state :side-effector])
+                          :emit-side-effect! (get-in system [:side-effector :emit-side-effect!]))))
 
 
 (defn ^:export start []
