@@ -134,8 +134,10 @@
 
       (assoc component
              :!db !db
-             :mutators {:emit-mutation! (make-emit-mutation config-opts <mutations)
-                        :admit-throttled-mutations! (make-admit-throttled-mutations <admit-throttled-mutations)}
+
+             :emit-mutation! (make-emit-mutation config-opts <mutations)
+             :admit-throttled-mutations! (make-admit-throttled-mutations <admit-throttled-mutations)
+
              :!handler (r/cursor !db [:location :handler])
              :!query (r/cursor !db [:location :query])
              :!chsk-status (r/cursor !db [:comms :chsk-status])

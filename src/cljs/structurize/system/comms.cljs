@@ -122,7 +122,7 @@
 
   (start [component]
     (log/info "initialising comms")
-    (let [emit-mutation! (get-in state [:mutators :emit-mutation!])
+    (let [emit-mutation! (:emit-mutation! state)
           chsk-opts (get-in config-opts [:comms :chsk-opts])
           {:keys [chsk ch-recv send-fn] chsk-state :state} (sente/make-channel-socket! "/chsk" chsk-opts)]
 

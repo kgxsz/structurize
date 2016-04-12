@@ -91,11 +91,10 @@
 
   (start [component]
     (log/info "initialising browser")
-    (let [emit-mutation! (get-in state [:mutators :emit-mutation!])
-          history (make-history)]
+    (let [history (make-history)]
 
       (log/info "begin listening for navigation from the browser")
-      (listen-for-navigation history (make-navigation-handler history emit-mutation!))
+      (listen-for-navigation history (make-navigation-handler history (:emit-mutation! state)))
 
       (assoc component
              :change-location! (make-change-location history))))
