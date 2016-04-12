@@ -12,10 +12,8 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; components
 
 
-(defn sign-in-with-github [{:keys [config-opts state side-effector] :as Φ}]
-  (let [{:keys [!db]} state
-        {:keys [send! change-location!]} side-effector
-        host (get-in config-opts [:host])]
+(defn sign-in-with-github [{:keys [config-opts state emit-side-effect!] :as Φ}]
+  (let [{:keys [!db]} state]
 
     (log/debug "mount/render sign-in-with-github")
 
@@ -23,39 +21,30 @@
           !message-reply (r/cursor !db [:comms :message :sign-in/init-sign-in-with-github :reply])]
 
       (when (= :reply-received @!message-status)
-        (let [{:keys [client-id attempt-id scope]} @!message-reply
-              redirect-uri (str host (b/path-for routes :sign-in-with-github))]
-          (change-location! {:prefix "https://github.com"
-                             :path "/login/oauth/authorize"
-                             :query {:client_id client-id
-                                     :state attempt-id
-                                     :scope scope
-                                     :redirect_uri redirect-uri}})))
+        (let [{:keys [client-id attempt-id scope]} @!message-reply]
+          (emit-side-effect! [:general/redirect-to-github {:client-id client-id
+                                                           :attempt-id attempt-id
+                                                           :scope scope}])))
 
-      [:div.button.clickable {:on-click (u/without-propagation #(send! [:sign-in/init-sign-in-with-github {}]))}
+      [:div.button.clickable {:on-click (u/without-propagation
+                                         #(emit-side-effect! [:general/init-sign-in-with-github]))}
        [:span.button-icon.icon-github]
        [:span.button-text "sign in with GitHub"]])))
 
 
-(defn sign-out [{:keys [state side-effector] :as Φ}]
-  (let [{:keys [!db]} state
-        {:keys [post!]} side-effector
-        !post-status (r/cursor !db [:comms :post "/sign-out" :status])]
-
+(defn sign-out [{:keys [state emit-side-effect!] :as Φ}]
+  (let [{:keys [!db]} state]
     (log/debug "mount/render sign-out")
-
-    [:div.button.clickable {:on-click (u/without-propagation #(post! ["/sign-out" {}]))}
+    [:div.button.clickable {:on-click (u/without-propagation #(emit-side-effect! [:general/sign-out]))}
      [:span.button-icon.icon-exit]
      [:span.button-text "sign out"]]))
-
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; top level pages
 
 
-(defn home-page [{:keys [config-opts state side-effector] :as Φ}]
+(defn home-page [{:keys [config-opts state emit-side-effect!] :as Φ}]
   (let [{:keys [!db]} state
-        {:keys [emit-mutation!]} side-effector
         !me (r/cursor !db [:comms :message :general/init :reply :me])
         !star (r/cursor !db [:playground :star])
         !heart (r/cursor !db [:playground :heart])]
@@ -86,26 +75,26 @@
           (if me
             [sign-out Φ]
             [sign-in-with-github Φ])
-          [:div.button.clickable {:on-click (u/without-propagation #(emit-mutation! [:playground/inc-star {:cursor !star :Δ inc}]))}
+          [:div.button.clickable {:on-click (u/without-propagation
+                                             #(emit-side-effect! [:playground/inc-item {:cursor !star :item-name "star"}]))}
            [:span.button-icon.icon-star]
            [:span.button-text star]]
-          [:div.button.clickable {:on-click (u/without-propagation #(emit-mutation! [:playground/inc-heart {:cursor !heart :Δ inc}]))}
+          [:div.button.clickable {:on-click (u/without-propagation
+                                             #(emit-side-effect! [:playground/inc-item {:cursor !heart :item-name "heart"}]))}
            [:span.button-icon.icon-heart]
            [:span.button-text heart]]]]))))
 
 
-(defn sign-in-with-github-page [{:keys [state side-effector] :as Φ}]
+(defn sign-in-with-github-page [{:keys [state emit-side-effect!] :as Φ}]
   (let [{:keys [!db !query]} state
-        {:keys [post! change-location!]} side-effector
         {:keys [code error] attempt-id :state} @!query
         !post-status (r/cursor !db [:comms :post "/sign-in/github" :status])]
 
     (log/debug "mount/render sign-in-with-github-page")
 
     (cond
-      (and code attempt-id) (do (change-location! {:query {} :replace? true})
-                                (post! ["/sign-in/github" {:code code, :attempt-id attempt-id}]))
-      (= :response-received @!post-status) (change-location! {:path (b/path-for routes :home)}))
+      (and code attempt-id) (emit-side-effect! [:general/sign-in-with-github {:code code, :attempt-id attempt-id}])
+      (= :response-received @!post-status) (emit-side-effect! [:general/change-location {:path (b/path-for routes :home)}]))
 
     (if (or error (= :failed @!post-status))
 
@@ -118,7 +107,8 @@
         [:h1.hero-caption "Sign in with GitHub failed"]]
 
        [:div.options-section
-        [:div.button.clickable {:on-click (u/without-propagation #(change-location! {:path (b/path-for routes :home)}))}
+        [:div.button.clickable {:on-click (u/without-propagation
+                                           #(emit-side-effect! [:general/change-location {:path (b/path-for routes :home)}]))}
          [:span.button-icon.icon-home]
          [:span.button-text "go home"]]]]
 
@@ -131,21 +121,20 @@
         [:h1.hero-caption "Signing you in with GitHub"]]])))
 
 
-(defn unknown-page [{:keys [side-effector] :as Φ}]
-  (let [{:keys [change-location!]} side-effector]
+(defn unknown-page [{:keys [emit-side-effect!] :as Φ}]
+  (log/debug "mount/render unkown-page")
 
-    (log/debug "mount/render unkown-page")
+  [:div.page
+   [:div.hero
+    [:div.hero-visual
+     [:span.icon.icon-poop]]
+    [:h1.hero-caption "Looks like you're lost"]]
 
-    [:div.page
-     [:div.hero
-      [:div.hero-visual
-       [:span.icon.icon-poop]]
-      [:h1.hero-caption "Looks like you're lost"]]
-
-     [:div.options-section
-      [:div.button.clickable {:on-click (u/without-propagation #(change-location! {:path (b/path-for routes :home)}))}
-       [:span.button-icon.icon-home]
-       [:span.button-text "go home"]]]]))
+   [:div.options-section
+    [:div.button.clickable {:on-click (u/without-propagation
+                                       #(emit-side-effect! [:general/change-location {:path (b/path-for routes :home)}]))}
+     [:span.button-icon.icon-home]
+     [:span.button-text "go home"]]]])
 
 
 (defn loading [φ]
@@ -178,10 +167,9 @@
    It will send a message to the server to receive the initialising data required by the top
    level components. It will wait until a reply is received before mounting the page. "
 
-  [{:keys [config-opts state side-effector] :as Φ}]
+  [{:keys [config-opts state emit-side-effect!] :as Φ}]
 
   (let [{:keys [!db !chsk-status]} state
-        {:keys [send!]} side-effector
         !message-reply (r/cursor !db [:comms :message :general/init :reply])]
 
     (log/debug "mount root")
@@ -194,7 +182,7 @@
         (log/debug "render root")
 
         (when (and chsk-status-open? initialising?)
-          (send! [:general/init]))
+          (emit-side-effect! [:general/general-init]))
 
         [:div.top-level-container
 

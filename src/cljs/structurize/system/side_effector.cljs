@@ -1,5 +1,7 @@
 (ns structurize.system.side-effector
-  (:require [com.stuartsierra.component :as component]
+  (:require [bidi.bidi :as b]
+            [com.stuartsierra.component :as component]
+            [structurize.routes :refer [routes]]
             [reagent.ratom :as rr]
             [taoensso.timbre :as log])
   (:require-macros [cljs.core.async.macros :refer [go go-loop]]))
@@ -113,6 +115,63 @@
                                                                 (reduce (fn [a v] (update a v toggle-prop :upstream-focused))
                                                                         c
                                                                         (-> (reductions conj [] path) rest drop-last))))}])))
+
+
+(defmethod process-side-effect :general/general-init
+  [config-opts state side-effects side-effect]
+  (let [{:keys [send!]} side-effects]
+    (send! [:general/init])))
+
+
+(defmethod process-side-effect :general/change-location
+  [config-opts state side-effects side-effect]
+  (let [{:keys [change-location!]} side-effects
+        [_ {:keys [path]}] side-effect]
+    (change-location! {:path path})))
+
+
+(defmethod process-side-effect :general/redirect-to-github
+  [config-opts state side-effects side-effect]
+  (let [host (get-in config-opts [:host])
+        {:keys [change-location!]} side-effects
+        [_ {:keys [client-id attempt-id scope]}] side-effect
+        redirect-uri (str host (b/path-for routes :sign-in-with-github))]
+
+    (change-location! {:prefix "https://github.com"
+                       :path "/login/oauth/authorize"
+                       :query {:client_id client-id
+                               :state attempt-id
+                               :scope scope
+                               :redirect_uri redirect-uri}})))
+
+
+(defmethod process-side-effect :general/init-sign-in-with-github
+  [config-opts state side-effects side-effect]
+  (let [{:keys [send!]} side-effects]
+    (send! [:sign-in/init-sign-in-with-github {}])))
+
+
+(defmethod process-side-effect :general/sign-in-with-github
+  [config-opts state side-effects side-effect]
+  (let [{:keys [change-location! post!]} side-effects
+        [_ params] side-effect]
+    (change-location! {:query {} :replace? true})
+    (post! ["/sign-in/github" params])))
+
+
+(defmethod process-side-effect :general/sign-out
+  [config-opts state side-effects side-effect]
+  (let [{:keys [post!]} side-effects]
+    (post! ["/sign-out" {}])))
+
+
+(defmethod process-side-effect :playground/inc-item
+  [config-opts state side-effects side-effect]
+  (let [{:keys [emit-mutation!]} side-effects
+        [_ {:keys [cursor item-name]}] side-effect
+        mutation-id (keyword  (str ":playground/inc-" item-name))]
+
+    (emit-mutation! [mutation-id {:cursor cursor :Δ inc}])))
 
 
 (defmethod process-side-effect :default
