@@ -5,47 +5,16 @@
 
 (declare node-group)
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; helpers
-
-
-(defn add-prop [s prop]
-  (if s
-    (conj s prop)
-    #{prop}))
-
-
-(defn remove-prop [s prop]
-  (if s
-    (disj s prop)
-    #{}))
-
-
-(defn toggle-prop [s prop]
-  (if (contains? s prop)
-    (remove-prop s prop)
-    (add-prop s prop)))
-
-
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; state-browser components
 
 
-(defn node [{:keys [config-opts state side-effector] :as φ} path _]
+(defn node [{:keys [config-opts state emit-side-effect!] :as φ} path _]
   (let [{:keys [!db !state-browser-props]} state
-        {:keys [emit-mutation!]} side-effector
         log? (get-in config-opts [:tooling :log?])
         !node (r/cursor !db path)
         !node-props (r/cursor !state-browser-props [path])
-        toggle-collapse #(emit-mutation! [:state-browser/toggle-collapsed {:cursor !node-props
-                                                                        :tooling? true
-                                                                        :Δ (fn [c] (toggle-prop c :collapsed))}])
-        toggle-focus #(emit-mutation! [:state-browser/toggle-focused {:cursor !state-browser-props
-                                                                   :tooling? true
-                                                                   :Δ (fn [c]
-                                                                        (as-> c c
-                                                                          (update c path toggle-prop :focused)
-                                                                          (reduce (fn [a v] (update a v toggle-prop :upstream-focused))
-                                                                                  c
-                                                                                  (-> (reductions conj [] path) rest drop-last))))}])]
+        toggle-collapsed #(emit-side-effect! [:tooling/toggle-node-collapsed {:!node-props !node-props}])
+        toggle-focused #(emit-side-effect! [:tooling/toggle-node-focused {:path path}])]
 
     (when log? (log/debug "mount node:" path))
 
@@ -77,9 +46,9 @@
                                    focused? (conj :focused)
                                    upstream-focused? (conj :upstream-focused)
                                    first? (conj :first)))
-                         :on-mouse-over (fn [e] (toggle-focus) (.stopPropagation e))
-                         :on-mouse-out (fn [e] (toggle-focus) (.stopPropagation e))
-                         :on-click (fn [e] (toggle-collapse) (.stopPropagation e))}
+                         :on-mouse-over (fn [e] (toggle-focused) (.stopPropagation e))
+                         :on-mouse-out (fn [e] (toggle-focused) (.stopPropagation e))
+                         :on-click (fn [e] (toggle-collapsed) (.stopPropagation e))}
 
           (when (contains? node-props :cursored)
             [:div.node-key-flag.cursored [:span.icon.icon-pushpin]])
@@ -93,9 +62,9 @@
            collapsed-group-node? (list [:div.node-brace {:key :opening} "{"]
                                        [:div.node-value.clickable {:key k
                                                                    :class (when focused? :focused)
-                                                                   :on-mouse-over (u/without-propagation toggle-focus)
-                                                                   :on-mouse-out (u/without-propagation toggle-focus)
-                                                                   :on-click (u/without-propagation toggle-focus toggle-collapse)}
+                                                                   :on-mouse-over (u/without-propagation toggle-focused)
+                                                                   :on-mouse-out (u/without-propagation toggle-focused)
+                                                                   :on-click (u/without-propagation toggle-focused toggle-collapsed)}
                                         "~"]
                                        [:div.node-brace {:key :closing} "}"])
 
@@ -103,14 +72,14 @@
                                    [:div.node-brace {:key :closing} "}"])
 
            collapsed? [:div.node-value.clickable {:class (when focused? :focused)
-                                                  :on-mouse-over (u/without-propagation toggle-focus)
-                                                  :on-mouse-out (u/without-propagation toggle-focus)
-                                                  :on-click (u/without-propagation toggle-collapse)}
+                                                  :on-mouse-over (u/without-propagation toggle-focused)
+                                                  :on-mouse-out (u/without-propagation toggle-focused)
+                                                  :on-click (u/without-propagation toggle-collapsed)}
                        "~"]
 
            node-value? [:div.node-value {:class (when focused? :focused)
-                                         :on-mouse-over (u/without-propagation toggle-focus)
-                                         :on-mouse-out (u/without-propagation toggle-focus)}
+                                         :on-mouse-over (u/without-propagation toggle-focused)
+                                         :on-mouse-out (u/without-propagation toggle-focused)}
                         (pr-str v)]
 
            last? [node-group φ path (when focused? {:class :focused}) {:tail-braces (str tail-braces "}")}]
@@ -157,12 +126,14 @@
 
     (when log? (log/debug "mount mutation-browser"))
 
-
     (fn []
-      (when log? (log/debug "render mutation-browser"))
       (let [throttle-mutations? @!throttle-mutations?
             throttled-mutations @!throttled-mutations
+            processed-mutations @!processed-mutations
             no-throttled-mutations? (empty? throttled-mutations)]
+
+        (when log? (log/debug "render mutation-browser"))
+
         [:div.browser.mutation-browser
 
          [:div.throttle-controls
@@ -172,13 +143,13 @@
                                                             #(emit-side-effect! [:tooling/disable-mutations-throttling])))}
            [:span.icon.icon-control-play]]
 
-          [:div.throttle-control.control-pause {:class (if @!throttle-mutations? :active :clickable)
+          [:div.throttle-control.control-pause {:class (if throttle-mutations? :active :clickable)
                                                 :on-click (when-not throttle-mutations?
                                                             (u/without-propagation
                                                              #(emit-side-effect! [:tooling/enable-mutations-throttling])))}
 
            [:span.icon.icon-control-pause]]
-          [:div.throttle-control.control-next.clickable {:class (when @!throttle-mutations? :active)
+          [:div.throttle-control.control-next.clickable {:class (when throttle-mutations? :active)
                                                          :on-click (if throttle-mutations?
                                                                      (u/without-propagation
                                                                       #(emit-side-effect! [:tooling/admit-next-throttled-mutation]))
@@ -205,7 +176,7 @@
 
          [:div.processed-mutations
           (doall
-           (for [[id {:keys [emitted-at processed-at n] :as props}] @!processed-mutations]
+           (for [[id {:keys [emitted-at processed-at n] :as props}] processed-mutations]
              [:div.mutation-container {:key n}
               [:div.mutation-caption
                [:span.mutation-caption-symbol "Δ"]
@@ -234,11 +205,13 @@
         !tooling-active? (r/cursor !db [:tooling :tooling-active?])]
 
     (when log? (log/debug "mount tooling"))
+
     (fn []
       (let [tooling-active? @!tooling-active?]
-        (when log? (log/debug "render tooling"))
-        [:div.tooling {:class (when-not tooling-active? :collapsed)}
 
+        (when log? (log/debug "render tooling"))
+
+        [:div.tooling {:class (when-not tooling-active? :collapsed)}
          [:div.tooling-tab.clickable {:on-click (u/without-propagation
                                                  #(emit-side-effect! [:tooling/toggle-tooling-active]))}
           [:span.icon-cog]]
