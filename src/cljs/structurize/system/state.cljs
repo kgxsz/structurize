@@ -10,10 +10,10 @@
 
 (defn hydrate-mutation
   "Adds a few useful things to the mutation's properties."
-  [!db db mutation]
+  [db-before db-after mutation]
 
-  (let [latest-mutation (first (get-in @!db [:tooling :processed-mutations]))
-        [added removed _] (d/diff @!db db)
+  (let [latest-mutation (first (get-in db-before [:tooling :processed-mutations]))
+        [added removed _] (d/diff db-after db-before)
         [id props] mutation
         hydrated-props (-> props
                            (dissoc :Δ)
@@ -62,7 +62,8 @@
   "Returns a function that operates on state with the mutating function (Δ) provided in the mutation."
   [config-opts !db]
 
-  (let [update-processed-mutations (make-update-processed-mutations config-opts !db)]
+  (let [update-processed-mutations (make-update-processed-mutations config-opts !db)
+        tooling-enabled? (get-in config-opts [:tooling :enabled?])]
 
     (fn [mutation]
       (let [[id {:keys [cursor Δ]}] mutation]
@@ -70,10 +71,17 @@
         (log/debug "processing mutation:" id)
 
         (if-let [cursor-or-db (and Δ (or cursor !db))]
-          (let [db @!db]
-            (swap! cursor-or-db Δ)
-            (let [hydrated-mutation (hydrate-mutation !db db mutation)]
-              (swap! !db update-in [:tooling :processed-mutations] update-processed-mutations hydrated-mutation)))
+
+          (if tooling-enabled?
+
+            (let [db-before @!db]
+              (swap! cursor-or-db Δ)
+              (let [db-after @!db
+                    hydrated-mutation (hydrate-mutation db-before db-after mutation)]
+                (swap! !db update-in [:tooling :processed-mutations] update-processed-mutations hydrated-mutation)))
+
+            (swap! cursor-or-db Δ))
+
           (log/error "failed to process mutation:" id))))))
 
 
@@ -189,7 +197,8 @@
     (let [!db (make-db config-opts)
           <mutations (a/chan)
           <admit-throttled-mutations (a/chan)
-          process-tooling-mutation (make-process-tooling-mutation config-opts !db)]
+          emit-mutation! (make-emit-mutation config-opts <mutations)
+          admit-throttled-mutations! (make-admit-throttled-mutations <admit-throttled-mutations)]
 
       (log/info "begin listening for emitted mutations")
       (listen-for-emit-mutation config-opts !db <mutations)
@@ -200,8 +209,8 @@
       (assoc component
              :!db !db
 
-             :emit-mutation! (make-emit-mutation config-opts <mutations)
-             :admit-throttled-mutations! (make-admit-throttled-mutations <admit-throttled-mutations)
+             :emit-mutation! emit-mutation!
+             :admit-throttled-mutations! admit-throttled-mutations!
 
              :!handler (r/cursor !db [:location :handler])
              :!query (r/cursor !db [:location :query])
