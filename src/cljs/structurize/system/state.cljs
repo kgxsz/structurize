@@ -8,7 +8,9 @@
   (:require-macros [cljs.core.async.macros :refer [go go-loop]]))
 
 
-(defn hydrate-mutation [!db mutation]
+(defn hydrate-mutation
+  "Adds a few useful things to the mutation's properties."
+  [!db mutation]
   (let [latest-mutation (first (get-in @!db [:tooling :processed-mutations]))
         [id props] mutation
         hydrated-props (-> props
@@ -19,35 +21,39 @@
 
 
 (defn make-update-processed-mutations
+
+  "Returns a function that updates the processed-mutations by adding the new one,
+   and dropping the oldest one."
+
   [config-opts !db]
+
   (let [max-processed-mutations (get-in config-opts [:tooling :max-processed-mutations])]
     (fn [processed-mutations hydrated-mutation]
       (take max-processed-mutations (cons hydrated-mutation processed-mutations)))))
 
 
 (defn make-process-tooling-mutation
+
+  "Returns a function that operates on state with the mutating function (Δ) provided in the mutation.
+   However, it expects tooling mutations only, so they are treated differently than regular mutations."
+
   [config-opts !db]
+
   (let [log? (get-in config-opts [:general :tooling :log?])]
 
     (fn [mutation]
       (let [[id {:keys [cursor Δ]}] mutation]
 
-        (when log? (log/debug "processing mutation:" id))
+        (when log? (log/debug "processing tooling mutation:" id))
 
         (if-let [cursor-or-db (and Δ (or cursor !db))]
           (do
             (swap! cursor-or-db Δ))
-          (log/error "failed to process mutation:" id))))))
+          (log/error "failed to process tooling mutation:" id))))))
 
 
 (defn make-process-mutation
-
-  "Returns a function that operates on state with the mutating functions provided in the mutations themselves.
-
-   id - the id of the mutation
-   cursor - if included, will operate on the cursor into the state, if not, will operate on the db
-   Δ - a function that takes the db or the cursor and produces the desired change in state."
-
+  "Returns a function that operates on state with the mutating function (Δ) provided in the mutation."
   [config-opts !db]
 
   (let [update-processed-mutations (make-update-processed-mutations config-opts !db)]
@@ -73,8 +79,16 @@
 
 
 (defn make-emit-mutation
-  "Returns a function that emits a mutation onto the mutation channel."
+
+  "Returns a function that emits a mutation onto the mutation channel.
+
+   mutations are vectors made up of the following:
+   id - the id of the mutation
+   cursor - if included, will operate on the cursor into the state, if not, will operate on the db
+   Δ - a function that takes the db or the cursor and produces the desired change in state. "
+
   [config-opts <mutation]
+
   (fn [[id props]]
     (let [mutation [id (assoc props :emitted-at (t/now))]]
       (go (a/>! <mutation mutation)))))
@@ -87,14 +101,21 @@
    is not defined, then all throttled mutations will be admitted."
 
   [<admit-throttled-mutations]
-
   (fn [n]
     (go (a/>! <admit-throttled-mutations (or n :all)))))
 
 
-(defn listen-for-emit-mutation [config-opts !db <mutation]
+(defn listen-for-emit-mutation
+
+  "Listens for activity on the <mutation channel, upon which the received
+   mutation will be either processed as a tooling mutation, throttled,
+   or processed normally."
+
+  [config-opts !db <mutation]
+
   (let [process-mutation (make-process-mutation config-opts !db)
         process-tooling-mutation (make-process-tooling-mutation config-opts !db)]
+
     (go-loop []
       (let [[id props :as mutation] (a/<! <mutation)
             tooling? (= (namespace id) "tooling")
@@ -106,18 +127,28 @@
       (recur))))
 
 
- (defn listen-for-admit-throttled-mutations [config-opts !db <admit-throttled-mutations]
+(defn listen-for-admit-throttled-mutations
+
+  "Listens for activity on the <admit-throttled-mutation channel, upon which
+   n or all throttled mutations will be processed."
+
+  [config-opts !db <admit-throttled-mutations]
+
    (let [process-mutation (make-process-mutation config-opts !db)]
+
      (go-loop []
        (let [n (a/<! <admit-throttled-mutations)
              throttled-mutations (get-in @!db [:tooling :throttled-mutations])
              n-mutations (count throttled-mutations)]
+
          (if (zero? n-mutations)
            (log/debug "no throttled mutations to admit")
+
            (let [n (if (integer? n) n n-mutations)]
              (log/debugf "admitting %s throttled mutation(s)" n)
              (swap! !db update-in [:tooling :throttled-mutations] (partial drop-last n))
              (doseq [mutation (reverse (take-last n throttled-mutations))] (process-mutation mutation)))))
+
        (recur))))
 
 
