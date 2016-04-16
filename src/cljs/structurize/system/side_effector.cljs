@@ -37,8 +37,7 @@
 (defmethod process-side-effect :tooling/toggle-tooling-active
   [{:keys [config-opts state comms browser]} id args]
   (let [{:keys [emit-mutation!]} state]
-    (emit-mutation! [:tooling/toggle-tooling-active {:tooling? true
-                                                     :Δ (fn [c] (update-in c [:tooling :tooling-active?] not))}])))
+    (emit-mutation! [:tooling/toggle-tooling-active {:Δ (fn [c] (update-in c [:tooling :tooling-active?] not))}])))
 
 
 (defmethod process-side-effect :tooling/state-browser-init
@@ -50,7 +49,6 @@
         cursor-paths (for [c (vals state) :when (instance? rr/RCursor c)] (.-path c))]
 
     (emit-mutation! [:tooling/state-browser-init {:cursor !state-browser-props
-                                                  :tooling? true
                                                   :Δ (fn [state-browser-props]
                                                        (reduce (fn [a v] (update a v add-prop :cursored))
                                                                state-browser-props
@@ -67,7 +65,6 @@
 
     (admit-throttled-mutations!)
     (emit-mutation! [:tooling/disable-throttle-mutations {:cursor !throttle-mutations?
-                                                          :tooling? true
                                                           :Δ (constantly false)}])))
 
 
@@ -75,7 +72,6 @@
   [{:keys [config-opts state comms browser]} id args]
   (let [{:keys [!throttle-mutations? emit-mutation!]} state]
     (emit-mutation! [:tooling/disable-throttle-mutations {:cursor !throttle-mutations?
-                                                          :tooling? true
                                                           :Δ (constantly true)}])))
 
 
@@ -91,7 +87,6 @@
         {:keys [!node-props]} args]
 
     (emit-mutation! [:tooling/toggle-node-collapsed {:cursor !node-props
-                                                     :tooling? true
                                                      :Δ (fn [c] (toggle-prop c :collapsed))}])))
 
 
@@ -100,14 +95,13 @@
   (let [{:keys [!state-browser-props emit-mutation!]} state
         {:keys [path]} args]
 
-    (emit-mutation! [:state-browser/toggle-node-focused {:cursor !state-browser-props
-                                                         :tooling? true
-                                                         :Δ (fn [c]
-                                                              (as-> c c
-                                                                (update c path toggle-prop :focused)
-                                                                (reduce (fn [a v] (update a v toggle-prop :upstream-focused))
-                                                                        c
-                                                                        (-> (reductions conj [] path) rest drop-last))))}])))
+    (emit-mutation! [:tooling/toggle-node-focused {:cursor !state-browser-props
+                                                   :Δ (fn [c]
+                                                        (as-> c c
+                                                          (update c path toggle-prop :focused)
+                                                          (reduce (fn [a v] (update a v toggle-prop :upstream-focused))
+                                                                  c
+                                                                  (-> (reductions conj [] path) rest drop-last))))}])))
 
 
 (defmethod process-side-effect :general/general-init
@@ -178,8 +172,9 @@
   "Returns a function that receives a side-effect and processes it appropriately via multimethods"
   [Φ]
   (fn [[id args :as side-effect]]
-    (log/debug "emitting side-effect:" id)
-    (process-side-effect Φ id args)))
+    (let [log? (not= (namespace id) "tooling")]
+      (when log? (log/debug "emitting side-effect:" id))
+      (process-side-effect Φ id args))))
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; component setup
