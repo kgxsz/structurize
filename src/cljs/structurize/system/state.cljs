@@ -10,13 +10,19 @@
 
 (defn hydrate-mutation
   "Adds a few useful things to the mutation's properties."
-  [!db mutation]
+  [!db db mutation]
+
   (let [latest-mutation (first (get-in @!db [:tooling :processed-mutations]))
+        [added removed _] (d/diff @!db db)
         [id props] mutation
         hydrated-props (-> props
                            (dissoc :Δ)
                            (assoc :processed (t/now)
-                                  :n (inc (:n (second latest-mutation) 0))))]
+                                  :n (inc (:n (second latest-mutation) 0))
+                                  :removed removed
+                                  :added added))]
+    (log/warn removed)
+    (log/warn added)
     [id hydrated-props]))
 
 
@@ -59,17 +65,15 @@
   (let [update-processed-mutations (make-update-processed-mutations config-opts !db)]
 
     (fn [mutation]
-      (let [[id {:keys [cursor Δ]}] mutation
-            hydrated-mutation (hydrate-mutation !db mutation)
-            db @!db]
+      (let [[id {:keys [cursor Δ]}] mutation]
 
         (log/debug "processing mutation:" id)
 
         (if-let [cursor-or-db (and Δ (or cursor !db))]
-          (do
+          (let [db @!db]
             (swap! cursor-or-db Δ)
-            #_ (log/warn (d/diff @!db db)) ;; [things-only-in-a things-only-in-b things-in-both]
-            (swap! !db update-in [:tooling :processed-mutations] update-processed-mutations hydrated-mutation))
+            (let [hydrated-mutation (hydrate-mutation !db db mutation)]
+              (swap! !db update-in [:tooling :processed-mutations] update-processed-mutations hydrated-mutation)))
           (log/error "failed to process mutation:" id))))))
 
 
