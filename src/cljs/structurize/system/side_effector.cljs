@@ -49,9 +49,9 @@
         cursor-paths (for [c (vals state) :when (instance? rr/RCursor c)] (.-path c))]
 
     (emit-mutation! [:tooling/state-browser-init {:cursor !state-browser-props
-                                                  :Δ (fn [state-browser-props]
+                                                  :Δ (fn [c]
                                                        (reduce (fn [a v] (update a v add-prop :cursored))
-                                                               state-browser-props
+                                                               c
                                                                cursor-paths))}])))
 
 

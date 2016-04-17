@@ -8,34 +8,78 @@
   (:require-macros [cljs.core.async.macros :refer [go go-loop]]))
 
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; cheeky helpers
+
+
+(defn add-prop [s prop]
+  (if s
+    (conj s prop)
+    #{prop}))
+
+
+(defn remove-prop [s prop]
+  (if s
+    (disj s prop)
+    #{}))
+
+
+(defn toggle-prop [s prop]
+  (if (contains? s prop)
+    (remove-prop s prop)
+    (add-prop s prop)))
+
+
+(defn map-paths [m]
+  (if (or (not (map? m))
+          (empty? m))
+    '(())
+    (for [[k v] m
+          subkey (map-paths v)]
+      (cons k subkey))))
+
+
+(defn build-diff [added removed]
+  (let [paths (set (concat (map-paths added) (map-paths removed)))]
+    (reduce
+     (fn [a path] (assoc a path {:before (get-in removed path) :after (get-in added path)}))
+     {}
+     paths)))
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; cheeky helpers
+
+
 (defn hydrate-mutation
   "Adds a few useful things to the mutation's properties."
-  [db-before db-after mutation]
+  [db-before db-after previous-mutation mutation]
 
-  (let [latest-mutation (first (get-in db-before [:tooling :processed-mutations]))
-        [added removed _] (d/diff db-after db-before)
+  (let [[added removed _] (d/diff db-after db-before)
+        mutation-paths (map-paths added)
+        diff (build-diff added removed)
         [id props] mutation
         hydrated-props (-> props
                            (dissoc :Δ)
                            (assoc :processed (t/now)
-                                  :n (inc (:n (second latest-mutation) 0))
-                                  :removed removed
-                                  :added added))]
-    (log/warn removed)
-    (log/warn added)
+                                  :n (inc (:n (second previous-mutation) 0))
+                                  :diff diff
+                                  :mutation-paths mutation-paths))]
+    (log/warn mutation-paths)
+    (log/warn diff)
     [id hydrated-props]))
 
 
-(defn make-update-processed-mutations
-
-  "Returns a function that updates the processed-mutations by adding the new one,
-   and dropping the oldest one."
+(defn make-update-tooling
 
   [{:keys [config-opts] :as Φ}]
-
   (let [max-processed-mutations (get-in config-opts [:tooling :max-processed-mutations])]
-    (fn [processed-mutations hydrated-mutation]
-      (take max-processed-mutations (cons hydrated-mutation processed-mutations)))))
+
+    (fn [tooling previous-mutation hydrated-mutation]
+      (let [mutation-paths (:mutation-paths (second hydrated-mutation))
+            previous-paths (:paths (second previous-mutation))]
+        (-> tooling
+            (update-in [:processed-mutations] (comp (partial take max-processed-mutations) (partial cons hydrated-mutation)))
+            (update-in [:state-browser-props] #(reduce (fn [a v] (update a v remove-prop :mutated)) % previous-paths))
+            (update-in [:state-browser-props] #(reduce (fn [a v] (update a v add-prop :mutated)) % mutation-paths)))))))
 
 
 (defn make-process-tooling-mutation
@@ -62,7 +106,7 @@
   "Returns a function that operates on state with the mutating function (Δ) provided in the mutation."
   [{:keys [config-opts !db] :as Φ}]
 
-  (let [update-processed-mutations (make-update-processed-mutations Φ)
+  (let [update-tooling (make-update-tooling Φ)
         tooling-enabled? (get-in config-opts [:tooling :enabled?])]
 
     (fn [mutation]
@@ -73,12 +117,12 @@
         (if-let [cursor-or-db (and Δ (or cursor !db))]
 
           (if tooling-enabled?
-
             (let [db-before @!db]
               (swap! cursor-or-db Δ)
               (let [db-after @!db
-                    hydrated-mutation (hydrate-mutation db-before db-after mutation)]
-                (swap! !db update-in [:tooling :processed-mutations] update-processed-mutations hydrated-mutation)))
+                    previous-mutation (first (get-in db-before [:tooling :processed-mutations]))
+                    hydrated-mutation (hydrate-mutation db-before db-after previous-mutation mutation)]
+                (swap! !db update-in [:tooling] update-tooling previous-mutation hydrated-mutation)))
 
             (swap! cursor-or-db Δ))
 
@@ -198,8 +242,7 @@
           admit-throttled-mutations! (make-admit-throttled-mutations <admit-throttled-mutations)
 
           Φ {:config-opts config-opts
-             :!db !db
-             :emit-mutation! emit-mutation!}
+             :!db !db}
 
           process-mutation (make-process-mutation Φ)
           process-tooling-mutation (make-process-tooling-mutation Φ)]
