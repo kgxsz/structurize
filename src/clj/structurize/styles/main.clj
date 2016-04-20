@@ -188,7 +188,7 @@
        [:.node-value :.node-key {:height "100%"
                                  :margin-bottom "2px"
                                  :padding "2px 3px 1px 3px"
-                                 :border-radius "3px"
+                                 :border-radius "4px"
                                  :background-color (:grey-c colours)}]
 
        [:.node-key {:display :flex
@@ -197,35 +197,25 @@
                     :margin-right "2px"}
         [:span {:pointer-events :none}]
         [:&.first {:margin-left 0}]
-        [:&.focused :&.upstream-focused {:background-color (:light-purple colours)
-                                         :color (:dark-purple colours)}]]
+        [:&.cursored {:background-color (:light-blue colours)
+                      :color (:dark-blue colours)}]
+        [:&.upstream-cursored {:background-color (:dark-blue colours)
+                               :color (:light-blue colours)}]
+        [:&.mutated :&.upstream-mutated {:color (:light-green colours)}]
+        [:&.focused :&.upstream-focused {:background-color (:dark-blue colours)
+                                         :color (:light-blue colours)}]]
 
        [:.node-value
+        [:&.mutated :&.upstream-mutated {:color (:light-green colours)}]
         [:&.focused {:background-color (:light-blue colours)
                      :color (:dark-blue colours)}]]
 
        [:.node-group
+        [:&.mutated
+         [:.node-key :.node-value {:color (:light-green colours)}]]
         [:&.focused
          [:.node-key :.node-value {:background-color (:light-blue colours)
-                                   :color (:dark-blue colours)}]]]
-
-       [:.node-key-flag {:display :flex
-                         :justify-content :center
-                         :align-items :center
-                         :width "13px"
-                         :height "13px"
-                         :font-size "1rem"
-                         :margin "0 1px"
-                         :border-radius "3px"}
-
-        [:&:first-child {:margin-left 0}]
-
-        [:.icon {:padding-left "1px"}]
-
-        [:&.cursored {:background-color (:purple colours)
-                      :color (:white-a colours)}]
-        [:&.mutated {:background-color (:red colours)
-                     :color (:white-a colours)}]]]]]
+                                   :color (:dark-blue colours)}]]]]]]
 
     [:.mutation-browser {:display :flex
                          :height "90px"}

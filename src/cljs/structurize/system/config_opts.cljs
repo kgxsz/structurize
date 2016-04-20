@@ -13,7 +13,7 @@
            :host (:host config)
            :tooling {:enabled? true
                      :log? false
-                     :show-in-state-browser? false
+                     :show-in-state-browser? true
                      :max-processed-mutations 50}
            :comms {:chsk-opts {:type :auto
                                :packer :edn}}))

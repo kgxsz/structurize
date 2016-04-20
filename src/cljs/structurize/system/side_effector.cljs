@@ -10,22 +10,14 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; cheeky helpers
 
 
-(defn add-prop [s prop]
-  (if s
-    (conj s prop)
-    #{prop}))
-
-
-(defn remove-prop [s prop]
-  (if s
-    (disj s prop)
-    #{}))
-
-
-(defn toggle-prop [s prop]
-  (if (contains? s prop)
-    (remove-prop s prop)
-    (add-prop s prop)))
+(defn upstream-paths [paths]
+  (->> paths
+       (map drop-last)
+       (remove empty?)
+       (map (partial reductions conj []))
+       (map rest)
+       (apply concat)
+       set))
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; multi-method side-effect handling
@@ -46,14 +38,12 @@
   "Initialise the state browser by marking the cursored nodes."
 
   (let [{:keys [!state-browser-props emit-mutation!]} state
-        cursor-paths (for [c (vals state) :when (instance? rr/RCursor c)] (.-path c))]
+        cursor-paths (into #{} (for [c (vals state) :when (instance? rr/RCursor c)] (.-path c)))]
 
     (emit-mutation! [:tooling/state-browser-init {:cursor !state-browser-props
                                                   :Δ (fn [c]
-                                                       (reduce (fn [a v] (update a v add-prop :cursored))
-                                                               c
-                                                               cursor-paths))}])))
-
+                                                       (assoc c :cursored {:paths cursor-paths
+                                                                           :upstream-paths (upstream-paths cursor-paths)}))}])))
 
 (defmethod process-side-effect :tooling/disable-mutations-throttling
   [{:keys [config-opts state comms browser]} id args]
@@ -83,11 +73,13 @@
 
 (defmethod process-side-effect :tooling/toggle-node-collapsed
   [{:keys [config-opts state comms browser]} id args]
-  (let [{:keys [emit-mutation!]} state
-        {:keys [!node-props]} args]
-
-    (emit-mutation! [:tooling/toggle-node-collapsed {:cursor !node-props
-                                                     :Δ (fn [c] (toggle-prop c :collapsed))}])))
+  (let [{:keys [emit-mutation! !state-browser-props]} state
+        {:keys [path]} args]
+    (emit-mutation! [:tooling/toggle-node-collapsed {:cursor !state-browser-props
+                                                     :Δ (fn [c]
+                                                          (update-in c [:collapsed] #(if (contains? % path)
+                                                                                       (disj % path)
+                                                                                       (conj % path))))}])))
 
 
 (defmethod process-side-effect :tooling/toggle-node-focused
@@ -97,11 +89,9 @@
 
     (emit-mutation! [:tooling/toggle-node-focused {:cursor !state-browser-props
                                                    :Δ (fn [c]
-                                                        (as-> c c
-                                                          (update c path toggle-prop :focused)
-                                                          (reduce (fn [a v] (update a v toggle-prop :upstream-focused))
-                                                                  c
-                                                                  (-> (reductions conj [] path) rest drop-last))))}])))
+                                                        (-> c
+                                                            (update-in [:focused :paths] #(if (empty? %) #{path} #{}))
+                                                            (update-in [:focused :upstream-paths] #(if (empty? %) (upstream-paths #{path}) #{}))))}])))
 
 
 (defmethod process-side-effect :general/general-init

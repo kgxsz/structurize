@@ -11,24 +11,6 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; cheeky helpers
 
 
-(defn add-prop [s prop]
-  (if s
-    (conj s prop)
-    #{prop}))
-
-
-(defn remove-prop [s prop]
-  (if s
-    (disj s prop)
-    #{}))
-
-
-(defn toggle-prop [s prop]
-  (if (contains? s prop)
-    (remove-prop s prop)
-    (add-prop s prop)))
-
-
 (defn map-paths [m]
   (if (or (not (map? m))
           (empty? m))
@@ -46,15 +28,26 @@
      paths)))
 
 
+(defn upstream-paths [paths]
+  (->> paths
+       (map drop-last)
+       (remove empty?)
+       (map (partial reductions conj []))
+       (map rest)
+       (apply concat)
+       set))
+
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; cheeky helpers
 
 
 (defn hydrate-mutation
   "Adds a few useful things to the mutation's properties."
-  [db-before db-after previous-mutation mutation]
+  [db-before db-after mutation]
 
-  (let [[added removed _] (d/diff db-after db-before)
-        mutation-paths (map-paths added)
+  (let [previous-mutation (first (get-in db-before [:tooling :processed-mutations]))
+        [added removed _] (d/diff db-after db-before)
+        mutation-paths (into #{} (map-paths added))
         diff (build-diff added removed)
         [id props] mutation
         hydrated-props (-> props
@@ -73,13 +66,12 @@
   [{:keys [config-opts] :as Φ}]
   (let [max-processed-mutations (get-in config-opts [:tooling :max-processed-mutations])]
 
-    (fn [tooling previous-mutation hydrated-mutation]
-      (let [mutation-paths (:mutation-paths (second hydrated-mutation))
-            previous-paths (:paths (second previous-mutation))]
-        (-> tooling
-            (update-in [:processed-mutations] (comp (partial take max-processed-mutations) (partial cons hydrated-mutation)))
-            (update-in [:state-browser-props] #(reduce (fn [a v] (update a v remove-prop :mutated)) % previous-paths))
-            (update-in [:state-browser-props] #(reduce (fn [a v] (update a v add-prop :mutated)) % mutation-paths)))))))
+    (fn [db hydrated-mutation]
+      (let [mutation-paths (:mutation-paths (second hydrated-mutation))]
+        (-> db
+            (update-in [:tooling :processed-mutations] (comp (partial take max-processed-mutations) (partial cons hydrated-mutation)))
+            (assoc-in [:tooling :state-browser-props :mutated :paths] mutation-paths)
+            (assoc-in [:tooling :state-browser-props :mutated :upstream-paths] (upstream-paths mutation-paths)))))))
 
 
 (defn make-process-tooling-mutation
@@ -120,9 +112,8 @@
             (let [db-before @!db]
               (swap! cursor-or-db Δ)
               (let [db-after @!db
-                    previous-mutation (first (get-in db-before [:tooling :processed-mutations]))
-                    hydrated-mutation (hydrate-mutation db-before db-after previous-mutation mutation)]
-                (swap! !db update-in [:tooling] update-tooling previous-mutation hydrated-mutation)))
+                    hydrated-mutation (hydrate-mutation db-before db-after mutation)]
+                (swap! !db update-tooling hydrated-mutation)))
 
             (swap! cursor-or-db Δ))
 
@@ -220,9 +211,15 @@
                      :throttle-mutations? false
                      :throttled-mutations '()
                      :processed-mutations '()
-                     :state-browser-props {[:tooling :processed-mutations] #{:collapsed}
-                                           [:tooling :throttled-mutations] #{:collapsed}
-                                           [:tooling :state-browser-props] #{:collapsed}}}}))
+                     :state-browser-props {:cursored {:paths #{}
+                                                      :upstream-paths #{}}
+                                           :mutated {:paths #{}
+                                                     :upstream-paths #{}}
+                                           :collapsed #{[:tooling :processed-mutations]
+                                                        [:tooling :throttled-mutations]
+                                                        [:tooling :state-browser-props]}
+                                           :focused {:paths #{}
+                                                     :upstream-paths #{}}}}}))
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; component setup

@@ -12,8 +12,7 @@
   (let [{:keys [!db !state-browser-props]} state
         log? (get-in config-opts [:tooling :log?])
         !node (r/cursor !db path)
-        !node-props (r/cursor !state-browser-props [path])
-        toggle-collapsed #(emit-side-effect! [:tooling/toggle-node-collapsed {:!node-props !node-props}])
+        toggle-collapsed #(emit-side-effect! [:tooling/toggle-node-collapsed {:path path}])
         toggle-focused #(emit-side-effect! [:tooling/toggle-node-focused {:path path}])]
 
     (when log? (log/debug "mount node:" path))
@@ -21,18 +20,35 @@
     (fn [_ _ opts]
       (let [{:keys [tail-braces first? last?]} opts
             node @!node
-            node-props @!node-props
+            {:keys [cursored mutated collapsed focused]} @!state-browser-props
+            collapsed? (contains? collapsed path)
+            cursored? (contains? (:paths cursored) path)
+            upstream-cursored? (contains? (:upstream-paths cursored) path)
+            mutated? (contains? (:paths mutated) path)
+            upstream-mutated? (contains? (:upstream-paths mutated) path)
+            focused?  (contains? (:paths focused) path)
+            upstream-focused? (contains? (:upstream-paths focused) path)
             k (last path)
             v @!node
-            upstream-focused? (contains? node-props :upstream-focused)
-            focused? (contains? node-props :focused)
-            collapsed? (contains? node-props :collapsed)
             collapsed-group-node? (and collapsed?
                                        (map? v)
                                        (not (empty? node)))
             empty-group-node? (and (map? v) (empty? node))
             node-value? (not (map? v))
-            show-tail-braces? (and last? (or collapsed? empty-group-node? node-value?))]
+            show-tail-braces? (and last? (or collapsed? empty-group-node? node-value?))
+            node-key-class (u/->class
+                            (cond-> #{:clickable}
+                              focused? (conj :focused)
+                              upstream-focused? (conj :upstream-focused)
+                              #_cursored? #_(conj :cursored)
+                              #_upstream-cursored? #_(conj :upstream-cursored)
+                              mutated? (conj :mutated)
+                              upstream-mutated? (conj :upstream-mutated)
+                              first? (conj :first)))
+            node-value-class (u/->class (cond-> #{}
+                                          focused? (conj :focused)
+                                          mutated? (conj :mutated)
+                                          upstream-mutated? (conj :upstream-mutated)))]
 
         (when log? (log/debug "render node:" path))
 
@@ -41,19 +57,10 @@
           "{"]
 
 
-         [:div.node-key {:class (u/->class
-                                 (cond-> #{:clickable}
-                                   focused? (conj :focused)
-                                   upstream-focused? (conj :upstream-focused)
-                                   first? (conj :first)))
+         [:div.node-key {:class node-key-class
                          :on-mouse-over (fn [e] (toggle-focused) (.stopPropagation e))
                          :on-mouse-out (fn [e] (toggle-focused) (.stopPropagation e))
                          :on-click (fn [e] (toggle-collapsed) (.stopPropagation e))}
-
-          (when (contains? node-props :cursored)
-            [:div.node-key-flag.cursored [:span.icon.icon-pushpin]])
-          (when (contains? node-props :mutated)
-            [:div.node-key-flag.mutated [:span.icon.icon-star]])
 
           (pr-str k)]
 
@@ -61,7 +68,7 @@
 
            collapsed-group-node? (list [:div.node-brace {:key :opening} "{"]
                                        [:div.node-value.clickable {:key k
-                                                                   :class (when focused? :focused)
+                                                                   :class node-value-class
                                                                    :on-mouse-over (u/without-propagation toggle-focused)
                                                                    :on-mouse-out (u/without-propagation toggle-focused)
                                                                    :on-click (u/without-propagation toggle-focused toggle-collapsed)}
@@ -71,20 +78,20 @@
            empty-group-node? (list [:div.node-brace {:key :opening} "{"]
                                    [:div.node-brace {:key :closing} "}"])
 
-           collapsed? [:div.node-value.clickable {:class (when focused? :focused)
+           collapsed? [:div.node-value.clickable {:class node-value-class
                                                   :on-mouse-over (u/without-propagation toggle-focused)
                                                   :on-mouse-out (u/without-propagation toggle-focused)
                                                   :on-click (u/without-propagation toggle-collapsed)}
                        "~"]
 
-           node-value? [:div.node-value {:class (when focused? :focused)
+           node-value? [:div.node-value {:class node-value-class
                                          :on-mouse-over (u/without-propagation toggle-focused)
                                          :on-mouse-out (u/without-propagation toggle-focused)}
                         (pr-str v)]
 
-           last? [node-group φ path (when focused? {:class :focused}) {:tail-braces (str tail-braces "}")}]
+           last? [node-group φ path {:class node-value-class} {:tail-braces (str tail-braces "}")}]
 
-           :else [node-group φ path (when focused? {:class :focused})])
+           :else [node-group φ path {:class node-value-class} {:tail-braces "}"}])
 
          [:div.node-brace {:class (when-not show-tail-braces? :hidden)}
           tail-braces]]))))
@@ -99,7 +106,7 @@
     (when log? (log/debug "mount node-group:" path))
 
     (fn [_ _ props opts]
-      (let [{:keys [tail-braces] :or {tail-braces "}"}} opts
+      (let [{:keys [tail-braces]} opts
             nodes (cond->> @!nodes
                     (not show-tooling?) (remove (fn [[k _]] (= :tooling k))))
             num-nodes (count nodes)]
@@ -196,7 +203,7 @@
     (fn []
       (when log? (log/debug "render state-browser"))
       [:div.browser.state-browser
-       [node-group φ []]])))
+       [node-group φ [] {:tail-braces "}"}]])))
 
 
 (defn tooling [{:keys [config-opts state emit-side-effect!] :as φ}]
