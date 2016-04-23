@@ -162,7 +162,7 @@
 
 
 (defmethod process-side-effect :default
-  [_ _ _ [id _]]
+  [_ id _]
   (log/debug "failed to process side-effect:" id))
 
 
