@@ -197,18 +197,16 @@
                     :margin-right "2px"}
         [:span {:pointer-events :none}]
         [:&.first {:margin-left 0}]
+        [:&.mutated :&.upstream-mutated {:color (:light-green colours)}]
         [:&.cursored {:background-color (:light-blue colours)
                       :color (:dark-blue colours)}]
-        [:&.upstream-cursored {:background-color (:dark-blue colours)
-                               :color (:light-blue colours)}]
-        [:&.mutated :&.upstream-mutated {:color (:light-green colours)}]
-        [:&.focused :&.upstream-focused {:background-color (:dark-blue colours)
-                                         :color (:light-blue colours)}]]
+        [:&.focused :&.upstream-focused :&.upstream-cursored {:background-color (:dark-blue colours)
+                                                              :color (:light-blue colours)}]]
 
        [:.node-value
         [:&.mutated :&.upstream-mutated {:color (:light-green colours)}]
-        [:&.focused {:background-color (:light-blue colours)
-                     :color (:dark-blue colours)}]]
+        [:&.focused :&.upstream-cursored {:background-color (:light-blue colours)
+                                          :color (:dark-blue colours)}]]
 
        [:.node-group
         [:&.mutated
@@ -246,8 +244,7 @@
        [:&.control-next {:background-color (:light-yellow colours)
                          :color (:dark-yellow  colours)}]]]
 
-     [:.mutation-container {:margin-top "5px"}
-      [:&.throttled-mutation ]]
+     [:.mutation-container {:margin-top "5px"}]
 
      [:.mutation-caption {:margin-left "18px"}
       [:.mutation-caption-symbol {:font-size "1.6rem"
@@ -280,7 +277,21 @@
                           :height "82px"}]
 
      [:.processed-mutations {:display :flex
-                             :padding-right "15px"}]]]])
+                             :padding-right "15px"}]]
+
+
+    [:.cursor-browser {:display :flex
+                       :flex-wrap :wrap
+                       :align-content :flex-start
+                       :height "50px"}
+
+     [:.cursor {:padding "3px 5px"
+                :margin "2px"
+                :border-radius "3px"
+                :background-color (:dark-blue colours)
+                :color (:light-blue colours)}
+      [:&:hover {:background-color (:light-blue colours)
+                 :color (:dark-blue colours)}]]]]])
 
 
 (def main

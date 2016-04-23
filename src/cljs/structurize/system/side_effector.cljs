@@ -32,18 +32,16 @@
     (emit-mutation! [:tooling/toggle-tooling-active {:Δ (fn [c] (update-in c [:tooling :tooling-active?] not))}])))
 
 
-(defmethod process-side-effect :tooling/state-browser-init
+(defmethod process-side-effect :tooling/cursor-browser-init
   [{:keys [config-opts state comms browser]} id args]
 
-  "Initialise the state browser by marking the cursored nodes."
+  "Initialise the cursor browser by collecting the global cursors."
 
-  (let [{:keys [!state-browser-props emit-mutation!]} state
-        cursor-paths (into #{} (for [c (vals state) :when (instance? rr/RCursor c)] (.-path c)))]
+  (let [{:keys [emit-mutation!]} state
+        cursors (for [[k v] state :when (instance? rr/RCursor v)] [k (.-path v)])]
 
-    (emit-mutation! [:tooling/state-browser-init {:cursor !state-browser-props
-                                                  :Δ (fn [c]
-                                                       (assoc c :cursored {:paths cursor-paths
-                                                                           :upstream-paths (upstream-paths cursor-paths)}))}])))
+    (emit-mutation! [:tooling/cursor-browser-init {:Δ (fn [c] (assoc-in c [:tooling :cursors] cursors))}])))
+
 
 (defmethod process-side-effect :tooling/disable-mutations-throttling
   [{:keys [config-opts state comms browser]} id args]
@@ -75,11 +73,24 @@
   [{:keys [config-opts state comms browser]} id args]
   (let [{:keys [emit-mutation! !state-browser-props]} state
         {:keys [path]} args]
+
     (emit-mutation! [:tooling/toggle-node-collapsed {:cursor !state-browser-props
                                                      :Δ (fn [c]
                                                           (update-in c [:collapsed] #(if (contains? % path)
                                                                                        (disj % path)
                                                                                        (conj % path))))}])))
+
+
+(defmethod process-side-effect :tooling/toggle-node-cursored
+  [{:keys [config-opts state comms browser]} id args]
+  (let [{:keys [emit-mutation! !state-browser-props]} state
+        {:keys [path]} args]
+
+    (emit-mutation! [:tooling/toggle-node-cursored {:cursor !state-browser-props
+                                                    :Δ (fn [c]
+                                                         (-> c
+                                                             (update-in [:cursored :paths] #(if (empty? %) #{path} #{}))
+                                                             (update-in [:cursored :upstream-paths] #(if (empty? %) (upstream-paths #{path}) #{}))))}])))
 
 
 (defmethod process-side-effect :tooling/toggle-node-focused

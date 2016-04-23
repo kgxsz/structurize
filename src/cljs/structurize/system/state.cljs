@@ -215,11 +215,10 @@
                                                       :upstream-paths #{}}
                                            :mutated {:paths #{}
                                                      :upstream-paths #{}}
-                                           :collapsed #{[:tooling :processed-mutations]
-                                                        [:tooling :throttled-mutations]
-                                                        [:tooling :state-browser-props]}
+                                           :collapsed #{[:tooling]}
                                            :focused {:paths #{}
-                                                     :upstream-paths #{}}}}}))
+                                                     :upstream-paths #{}}}
+                     :cursors '()}}))
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; component setup
@@ -262,6 +261,7 @@
              :!throttle-mutations? (r/cursor !db [:tooling :throttle-mutations?])
              :!throttled-mutations (r/cursor !db [:tooling :throttled-mutations])
              :!processed-mutations (r/cursor !db [:tooling :processed-mutations])
-             :!state-browser-props (r/cursor !db [:tooling :state-browser-props]))))
+             :!state-browser-props (r/cursor !db [:tooling :state-browser-props])
+             :!cursors (r/cursor !db [:tooling :cursors]))))
 
   (stop [component] component))
