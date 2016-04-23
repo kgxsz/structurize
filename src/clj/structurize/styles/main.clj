@@ -216,22 +216,19 @@
                                    :color (:dark-blue colours)}]]]]]]
 
     [:.mutation-browser {:display :flex
-                         :height "90px"}
+                         :height "70px"}
 
 
-     [:.throttle-controls {:align-self :center
-                           :display :flex
-                           :flex-direction :column
-                           :justify-content :center
-                           :align-items :center
-                           :border-radius "5px"}
+     [:.throttle-controls {:align-self :center}
 
+      [:.throttle-control-row {:display :flex}]
       [:.throttle-control {:display :flex
+                           :background-color (:grey-c colours)
                            :align-items :center
                            :justify-content :center
                            :height "24px"
                            :width "24px"
-                           :margin "3px 0"
+                           :margin "2px"
                            :border-radius "12px"
                            :opacity 0.3}
 
@@ -241,8 +238,8 @@
                          :color (:dark-green colours)}]
        [:&.control-pause {:background-color (:light-red colours)
                           :color (:dark-red colours)}]
-       [:&.control-next {:background-color (:light-yellow colours)
-                         :color (:dark-yellow  colours)}]]]
+       [:&.control-next :&.control-previous {:background-color (:light-yellow colours)
+                                             :color (:dark-yellow  colours)}]]]
 
      [:.mutation-container {:margin-top "5px"}]
 
@@ -274,7 +271,7 @@
                           :border-color (:grey-a colours)
                           :align-items :center
                           :width "0px"
-                          :height "82px"}]
+                          :height "64px"}]
 
      [:.processed-mutations {:display :flex
                              :padding-right "15px"}]]
@@ -283,7 +280,7 @@
     [:.cursor-browser {:display :flex
                        :flex-wrap :wrap
                        :align-content :flex-start
-                       :height "50px"}
+                       :height "55px"}
 
      [:.cursor {:padding "3px 5px"
                 :margin "2px"

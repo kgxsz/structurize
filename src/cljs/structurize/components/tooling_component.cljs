@@ -143,25 +143,35 @@
         [:div.browser.mutation-browser
 
          [:div.throttle-controls
-          [:div.throttle-control.control-play {:class (if throttle-mutations? :clickable :active)
-                                               :on-click (when throttle-mutations?
-                                                           (u/without-propagation
-                                                            #(emit-side-effect! [:tooling/disable-mutations-throttling])))}
-           [:span.icon.icon-control-play]]
-
-          [:div.throttle-control.control-pause {:class (if throttle-mutations? :active :clickable)
-                                                :on-click (when-not throttle-mutations?
+          [:div.throttle-control-row
+           [:div.throttle-control.control-play {:class (if throttle-mutations? :clickable :active)
+                                                :on-click (when throttle-mutations?
                                                             (u/without-propagation
-                                                             #(emit-side-effect! [:tooling/enable-mutations-throttling])))}
+                                                             #(emit-side-effect! [:tooling/disable-mutations-throttling])))}
+            [:span.icon.icon-control-play]]
 
-           [:span.icon.icon-control-pause]]
-          [:div.throttle-control.control-next.clickable {:class (when throttle-mutations? :active)
-                                                         :on-click (if throttle-mutations?
-                                                                     (u/without-propagation
-                                                                      #(emit-side-effect! [:tooling/admit-next-throttled-mutation]))
-                                                                     (u/without-propagation
-                                                                      #(emit-side-effect! [:tooling/enable-mutations-throttling])))}
-           [:span.icon.icon-control-next]]]
+           [:div.throttle-control.control-pause {:class (if throttle-mutations? :active :clickable)
+                                                 :on-click (when-not throttle-mutations?
+                                                             (u/without-propagation
+                                                              #(emit-side-effect! [:tooling/enable-mutations-throttling])))}
+
+            [:span.icon.icon-control-pause]]]
+          [:div.throttle-control-row
+           [:div.throttle-control.control-previous.clickable {:class (when throttle-mutations? :active)
+                                                              :on-click (if throttle-mutations?
+                                                                          (u/without-propagation
+                                                                           #(emit-side-effect! [:tooling/admit-previous-throttled-mutation]))
+                                                                          (u/without-propagation
+                                                                           #(emit-side-effect! [:tooling/enable-mutations-throttling])))}
+            [:span.icon.icon-control-prev]]
+
+           [:div.throttle-control.control-next.clickable {:class (when throttle-mutations? :active)
+                                                          :on-click (if throttle-mutations?
+                                                                      (u/without-propagation
+                                                                       #(emit-side-effect! [:tooling/admit-next-throttled-mutation]))
+                                                                      (u/without-propagation
+                                                                       #(emit-side-effect! [:tooling/enable-mutations-throttling])))}
+            [:span.icon.icon-control-next]]]]
 
          (when throttle-mutations?
            [:div.throttle-divider])
