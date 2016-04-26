@@ -216,19 +216,24 @@
                                    :color (:dark-blue colours)}]]]]]]
 
     [:.mutation-browser {:display :flex
-                         :height "70px"}
+                         :height "90px"}
 
+     [:.mutation-browser-divider {:align-self :center
+                                  :margin-left "12px"
+                                  :border "solid 1px"
+                                  :border-radius "4px"
+                                  :border-color (:grey-a colours)
+                                  :align-items :center
+                                  :width "0px"
+                                  :height "82px"}]
 
-     [:.throttle-controls {:align-self :center}
-
-      [:.throttle-control-row {:display :flex}]
-      [:.throttle-control {:display :flex
-                           :background-color (:grey-c colours)
+     [:.time-controls {:align-self :center}
+      [:.time-control {:display :flex
                            :align-items :center
                            :justify-content :center
                            :height "24px"
                            :width "24px"
-                           :margin "2px"
+                           :margin "4px"
                            :border-radius "12px"
                            :opacity 0.3}
 
@@ -236,8 +241,6 @@
 
        [:&.control-play {:background-color (:light-green colours)
                          :color (:dark-green colours)}]
-       [:&.control-pause {:background-color (:light-red colours)
-                          :color (:dark-red colours)}]
        [:&.control-next :&.control-previous {:background-color (:light-yellow colours)
                                              :color (:dark-yellow  colours)}]]]
 
@@ -257,21 +260,12 @@
                   :border-radius "3px"
                   :height "100%"}
 
-      [:&.throttled-mutation {:background-color (:light-yellow colours)
+      [:&.timed-mutation {:background-color (:light-yellow colours)
                               :color (:dark-yellow colours)}]
-      [:&.no-throttled-mutation {:background-color :transparent
+      [:&.no-timed-mutation {:background-color :transparent
                                  :color (:white-b colours)}]
       [:&.processed-mutation {:background-color (:light-green colours)
                               :color (:dark-green colours)}]]
-
-     [:.throttle-divider {:align-self :center
-                          :margin-left "12px"
-                          :border "solid 1px"
-                          :border-radius "4px"
-                          :border-color (:grey-a colours)
-                          :align-items :center
-                          :width "0px"
-                          :height "64px"}]
 
      [:.processed-mutations {:display :flex
                              :padding-right "15px"}]]

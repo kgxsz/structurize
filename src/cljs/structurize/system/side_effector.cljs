@@ -43,32 +43,6 @@
     (emit-mutation! [:tooling/cursor-browser-init {:Δ (fn [c] (assoc-in c [:tooling :cursors] cursors))}])))
 
 
-(defmethod process-side-effect :tooling/disable-mutations-throttling
-  [{:keys [config-opts state comms browser]} id args]
-
-  "Disables mutation throttling, ensure that
-   all outstanding mutations are flushed out."
-
-  (let [{:keys [!throttle-mutations? emit-mutation! admit-throttled-mutations!]} state]
-
-    (admit-throttled-mutations!)
-    (emit-mutation! [:tooling/disable-throttle-mutations {:cursor !throttle-mutations?
-                                                          :Δ (constantly false)}])))
-
-
-(defmethod process-side-effect :tooling/enable-mutations-throttling
-  [{:keys [config-opts state comms browser]} id args]
-  (let [{:keys [!throttle-mutations? emit-mutation!]} state]
-    (emit-mutation! [:tooling/disable-throttle-mutations {:cursor !throttle-mutations?
-                                                          :Δ (constantly true)}])))
-
-
-(defmethod process-side-effect :tooling/admit-next-throttled-mutation
-  [{:keys [config-opts state comms browser]} id args]
-  (let [{:keys [admit-throttled-mutations!]} state]
-    (admit-throttled-mutations! 1)))
-
-
 (defmethod process-side-effect :tooling/toggle-node-collapsed
   [{:keys [config-opts state comms browser]} id args]
   (let [{:keys [emit-mutation! !state-browser-props]} state
@@ -103,6 +77,39 @@
                                                         (-> c
                                                             (update-in [:focused :paths] #(if (empty? %) #{path} #{}))
                                                             (update-in [:focused :upstream-paths] #(if (empty? %) (upstream-paths #{path}) #{}))))}])))
+
+
+(defmethod process-side-effect :tooling/back-in-time
+  [{:keys [config-opts state comms browser]} id args]
+  (let [{:keys [emit-mutation!]} state]
+
+    (emit-mutation! [:tooling/back-in-time {:Δ (fn [c]
+                                                 (let [processed-mutations (get-in c [:tooling :processed-mutations])
+                                                       latest-processed-mutation (first processed-mutations)
+                                                       second-latest-processed-mutation (second processed-mutations)
+                                                       [_ {:keys [diff]}] latest-processed-mutation
+                                                       [_ {:keys [mutation-paths upstream-mutation-paths]}] second-latest-processed-mutation]
+                                                   (as-> c c
+                                                       (update-in c [:tooling :unprocessed-mutations] conj latest-processed-mutation)
+                                                       (update-in c [:tooling :processed-mutations] rest)
+                                                       (assoc-in c [:tooling :state-browser-props :mutated :paths] mutation-paths)
+                                                       (assoc-in c [:tooling :state-browser-props :mutated :upstream-paths] upstream-mutation-paths)
+                                                       (reduce (fn [c [path {:keys [before]}]] (assoc-in c path before)) c diff))))}])))
+
+
+(defmethod process-side-effect :tooling/forward-in-time
+  [{:keys [config-opts state comms browser]} id args]
+  (let [{:keys [emit-mutation!]} state]
+
+    (emit-mutation! [:tooling/forward-in-time {:Δ (fn [c]
+                                                    (let [next-unprocessed-mutation (first (get-in c [:tooling :unprocessed-mutations]))
+                                                          [_ {:keys [mutation-paths upstream-mutation-paths diff]}] next-unprocessed-mutation]
+                                                      (as-> c c
+                                                          (update-in c [:tooling :processed-mutations] conj next-unprocessed-mutation)
+                                                          (update-in c [:tooling :unprocessed-mutations] rest)
+                                                          (assoc-in c [:tooling :state-browser-props :mutated :paths] mutation-paths)
+                                                          (assoc-in c [:tooling :state-browser-props :mutated :upstream-paths] upstream-mutation-paths)
+                                                          (reduce (fn [c [path {:keys [after]}]] (assoc-in c path after)) c diff))))}])))
 
 
 (defmethod process-side-effect :general/general-init
@@ -171,11 +178,21 @@
 
 (defn make-emit-side-effect
   "Returns a function that receives a side-effect and processes it appropriately via multimethods"
-  [Φ]
+  [{:keys [config-opts state] :as Φ}]
   (fn [[id args :as side-effect]]
-    (let [log? (not= (namespace id) "tooling")]
-      (when log? (log/debug "emitting side-effect:" id))
-      (process-side-effect Φ id args))))
+    (let [{:keys [!db]} state
+          tooling? (= (namespace id) "tooling")
+          real-time? (empty? (get-in @!db [:tooling :unprocessed-mutations]))]
+
+      (if real-time?
+
+        (let [log? (or (not tooling?) (get-in config-opts [:general :tooling :log?]))]
+          (when log? (log/debug "emitting side-effect:" id))
+          (process-side-effect Φ id args))
+
+        (if tooling?
+          (process-side-effect Φ id args)
+          (log/debug "while time travelling, ignoring side-effect:" id))))))
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; component setup

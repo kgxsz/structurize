@@ -127,68 +127,56 @@
 
 
 (defn mutation-browser [{:keys [config-opts state emit-side-effect!] :as φ}]
-  (let [{:keys [!throttle-mutations? !throttled-mutations !processed-mutations]} state
+  (let [{:keys [!db]} state
+        !processed-mutations (r/cursor !db [:tooling :processed-mutations])
+        !unprocessed-mutations (r/cursor !db [:tooling :unprocessed-mutations])
         log? (get-in config-opts [:tooling :log?])]
 
     (when log? (log/debug "mount mutation-browser"))
 
     (fn []
-      (let [throttle-mutations? @!throttle-mutations?
-            throttled-mutations @!throttled-mutations
-            processed-mutations @!processed-mutations
-            no-throttled-mutations? (empty? throttled-mutations)]
+      (let [processed-mutations @!processed-mutations
+            unprocessed-mutations @!unprocessed-mutations
+            real-time? (empty? unprocessed-mutations)
+            beginning-of-time? (empty? processed-mutations)]
 
         (when log? (log/debug "render mutation-browser"))
 
         [:div.browser.mutation-browser
+         [:div.time-controls
+          [:div.time-control.control-play {:class (when real-time? :active)}
+           [:span.icon.icon-control-play]]
 
-         [:div.throttle-controls
-          [:div.throttle-control-row
-           [:div.throttle-control.control-play {:class (if throttle-mutations? :clickable :active)
-                                                :on-click (when throttle-mutations?
-                                                            (u/without-propagation
-                                                             #(emit-side-effect! [:tooling/disable-mutations-throttling])))}
-            [:span.icon.icon-control-play]]
+          [:div.time-control.control-previous {:class (u/->class (cond-> #{}
+                                                                   (not real-time?) (conj :active)
+                                                                   (not beginning-of-time?) (conj :clickable)))
+                                               :on-click (when-not beginning-of-time?
+                                                           (u/without-propagation
+                                                            #(emit-side-effect! [:tooling/back-in-time])))}
+           [:span.icon.icon-control-prev]]
 
-           [:div.throttle-control.control-pause {:class (if throttle-mutations? :active :clickable)
-                                                 :on-click (when-not throttle-mutations?
-                                                             (u/without-propagation
-                                                              #(emit-side-effect! [:tooling/enable-mutations-throttling])))}
+          [:div.time-control.control-next {:class (when-not real-time? (u/->class #{:active :clickable}))
+                                           :on-click (when-not real-time?
+                                                       (u/without-propagation
+                                                        #(emit-side-effect! [:tooling/forward-in-time])))}
+           [:span.icon.icon-control-next]]]
 
-            [:span.icon.icon-control-pause]]]
-          [:div.throttle-control-row
-           [:div.throttle-control.control-previous.clickable {:class (when throttle-mutations? :active)
-                                                              :on-click (if throttle-mutations?
-                                                                          (u/without-propagation
-                                                                           #(emit-side-effect! [:tooling/admit-previous-throttled-mutation]))
-                                                                          (u/without-propagation
-                                                                           #(emit-side-effect! [:tooling/enable-mutations-throttling])))}
-            [:span.icon.icon-control-prev]]
+         #_(when time-mutations?
+             [:div.time-divider])
 
-           [:div.throttle-control.control-next.clickable {:class (when throttle-mutations? :active)
-                                                          :on-click (if throttle-mutations?
-                                                                      (u/without-propagation
-                                                                       #(emit-side-effect! [:tooling/admit-next-throttled-mutation]))
-                                                                      (u/without-propagation
-                                                                       #(emit-side-effect! [:tooling/enable-mutations-throttling])))}
-            [:span.icon.icon-control-next]]]]
-
-         (when throttle-mutations?
-           [:div.throttle-divider])
-
-         (when throttle-mutations?
-           [:div.mutation-container.throttled-mutation
+         #_(when time-mutations?
+           [:div.mutation-container.timed-mutation
             [:div.mutation-caption
              [:span.mutation-caption-symbol "Δ"]
              [:span.mutation-caption-subscript "next"]]
             [:div.mutation-shell
-             (if no-throttled-mutations?
-               [:div.mutation.no-throttled-mutation
-                "no throttled mutations"]
-               [:div.mutation.throttled-mutation
-                (pr-str (first (last throttled-mutations)))])]])
+             (if no-timed-mutations?
+               [:div.mutation.no-timed-mutation
+                "no timed mutations"]
+               [:div.mutation.timed-mutation
+                (pr-str (first (last timed-mutations)))])]])
 
-         [:div.throttle-divider]
+         [:div.mutation-browser-divider]
 
          [:div.processed-mutations
           (doall

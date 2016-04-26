@@ -48,6 +48,7 @@
   (let [previous-mutation (first (get-in db-before [:tooling :processed-mutations]))
         [added removed _] (d/diff db-after db-before)
         mutation-paths (into #{} (map-paths added))
+        upstream-mutation-paths (upstream-paths mutation-paths)
         diff (build-diff added removed)
         [id props] mutation
         hydrated-props (-> props
@@ -55,7 +56,10 @@
                            (assoc :processed (t/now)
                                   :n (inc (:n (second previous-mutation) 0))
                                   :diff diff
-                                  :mutation-paths mutation-paths))]
+                                  :mutation-paths mutation-paths
+                                  :upstream-mutation-paths upstream-mutation-paths))]
+    (log/warn added)
+    (log/warn removed)
     (log/warn mutation-paths)
     (log/warn diff)
     [id hydrated-props]))
@@ -67,11 +71,11 @@
   (let [max-processed-mutations (get-in config-opts [:tooling :max-processed-mutations])]
 
     (fn [db hydrated-mutation]
-      (let [mutation-paths (:mutation-paths (second hydrated-mutation))]
+      (let [[_ {:keys [mutation-paths upstream-mutation-paths]}] hydrated-mutation]
         (-> db
             (update-in [:tooling :processed-mutations] (comp (partial take max-processed-mutations) (partial cons hydrated-mutation)))
             (assoc-in [:tooling :state-browser-props :mutated :paths] mutation-paths)
-            (assoc-in [:tooling :state-browser-props :mutated :upstream-paths] (upstream-paths mutation-paths)))))))
+            (assoc-in [:tooling :state-browser-props :mutated :upstream-paths] upstream-mutation-paths))))))
 
 
 (defn make-process-tooling-mutation
@@ -102,27 +106,28 @@
         tooling-enabled? (get-in config-opts [:tooling :enabled?])]
 
     (fn [mutation]
-      (let [[id {:keys [cursor Δ]}] mutation]
+      (let [[id {:keys [cursor Δ]}] mutation
+            real-time? (empty? (get-in @!db [:tooling :unprocessed-mutations]))]
 
-        (log/debug "processing mutation:" id)
+        (if real-time?
 
-        (if-let [cursor-or-db (and Δ (or cursor !db))]
+          (do
+            (log/debug "processing mutation:" id)
 
-          (if tooling-enabled?
-            (let [db-before @!db]
-              (swap! cursor-or-db Δ)
-              (let [db-after @!db
-                    hydrated-mutation (hydrate-mutation db-before db-after mutation)]
-                (swap! !db update-tooling hydrated-mutation)))
+            (if-let [cursor-or-db (and Δ (or cursor !db))]
 
-            (swap! cursor-or-db Δ))
+              (if tooling-enabled?
+                (let [db-before @!db]
+                  (swap! cursor-or-db Δ)
+                  (let [db-after @!db
+                        hydrated-mutation (hydrate-mutation db-before db-after mutation)]
+                    (swap! !db update-tooling hydrated-mutation)))
 
-          (log/error "failed to process mutation:" id))))))
+                (swap! cursor-or-db Δ))
 
+              (log/error "failed to process mutation:" id)))
 
-(defn throttle-mutation [[id _ :as mutation] !db]
-  (log/debug "throttling mutation:" id)
-  (swap! !db update-in [:tooling :throttled-mutations] conj mutation))
+          (log/debug "while time travelling, ignoring mutation:" id))))))
 
 
 (defn make-emit-mutation
@@ -141,58 +146,20 @@
       (go (a/>! <mutation mutation)))))
 
 
-(defn make-admit-throttled-mutations
-
-  "Returns a function that puts onto the admit throttled mutations channel.
-   If n is defined, then up to n throttled mutations will be admitted, if n
-   is not defined, then all throttled mutations will be admitted."
-
-  [<admit-throttled-mutations]
-  (fn [n]
-    (go (a/>! <admit-throttled-mutations (or n :all)))))
-
-
 (defn listen-for-emit-mutation
 
   "Listens for activity on the <mutation channel, upon which the received
-   mutation will be either processed as a tooling mutation, throttled,
-   or processed normally."
+   mutation will be either processed as a tooling mutation or processed normally."
 
   [{:keys [!db] :as Φ} <mutation process-mutation process-tooling-mutation]
 
   (go-loop []
-    (let [[id props :as mutation] (a/<! <mutation)
-          tooling? (= (namespace id) "tooling")
-          throttle-mutations? (get-in @!db [:tooling :throttle-mutations?])]
-      (cond
-        tooling? (process-tooling-mutation mutation)
-        throttle-mutations? (throttle-mutation mutation !db)
-        :else (process-mutation mutation)))
+    (let [[id _ :as mutation] (a/<! <mutation)
+          tooling? (= (namespace id) "tooling")]
+      (if tooling?
+        (process-tooling-mutation mutation)
+        (process-mutation mutation)))
     (recur)))
-
-
-(defn listen-for-admit-throttled-mutations
-
-  "Listens for activity on the <admit-throttled-mutation channel, upon which
-   n or all throttled mutations will be processed."
-
-  [{:keys [!db] :as Φ} <admit-throttled-mutations process-mutation]
-
-  (go-loop []
-    (let [n (a/<! <admit-throttled-mutations)
-          throttled-mutations (get-in @!db [:tooling :throttled-mutations])
-          n-mutations (count throttled-mutations)]
-
-      (if (zero? n-mutations)
-        (log/debug "no throttled mutations to admit")
-
-        (let [n (if (integer? n) n n-mutations)]
-          (log/debugf "admitting %s throttled mutation(s)" n)
-          (swap! !db update-in [:tooling :throttled-mutations] (partial drop-last n))
-          (doseq [mutation (reverse (take-last n throttled-mutations))] (process-mutation mutation)))))
-
-    (recur)))
-
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; db setup
@@ -202,14 +169,13 @@
   (r/atom {:playground {:heart 0
                         :star 3}
            :location {:path nil
-                      :handler :unknown-page
+                      :handler :unknown
                       :query nil}
            :comms {:chsk-status :init
                    :message {}
                    :post {}}
            :tooling {:tooling-active? true
-                     :throttle-mutations? false
-                     :throttled-mutations '()
+                     :unprocessed-mutations '()
                      :processed-mutations '()
                      :state-browser-props {:cursored {:paths #{}
                                                       :upstream-paths #{}}
@@ -230,36 +196,23 @@
   (start [component]
     (log/info "initialising state")
     (let [!db (make-db config-opts)
-
           <mutations (a/chan)
-          <admit-throttled-mutations (a/chan)
-
           emit-mutation! (make-emit-mutation <mutations)
-          admit-throttled-mutations! (make-admit-throttled-mutations <admit-throttled-mutations)
-
           Φ {:config-opts config-opts
              :!db !db}
-
           process-mutation (make-process-mutation Φ)
           process-tooling-mutation (make-process-tooling-mutation Φ)]
 
       (log/info "begin listening for emitted mutations")
       (listen-for-emit-mutation Φ <mutations process-mutation process-tooling-mutation)
 
-      (log/info "begin listening for admittance of throttled mutations")
-      (listen-for-admit-throttled-mutations Φ <admit-throttled-mutations process-mutation)
-
       (assoc component
              :!db !db
-
              :emit-mutation! emit-mutation!
-             :admit-throttled-mutations! admit-throttled-mutations!
 
              :!handler (r/cursor !db [:location :handler])
              :!query (r/cursor !db [:location :query])
              :!chsk-status (r/cursor !db [:comms :chsk-status])
-             :!throttle-mutations? (r/cursor !db [:tooling :throttle-mutations?])
-             :!throttled-mutations (r/cursor !db [:tooling :throttled-mutations])
              :!processed-mutations (r/cursor !db [:tooling :processed-mutations])
              :!state-browser-props (r/cursor !db [:tooling :state-browser-props])
              :!cursors (r/cursor !db [:tooling :cursors]))))

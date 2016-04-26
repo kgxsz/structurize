@@ -11,10 +11,10 @@
 (defn make-system []
   (-> (component/system-map
        :config-opts (map->ConfigOpts {})
+       :state (map->State {})
        :browser (map->Browser {})
        :comms (map->Comms {})
        :side-effector (map->SideEffector {})
-       :state (map->State {})
        :renderer (map->Renderer {}))
       (component/system-using
        {:state [:config-opts]
