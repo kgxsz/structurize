@@ -12,24 +12,22 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; components
 
 
-(defn sign-in-with-github [{:keys [config-opts state emit-side-effect!] :as Φ}]
-  (let [{:keys [!db]} state]
+(defn sign-in-with-github [{:keys [config-opts !db emit-side-effect!] :as Φ}]
+  (log/debug "mount/render sign-in-with-github")
 
-    (log/debug "mount/render sign-in-with-github")
+  (let [!message-status (r/cursor !db [:comms :message :sign-in/init-sign-in-with-github :status])
+        !message-reply (r/cursor !db [:comms :message :sign-in/init-sign-in-with-github :reply])]
 
-    (let [!message-status (r/cursor !db [:comms :message :sign-in/init-sign-in-with-github :status])
-          !message-reply (r/cursor !db [:comms :message :sign-in/init-sign-in-with-github :reply])]
+    (when (= :reply-received @!message-status)
+      (let [{:keys [client-id attempt-id scope]} @!message-reply]
+        (emit-side-effect! [:general/redirect-to-github {:client-id client-id
+                                                         :attempt-id attempt-id
+                                                         :scope scope}])))
 
-      (when (= :reply-received @!message-status)
-        (let [{:keys [client-id attempt-id scope]} @!message-reply]
-          (emit-side-effect! [:general/redirect-to-github {:client-id client-id
-                                                           :attempt-id attempt-id
-                                                           :scope scope}])))
-
-      [:div.button.clickable {:on-click (u/without-propagation
-                                         #(emit-side-effect! [:general/init-sign-in-with-github]))}
-       [:span.button-icon.icon-github]
-       [:span.button-text "sign in with GitHub"]])))
+    [:div.button.clickable {:on-click (u/without-propagation
+                                       #(emit-side-effect! [:general/init-sign-in-with-github]))}
+     [:span.button-icon.icon-github]
+     [:span.button-text "sign in with GitHub"]]))
 
 
 (defn sign-out [{:keys [state emit-side-effect!] :as Φ}]
@@ -43,9 +41,8 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; top level pages
 
 
-(defn home-page [{:keys [config-opts state emit-side-effect!] :as Φ}]
-  (let [{:keys [!db]} state
-        !me (r/cursor !db [:comms :message :general/init :reply :me])
+(defn home-page [{:keys [config-opts !db emit-side-effect!] :as Φ}]
+  (let [!me (r/cursor !db [:comms :message :general/init :reply :me])
         !star (r/cursor !db [:playground :star])
         !heart (r/cursor !db [:playground :heart])]
 
@@ -85,8 +82,8 @@
            [:span.button-text heart]]]]))))
 
 
-(defn sign-in-with-github-page [{:keys [state emit-side-effect!] :as Φ}]
-  (let [{:keys [!db !query]} state
+(defn sign-in-with-github-page [{:keys [!db emit-side-effect!] :as Φ}]
+  (let [!query (r/cursor !db [:location :query])
         {:keys [code error] attempt-id :state} @!query
         !post-status (r/cursor !db [:comms :post "/sign-in/github" :status])]
 
@@ -148,11 +145,11 @@
 
   "The page is charged with mounting the relevant page, given the current handler."
 
-  [{:keys [state] :as Φ}]
+  [{:keys [!db] :as Φ}]
 
   (log/debug "mount/render page-container")
 
-  (let [{:keys [!handler]} state
+  (let [!handler (r/cursor !db [:location :handler])
         handler @!handler]
 
     (case handler
@@ -167,9 +164,9 @@
    It will send a message to the server to receive the initialising data required by the top
    level components. It will wait until a reply is received before mounting the page. "
 
-  [{:keys [config-opts state emit-side-effect!] :as Φ}]
+  [{:keys [config-opts !db emit-side-effect!] :as Φ}]
 
-  (let [{:keys [!db !chsk-status]} state
+  (let [!chsk-status (r/cursor !db [:comms :chsk-status])
         !message-reply (r/cursor !db [:comms :message :general/init :reply])]
 
     (log/debug "mount root")

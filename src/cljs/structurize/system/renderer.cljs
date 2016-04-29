@@ -18,7 +18,6 @@
   (start [component]
     (log/info "initialising renderer")
     (render-root! {:config-opts config-opts
-                   :state state
                    :!db (:!db state)
                    :emit-side-effect! (:emit-side-effect! side-effector)})
     component)

@@ -268,21 +268,7 @@
                               :color (:dark-green colours)}]]
 
      [:.processed-mutations {:display :flex
-                             :padding-right "15px"}]]
-
-
-    [:.cursor-browser {:display :flex
-                       :flex-wrap :wrap
-                       :align-content :flex-start
-                       :height "55px"}
-
-     [:.cursor {:padding "3px 5px"
-                :margin "2px"
-                :border-radius "3px"
-                :background-color (:dark-blue colours)
-                :color (:light-blue colours)}
-      [:&:hover {:background-color (:light-blue colours)
-                 :color (:dark-blue colours)}]]]]])
+                             :padding-right "15px"}]]]])
 
 
 (def main

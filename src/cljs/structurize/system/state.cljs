@@ -208,10 +208,6 @@
 
       (assoc component
              :!db !db
-             :emit-mutation! emit-mutation!
-
-             :!handler (r/cursor !db [:location :handler])
-             :!query (r/cursor !db [:location :query])
-             :!chsk-status (r/cursor !db [:comms :chsk-status]))))
+             :emit-mutation! emit-mutation!)))
 
   (stop [component] component))
