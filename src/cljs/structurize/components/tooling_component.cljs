@@ -8,10 +8,10 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; state-browser components
 
 
-(defn node [{:keys [config-opts state emit-side-effect!] :as φ} path _]
-  (let [{:keys [!db !state-browser-props]} state
-        log? (get-in config-opts [:tooling :log?])
+(defn node [{:keys [config-opts !db emit-side-effect!] :as φ} path _]
+  (let [log? (get-in config-opts [:tooling :log?])
         !node (r/cursor !db path)
+        !state-browser-props (r/cursor !db [:tooling :state-browser-props])
         toggle-collapsed #(emit-side-effect! [:tooling/toggle-node-collapsed {:path path}])
         toggle-focused #(emit-side-effect! [:tooling/toggle-node-focused {:path path}])]
 
@@ -98,9 +98,8 @@
           tail-braces]]))))
 
 
-(defn node-group [{:keys [config-opts state] :as φ} path _ _]
-  (let [{:keys [!db]} state
-        log? (get-in config-opts [:tooling :log?])
+(defn node-group [{:keys [config-opts !db] :as φ} path _ _]
+  (let [log? (get-in config-opts [:tooling :log?])
         !nodes (r/cursor !db path)]
 
     (when log? (log/debug "mount node-group:" path))
@@ -126,9 +125,8 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; top-level components
 
 
-(defn mutation-browser [{:keys [config-opts state emit-side-effect!] :as φ}]
-  (let [{:keys [!db]} state
-        !processed-mutations (r/cursor !db [:tooling :processed-mutations])
+(defn mutation-browser [{:keys [config-opts !db emit-side-effect!] :as φ}]
+  (let [!processed-mutations (r/cursor !db [:tooling :processed-mutations])
         !unprocessed-mutations (r/cursor !db [:tooling :unprocessed-mutations])
         log? (get-in config-opts [:tooling :log?])]
 
@@ -191,7 +189,7 @@
 
 
 
-(defn state-browser [{:keys [config-opts state emit-side-effect!] :as φ}]
+(defn state-browser [{:keys [config-opts] :as φ}]
   (let [log? (get-in config-opts [:tooling :log?])]
 
     (when log? (log/debug "mount state-browser"))
@@ -202,28 +200,8 @@
        [node-group φ [] {:tail-braces "}"}]])))
 
 
-(defn cursor-browser [{:keys [config-opts state emit-side-effect!] :as φ}]
-  (let [{:keys [!cursors]} state
-        log? (get-in config-opts [:tooling :log?])
-        toggle-cursored (fn [path] (emit-side-effect! [:tooling/toggle-node-cursored {:path path}]))]
-
-    (when log? (log/debug "mount cursor-browser"))
-    (emit-side-effect! [:tooling/cursor-browser-init])
-
-    (fn []
-      (let [cursors @!cursors]
-        (when log? (log/debug "render cursor-browser"))
-        [:div.browser.cursor-browser
-         (for [[key path] cursors]
-           [:div.cursor.clickable {:key key
-                                   :on-mouse-over (u/without-propagation #(toggle-cursored path))
-                                   :on-mouse-out (u/without-propagation #(toggle-cursored path))}
-            (pr-str key)])]))))
-
-
-(defn tooling [{:keys [config-opts state emit-side-effect!] :as φ}]
-  (let [{:keys [!db]} state
-        log? (get-in config-opts [:tooling :log?])
+(defn tooling [{:keys [config-opts !db emit-side-effect!] :as φ}]
+  (let [log? (get-in config-opts [:tooling :log?])
         !tooling-active? (r/cursor !db [:tooling :tooling-active?])]
 
     (when log? (log/debug "mount tooling"))
@@ -241,5 +219,4 @@
          (when tooling-active?
            [:div.browsers
             [mutation-browser φ]
-            [state-browser φ]
-            [cursor-browser φ]])]))))
+            [state-browser φ]])]))))

@@ -212,9 +212,6 @@
 
              :!handler (r/cursor !db [:location :handler])
              :!query (r/cursor !db [:location :query])
-             :!chsk-status (r/cursor !db [:comms :chsk-status])
-             :!processed-mutations (r/cursor !db [:tooling :processed-mutations])
-             :!state-browser-props (r/cursor !db [:tooling :state-browser-props])
-             :!cursors (r/cursor !db [:tooling :cursors]))))
+             :!chsk-status (r/cursor !db [:comms :chsk-status]))))
 
   (stop [component] component))
