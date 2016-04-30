@@ -29,7 +29,7 @@
 (defmethod process-side-effect :tooling/toggle-tooling-active
   [{:keys [config-opts state comms browser]} id args]
   (let [{:keys [emit-mutation!]} state]
-    (emit-mutation! [:tooling/toggle-tooling-active {:Δ (fn [c] (update-in c [:tooling :tooling-active?] not))}])))
+    (emit-mutation! [:tooling/toggle-tooling-active {:Δ (fn [db] (update-in db [:tooling :tooling-active?] not))}])))
 
 
 (defmethod process-side-effect :tooling/cursor-browser-init
@@ -40,76 +40,73 @@
   (let [{:keys [emit-mutation!]} state
         cursors (for [[k v] state :when (instance? rr/RCursor v)] [k (.-path v)])]
 
-    (emit-mutation! [:tooling/cursor-browser-init {:Δ (fn [c] (assoc-in c [:tooling :cursors] cursors))}])))
+    (emit-mutation! [:tooling/cursor-browser-init {:Δ (fn [db] (assoc-in db [:tooling :cursors] cursors))}])))
 
 
 (defmethod process-side-effect :tooling/toggle-node-collapsed
   [{:keys [config-opts state comms browser]} id args]
-  (let [{:keys [emit-mutation! !state-browser-props]} state
+  (let [{:keys [emit-mutation!]} state
         {:keys [path]} args]
 
-    (emit-mutation! [:tooling/toggle-node-collapsed {:cursor !state-browser-props
-                                                     :Δ (fn [c]
-                                                          (update-in c [:collapsed] #(if (contains? % path)
-                                                                                       (disj % path)
-                                                                                       (conj % path))))}])))
+    (emit-mutation! [:tooling/toggle-node-collapsed {:Δ (fn [db]
+                                                          (update-in db [:tooling :state-browser-props :collapsed] #(if (contains? % path)
+                                                                                                                      (disj % path)
+                                                                                                                      (conj % path))))}])))
 
 
 (defmethod process-side-effect :tooling/toggle-node-cursored
   [{:keys [config-opts state comms browser]} id args]
-  (let [{:keys [emit-mutation! !state-browser-props]} state
+  (let [{:keys [emit-mutation!]} state
         {:keys [path]} args]
 
-    (emit-mutation! [:tooling/toggle-node-cursored {:cursor !state-browser-props
-                                                    :Δ (fn [c]
-                                                         (-> c
-                                                             (update-in [:cursored :paths] #(if (empty? %) #{path} #{}))
-                                                             (update-in [:cursored :upstream-paths] #(if (empty? %) (upstream-paths #{path}) #{}))))}])))
+    (emit-mutation! [:tooling/toggle-node-cursored {:Δ (fn [db]
+                                                         (-> db
+                                                             (update-in [:tooling :state-browser-props :cursored :paths] #(if (empty? %) #{path} #{}))
+                                                             (update-in [:tooling :state--browser-props :cursored :upstream-paths] #(if (empty? %) (upstream-paths #{path}) #{}))))}])))
 
 
 (defmethod process-side-effect :tooling/toggle-node-focused
   [{:keys [config-opts state comms browser]} id args]
-  (let [{:keys [!state-browser-props emit-mutation!]} state
+  (let [{:keys [emit-mutation!]} state
         {:keys [path]} args]
 
-    (emit-mutation! [:tooling/toggle-node-focused {:cursor !state-browser-props
-                                                   :Δ (fn [c]
-                                                        (-> c
-                                                            (update-in [:focused :paths] #(if (empty? %) #{path} #{}))
-                                                            (update-in [:focused :upstream-paths] #(if (empty? %) (upstream-paths #{path}) #{}))))}])))
+    (emit-mutation! [:tooling/toggle-node-focused {:Δ (fn [db]
+                                                        (-> db
+                                                            (update-in [:tooling :state-browser-props :focused :paths] #(if (empty? %) #{path} #{}))
+                                                            (update-in [:tooling :state-browser-props :focused :upstream-paths] #(if (empty? %) (upstream-paths #{path}) #{}))))}])))
 
 
 (defmethod process-side-effect :tooling/back-in-time
   [{:keys [config-opts state comms browser]} id args]
   (let [{:keys [emit-mutation!]} state]
 
-    (emit-mutation! [:tooling/back-in-time {:Δ (fn [c]
-                                                 (let [processed-mutations (get-in c [:tooling :processed-mutations])
+    (emit-mutation! [:tooling/back-in-time {:Δ (fn [db]
+                                                 (let [processed-mutations (get-in db [:tooling :processed-mutations])
                                                        latest-processed-mutation (first processed-mutations)
                                                        second-latest-processed-mutation (second processed-mutations)
                                                        [_ {:keys [diff]}] latest-processed-mutation
                                                        [_ {:keys [mutation-paths upstream-mutation-paths]}] second-latest-processed-mutation]
-                                                   (as-> c c
-                                                       (update-in c [:tooling :unprocessed-mutations] conj latest-processed-mutation)
-                                                       (update-in c [:tooling :processed-mutations] rest)
-                                                       (assoc-in c [:tooling :state-browser-props :mutated :paths] mutation-paths)
-                                                       (assoc-in c [:tooling :state-browser-props :mutated :upstream-paths] upstream-mutation-paths)
-                                                       (reduce (fn [c [path {:keys [before]}]] (assoc-in c path before)) c diff))))}])))
+                                                   (as-> db db
+                                                       (update-in db [:tooling :unprocessed-mutations] conj latest-processed-mutation)
+                                                       (update-in db [:tooling :processed-mutations] rest)
+                                                       (assoc-in db [:tooling :state-browser-props :mutated :paths] mutation-paths)
+                                                       (assoc-in db [:tooling :state-browser-props :mutated :upstream-paths] upstream-mutation-paths)
+                                                       (reduce (fn [db [path {:keys [before]}]] (assoc-in db path before)) db diff))))}])))
 
 
 (defmethod process-side-effect :tooling/forward-in-time
   [{:keys [config-opts state comms browser]} id args]
   (let [{:keys [emit-mutation!]} state]
 
-    (emit-mutation! [:tooling/forward-in-time {:Δ (fn [c]
-                                                    (let [next-unprocessed-mutation (first (get-in c [:tooling :unprocessed-mutations]))
+    (emit-mutation! [:tooling/forward-in-time {:Δ (fn [db]
+                                                    (let [next-unprocessed-mutation (first (get-in db [:tooling :unprocessed-mutations]))
                                                           [_ {:keys [mutation-paths upstream-mutation-paths diff]}] next-unprocessed-mutation]
-                                                      (as-> c c
-                                                          (update-in c [:tooling :processed-mutations] conj next-unprocessed-mutation)
-                                                          (update-in c [:tooling :unprocessed-mutations] rest)
-                                                          (assoc-in c [:tooling :state-browser-props :mutated :paths] mutation-paths)
-                                                          (assoc-in c [:tooling :state-browser-props :mutated :upstream-paths] upstream-mutation-paths)
-                                                          (reduce (fn [c [path {:keys [after]}]] (assoc-in c path after)) c diff))))}])))
+                                                      (as-> db db
+                                                          (update-in db [:tooling :processed-mutations] conj next-unprocessed-mutation)
+                                                          (update-in db [:tooling :unprocessed-mutations] rest)
+                                                          (assoc-in db [:tooling :state-browser-props :mutated :paths] mutation-paths)
+                                                          (assoc-in db [:tooling :state-browser-props :mutated :upstream-paths] upstream-mutation-paths)
+                                                          (reduce (fn [db [path {:keys [after]}]] (assoc-in db path after)) db diff))))}])))
 
 
 (defmethod process-side-effect :general/general-init
@@ -163,9 +160,9 @@
 (defmethod process-side-effect :playground/inc-item
   [{:keys [config-opts state comms browser]} id args]
   (let [{:keys [emit-mutation!]} state
-        {:keys [cursor item-name]} args
+        {:keys [path item-name]} args
         mutation-id (keyword  (str "playground/inc-" item-name))]
-    (emit-mutation! [mutation-id {:cursor cursor :Δ inc}])))
+    (emit-mutation! [mutation-id {:Δ (fn [db] (update-in db path inc))}])))
 
 
 (defmethod process-side-effect :default

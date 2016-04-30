@@ -106,7 +106,7 @@
         tooling-enabled? (get-in config-opts [:tooling :enabled?])]
 
     (fn [mutation]
-      (let [[id {:keys [cursor Δ]}] mutation
+      (let [[id {:keys [Δ]}] mutation
             real-time? (empty? (get-in @!db [:tooling :unprocessed-mutations]))]
 
         (if real-time?
@@ -114,18 +114,14 @@
           (do
             (log/debug "processing mutation:" id)
 
-            (if-let [cursor-or-db (and Δ (or cursor !db))]
+            (if tooling-enabled?
+              (let [db-before @!db]
+                (swap! !db Δ)
+                (let [db-after @!db
+                      hydrated-mutation (hydrate-mutation db-before db-after mutation)]
+                  (swap! !db update-tooling hydrated-mutation)))
 
-              (if tooling-enabled?
-                (let [db-before @!db]
-                  (swap! cursor-or-db Δ)
-                  (let [db-after @!db
-                        hydrated-mutation (hydrate-mutation db-before db-after mutation)]
-                    (swap! !db update-tooling hydrated-mutation)))
-
-                (swap! cursor-or-db Δ))
-
-              (log/error "failed to process mutation:" id)))
+              (swap! !db Δ)))
 
           (log/debug "while time travelling, ignoring mutation:" id))))))
 

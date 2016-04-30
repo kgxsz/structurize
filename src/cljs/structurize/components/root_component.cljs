@@ -73,11 +73,13 @@
             [sign-out Φ]
             [sign-in-with-github Φ])
           [:div.button.clickable {:on-click (u/without-propagation
-                                             #(emit-side-effect! [:playground/inc-item {:cursor !star :item-name "star"}]))}
+                                             #(emit-side-effect! [:playground/inc-item {:path [:playground :star]
+                                                                                        :item-name "star"}]))}
            [:span.button-icon.icon-star]
            [:span.button-text star]]
           [:div.button.clickable {:on-click (u/without-propagation
-                                             #(emit-side-effect! [:playground/inc-item {:cursor !heart :item-name "heart"}]))}
+                                             #(emit-side-effect! [:playground/inc-item {:path [:playground :heart]
+                                                                                        :item-name "heart"}]))}
            [:span.button-icon.icon-heart]
            [:span.button-text heart]]]]))))
 
