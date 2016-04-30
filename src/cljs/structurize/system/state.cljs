@@ -1,41 +1,18 @@
 (ns structurize.system.state
-  (:require [com.stuartsierra.component :as component]
-            [reagent.core :as r]
+  (:require [structurize.system.system-utils :as u]
             [cljs-time.core :as t]
-            [cljs.core.async :as a]
             [clojure.data :as d]
-            [taoensso.timbre :as log])
-  (:require-macros [cljs.core.async.macros :refer [go go-loop]]))
-
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; cheeky helpers
-
-
-(defn map-paths [m]
-  (if (or (not (map? m))
-          (empty? m))
-    '(())
-    (for [[k v] m
-          subkey (map-paths v)]
-      (cons k subkey))))
+            [com.stuartsierra.component :as component]
+            [reagent.core :as r]
+            [taoensso.timbre :as log]))
 
 
 (defn build-diff [added removed]
-  (let [paths (set (concat (map-paths added) (map-paths removed)))]
+  (let [paths (set (concat (u/map-paths added) (u/map-paths removed)))]
     (reduce
      (fn [a path] (assoc a path {:before (get-in removed path) :after (get-in added path)}))
      {}
      paths)))
-
-
-(defn upstream-paths [paths]
-  (->> paths
-       (map drop-last)
-       (remove empty?)
-       (map (partial reductions conj []))
-       (map rest)
-       (apply concat)
-       set))
 
 
 (defn make-emit-mutation* [{:keys [config-opts !db]}]
@@ -63,8 +40,8 @@
                                   (let [post-Δ-db (Δ db)
                                         previous-mutation (first (get-in db [:tooling :processed-mutations]))
                                         [added removed _] (d/diff post-Δ-db db)
-                                        mutation-paths (into #{} (map-paths added))
-                                        upstream-mutation-paths (upstream-paths mutation-paths)
+                                        mutation-paths (into #{} (u/map-paths added))
+                                        upstream-mutation-paths (u/upstream-paths mutation-paths)
                                         diff (build-diff added removed)
                                         updated-props (-> props
                                                           (dissoc :Δ)

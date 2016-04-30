@@ -1,23 +1,9 @@
 (ns structurize.system.side-effector
-  (:require [bidi.bidi :as b]
+  (:require [structurize.routes :refer [routes]]
+            [structurize.system.system-utils :as u]
+            [bidi.bidi :as b]
             [com.stuartsierra.component :as component]
-            [structurize.routes :refer [routes]]
-            [reagent.ratom :as rr]
-            [taoensso.timbre :as log])
-  (:require-macros [cljs.core.async.macros :refer [go go-loop]]))
-
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; cheeky helpers
-
-
-(defn upstream-paths [paths]
-  (->> paths
-       (map drop-last)
-       (remove empty?)
-       (map (partial reductions conj []))
-       (map rest)
-       (apply concat)
-       set))
+            [taoensso.timbre :as log]))
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; multi-method side-effect handling
@@ -47,7 +33,7 @@
     (emit-mutation! [:tooling/toggle-node-cursored {:Δ (fn [db]
                                                          (-> db
                                                              (update-in [:tooling :state-browser-props :cursored :paths] #(if (empty? %) #{path} #{}))
-                                                             (update-in [:tooling :state--browser-props :cursored :upstream-paths] #(if (empty? %) (upstream-paths #{path}) #{}))))}])))
+                                                             (update-in [:tooling :state--browser-props :cursored :upstream-paths] #(if (empty? %) (u/upstream-paths #{path}) #{}))))}])))
 
 
 (defmethod process-side-effect :tooling/toggle-node-focused
@@ -56,7 +42,7 @@
     (emit-mutation! [:tooling/toggle-node-focused {:Δ (fn [db]
                                                         (-> db
                                                             (update-in [:tooling :state-browser-props :focused :paths] #(if (empty? %) #{path} #{}))
-                                                            (update-in [:tooling :state-browser-props :focused :upstream-paths] #(if (empty? %) (upstream-paths #{path}) #{}))))}])))
+                                                            (update-in [:tooling :state-browser-props :focused :upstream-paths] #(if (empty? %) (u/upstream-paths #{path}) #{}))))}])))
 
 
 (defmethod process-side-effect :tooling/back-in-time
