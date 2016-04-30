@@ -38,124 +38,54 @@
        set))
 
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; cheeky helpers
+(defn make-emit-mutation* [{:keys [config-opts !db]}]
+  (let [log? (get-in config-opts [:general :tooling :log?])
+        tooling-disabled? (not (get-in config-opts [:tooling :enabled?]))
+        max-processed-mutations (get-in config-opts [:tooling :max-processed-mutations])]
 
+    (fn [[id {:keys [Δ] :as props} :as mutation]]
 
-(defn hydrate-mutation
-  "Adds a few useful things to the mutation's properties."
-  [db-before db-after mutation]
-
-  (let [previous-mutation (first (get-in db-before [:tooling :processed-mutations]))
-        [added removed _] (d/diff db-after db-before)
-        mutation-paths (into #{} (map-paths added))
-        upstream-mutation-paths (upstream-paths mutation-paths)
-        diff (build-diff added removed)
-        [id props] mutation
-        hydrated-props (-> props
-                           (dissoc :Δ)
-                           (assoc :processed (t/now)
-                                  :n (inc (:n (second previous-mutation) 0))
-                                  :diff diff
-                                  :mutation-paths mutation-paths
-                                  :upstream-mutation-paths upstream-mutation-paths))]
-    (log/warn added)
-    (log/warn removed)
-    (log/warn mutation-paths)
-    (log/warn diff)
-    [id hydrated-props]))
-
-
-(defn make-update-tooling
-
-  [{:keys [config-opts] :as Φ}]
-  (let [max-processed-mutations (get-in config-opts [:tooling :max-processed-mutations])]
-
-    (fn [db hydrated-mutation]
-      (let [[_ {:keys [mutation-paths upstream-mutation-paths]}] hydrated-mutation]
-        (-> db
-            (update-in [:tooling :processed-mutations] (comp (partial take max-processed-mutations) (partial cons hydrated-mutation)))
-            (assoc-in [:tooling :state-browser-props :mutated :paths] mutation-paths)
-            (assoc-in [:tooling :state-browser-props :mutated :upstream-paths] upstream-mutation-paths))))))
-
-
-(defn make-process-tooling-mutation
-
-  "Returns a function that operates on state with the mutating function (Δ) provided in the mutation.
-   However, it expects tooling mutations only, so they are treated differently than regular mutations."
-
-  [{:keys [config-opts !db] :as Φ}]
-
-  (let [log? (get-in config-opts [:general :tooling :log?])]
-
-    (fn [mutation]
-      (let [[id {:keys [cursor Δ]}] mutation]
-
-        (when log? (log/debug "processing tooling mutation:" id))
-
-        (if-let [cursor-or-db (and Δ (or cursor !db))]
-          (do
-            (swap! cursor-or-db Δ))
-          (log/error "failed to process tooling mutation:" id))))))
-
-
-(defn make-process-mutation
-  "Returns a function that operates on state with the mutating function (Δ) provided in the mutation."
-  [{:keys [config-opts !db] :as Φ}]
-
-  (let [update-tooling (make-update-tooling Φ)
-        tooling-enabled? (get-in config-opts [:tooling :enabled?])]
-
-    (fn [mutation]
-      (let [[id {:keys [Δ]}] mutation
+      (let [tooling-mutation? (= (namespace id) "tooling")
             real-time? (empty? (get-in @!db [:tooling :unprocessed-mutations]))]
 
-        (if real-time?
+        (when (or (not tooling-mutation?) log?)
+          (log/debug "processing mutation:" id))
 
-          (do
-            (log/debug "processing mutation:" id)
+        (cond
+          ;; tooling related mutations get swapped in no matter what
+          tooling-mutation? (swap! !db Δ)
 
-            (if tooling-enabled?
-              (let [db-before @!db]
-                (swap! !db Δ)
-                (let [db-after @!db
-                      hydrated-mutation (hydrate-mutation db-before db-after mutation)]
-                  (swap! !db update-tooling hydrated-mutation)))
+          ;; if tooling is disabled, swap in without any mutation decoration
+          tooling-disabled? (swap! !db Δ)
 
-              (swap! !db Δ)))
+          ;; only swap if we're in real time, apply the mutation Δ and any tooling related information
+          real-time? (swap! !db (fn [db]
+                                  (let [post-Δ-db (Δ db)
+                                        previous-mutation (first (get-in db [:tooling :processed-mutations]))
+                                        [added removed _] (d/diff post-Δ-db db)
+                                        mutation-paths (into #{} (map-paths added))
+                                        upstream-mutation-paths (upstream-paths mutation-paths)
+                                        diff (build-diff added removed)
+                                        updated-props (-> props
+                                                          (dissoc :Δ)
+                                                          (assoc :processed (t/now)
+                                                                 :n (inc (:n (second previous-mutation) 0))
+                                                                 :diff diff
+                                                                 :mutation-paths mutation-paths
+                                                                 :upstream-mutation-paths upstream-mutation-paths))
+                                        updated-mutation [id updated-props]]
 
-          (log/debug "while time travelling, ignoring mutation:" id))))))
+                                    (log/warn added)
+                                    (log/warn removed)
+                                    (log/warn mutation-paths)
+                                    (log/warn diff)
 
+                                    (-> post-Δ-db
+                                        (update-in [:tooling :processed-mutations] (comp (partial take max-processed-mutations) (partial cons updated-mutation)))
+                                        (assoc-in [:tooling :state-browser-props :mutated :paths] mutation-paths)
+                                        (assoc-in [:tooling :state-browser-props :mutated :upstream-paths] upstream-mutation-paths)))))
 
-(defn make-emit-mutation
-
-  "Returns a function that emits a mutation onto the mutation channel.
-
-   mutations are vectors made up of the following:
-   id - the id of the mutation
-   cursor - if included, will operate on the cursor into the state, if not, will operate on the db
-   Δ - a function that takes the db or the cursor and produces the desired change in state. "
-
-  [<mutation]
-
-  (fn [[id props]]
-    (let [mutation [id (assoc props :emitted-at (t/now))]]
-      (go (a/>! <mutation mutation)))))
-
-
-(defn listen-for-emit-mutation
-
-  "Listens for activity on the <mutation channel, upon which the received
-   mutation will be either processed as a tooling mutation or processed normally."
-
-  [{:keys [!db] :as Φ} <mutation process-mutation process-tooling-mutation]
-
-  (go-loop []
-    (let [[id _ :as mutation] (a/<! <mutation)
-          tooling? (= (namespace id) "tooling")]
-      (if tooling?
-        (process-tooling-mutation mutation)
-        (process-mutation mutation)))
-    (recur)))
+          :else (log/debug "while time travelling, ignoring mutation:" id))))))
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; db setup
@@ -179,8 +109,7 @@
                                                      :upstream-paths #{}}
                                            :collapsed #{[:tooling]}
                                            :focused {:paths #{}
-                                                     :upstream-paths #{}}}
-                     :cursors '()}}))
+                                                     :upstream-paths #{}}}}}))
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; component setup
@@ -191,19 +120,9 @@
 
   (start [component]
     (log/info "initialising state")
-    (let [!db (make-db config-opts)
-          <mutations (a/chan)
-          emit-mutation! (make-emit-mutation <mutations)
-          Φ {:config-opts config-opts
-             :!db !db}
-          process-mutation (make-process-mutation Φ)
-          process-tooling-mutation (make-process-tooling-mutation Φ)]
-
-      (log/info "begin listening for emitted mutations")
-      (listen-for-emit-mutation Φ <mutations process-mutation process-tooling-mutation)
-
+    (let [!db (make-db config-opts)]
       (assoc component
              :!db !db
-             :emit-mutation! emit-mutation!)))
+             :emit-mutation! (make-emit-mutation* {:config-opts config-opts :!db !db}))))
 
   (stop [component] component))
