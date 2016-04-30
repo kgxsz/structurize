@@ -12,7 +12,7 @@
     (assoc component
            :host (:host config)
            :tooling {:enabled? true
-                     :log? true
+                     :log? false
                      :max-processed-mutations 50}
            :comms {:chsk-opts {:type :auto
                                :packer :edn}}))

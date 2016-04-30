@@ -13,21 +13,27 @@
 
 
 (defn sign-in-with-github [{:keys [config-opts !db emit-side-effect!] :as Φ}]
-  (log/debug "mount/render sign-in-with-github")
+  (log/debug "mount sign-in-with-github")
 
-  (let [!message-status (r/cursor !db [:comms :message :sign-in/init-sign-in-with-github :status])
-        !message-reply (r/cursor !db [:comms :message :sign-in/init-sign-in-with-github :reply])]
+  (let [!reply-received? (r/track #(= :reply-received (get-in @!db [:comms :message :sign-in/init-sign-in-with-github :status])))
+        !message-reply (r/track #(get-in @!db [:comms :message :sign-in/init-sign-in-with-github :reply]))]
 
-    (when (= :reply-received @!message-status)
-      (let [{:keys [client-id attempt-id scope]} @!message-reply]
-        (emit-side-effect! [:general/redirect-to-github {:client-id client-id
-                                                         :attempt-id attempt-id
-                                                         :scope scope}])))
+    (fn []
+      (let [reply-received? @!reply-received?
+            message-reply @!message-reply]
 
-    [:div.button.clickable {:on-click (u/without-propagation
-                                       #(emit-side-effect! [:general/init-sign-in-with-github]))}
-     [:span.button-icon.icon-github]
-     [:span.button-text "sign in with GitHub"]]))
+        (log/debug "render sign-in-with-github")
+
+        (when reply-received?
+          (let [{:keys [client-id attempt-id scope]} message-reply]
+            (emit-side-effect! [:general/redirect-to-github {:client-id client-id
+                                                             :attempt-id attempt-id
+                                                             :scope scope}]))))
+
+      [:div.button.clickable {:on-click (u/without-propagation
+                                         #(emit-side-effect! [:general/init-sign-in-with-github]))}
+       [:span.button-icon.icon-github]
+       [:span.button-text "sign in with GitHub"]])))
 
 
 (defn sign-out [{:keys [state emit-side-effect!] :as Φ}]
@@ -42,9 +48,9 @@
 
 
 (defn home-page [{:keys [config-opts !db emit-side-effect!] :as Φ}]
-  (let [!me (r/cursor !db [:comms :message :general/init :reply :me])
-        !star (r/cursor !db [:playground :star])
-        !heart (r/cursor !db [:playground :heart])]
+  (let [!me (r/track #(get-in @!db [:comms :message :general/init :reply :me]))
+        !star (r/track #(get-in @!db [:playground :star]))
+        !heart (r/track #(get-in @!db [:playground :heart]))]
 
     (log/debug "mount home-page")
 
@@ -85,43 +91,50 @@
 
 
 (defn sign-in-with-github-page [{:keys [!db emit-side-effect!] :as Φ}]
-  (let [!query (r/cursor !db [:location :query])
-        {:keys [code error] attempt-id :state} @!query
-        !post-status (r/cursor !db [:comms :post "/sign-in/github" :status])]
+  (let [!query (r/track #(get-in @!db [:location :query]))
+        !response-received? (r/track #(= :response-received (get-in @!db [:comms :post "/sign-in/github" :status])))
+        !post-failed? (r/track #(= :failed (get-in @!db [:comms :post "/sign-in/github" :status])))]
 
-    (log/debug "mount/render sign-in-with-github-page")
+    (log/debug "mount sign-in-with-github-page")
 
-    (cond
-      (and code attempt-id) (emit-side-effect! [:general/sign-in-with-github {:code code, :attempt-id attempt-id}])
-      (= :response-received @!post-status) (emit-side-effect! [:general/change-location {:path (b/path-for routes :home)}]))
+    (fn []
+      (let [{:keys [code error] attempt-id :state} @!query
+            response-received? @!response-received?
+            post-failed? @!post-failed?]
 
-    (if (or error (= :failed @!post-status))
+        (log/debug "render sign-in-with-github-page")
 
-      [:div.page
-       [:div.hero
-        [:div.hero-visual
-         [:span.icon.icon-github]
-         [:span.hero-visual-divider "+"]
-         [:span.icon.icon-poop]]
-        [:h1.hero-caption "Sign in with GitHub failed"]]
+        (cond
+          (and code attempt-id) (emit-side-effect! [:general/sign-in-with-github {:code code, :attempt-id attempt-id}])
+          response-received? (emit-side-effect! [:general/change-location {:path (b/path-for routes :home)}]))
 
-       [:div.options-section
-        [:div.button.clickable {:on-click (u/without-propagation
-                                           #(emit-side-effect! [:general/change-location {:path (b/path-for routes :home)}]))}
-         [:span.button-icon.icon-home]
-         [:span.button-text "go home"]]]]
+        (if (or error post-failed?)
 
-      [:div.page.sign-in-with-github-page
-       [:div.hero
-        [:div.hero-visual
-         [:span.icon.icon-github]
-         [:span.hero-visual-divider "+"]
-         [:span.icon.icon-clock]]
-        [:h1.hero-caption "Signing you in with GitHub"]]])))
+          [:div.page
+           [:div.hero
+            [:div.hero-visual
+             [:span.icon.icon-github]
+             [:span.hero-visual-divider "+"]
+             [:span.icon.icon-poop]]
+            [:h1.hero-caption "Sign in with GitHub failed"]]
+
+           [:div.options-section
+            [:div.button.clickable {:on-click (u/without-propagation
+                                               #(emit-side-effect! [:general/change-location {:path (b/path-for routes :home)}]))}
+             [:span.button-icon.icon-home]
+             [:span.button-text "go home"]]]]
+
+          [:div.page.sign-in-with-github-page
+           [:div.hero
+            [:div.hero-visual
+             [:span.icon.icon-github]
+             [:span.hero-visual-divider "+"]
+             [:span.icon.icon-clock]]
+            [:h1.hero-caption "Signing you in with GitHub"]]])))))
 
 
 (defn unknown-page [{:keys [emit-side-effect!] :as Φ}]
-  (log/debug "mount/render unkown-page")
+  (log/debug "render unkown-page")
 
   [:div.page
    [:div.hero
@@ -137,7 +150,7 @@
 
 
 (defn loading [φ]
-  (log/debug "mount/render loading")
+  (log/debug "render loading")
   [:div.loading
    [:span.icon.icon-coffee-cup]
    [:h5.loading-caption "loading"]])
@@ -149,15 +162,19 @@
 
   [{:keys [!db] :as Φ}]
 
-  (log/debug "mount/render page-container")
+  (log/debug "mount page-container")
 
-  (let [!handler (r/cursor !db [:location :handler])
-        handler @!handler]
+  (let [!handler (r/track #(get-in @!db [:location :handler]))]
 
-    (case handler
-      :home [home-page Φ]
-      :sign-in-with-github [sign-in-with-github-page Φ]
-      :unknown [unknown-page Φ])))
+    (fn []
+      (let [handler @!handler]
+
+        (log/debug "render page-container")
+
+        (case handler
+          :home [home-page Φ]
+          :sign-in-with-github [sign-in-with-github-page Φ]
+          :unknown [unknown-page Φ])))))
 
 
 (defn root
@@ -168,15 +185,15 @@
 
   [{:keys [config-opts !db emit-side-effect!] :as Φ}]
 
-  (let [!chsk-status (r/cursor !db [:comms :chsk-status])
-        !message-reply (r/cursor !db [:comms :message :general/init :reply])]
+  (let [tooling-enabled? (get-in config-opts [:tooling :enabled?])
+        !chsk-status-open? (r/track #(= :open (get-in @!db [:comms :chsk-status])))
+        !initialising? (r/track #(nil? (get-in @!db [:comms :message :general/init :reply])))]
 
     (log/debug "mount root")
 
     (fn []
-      (let [chsk-status-open? (= :open @!chsk-status)
-            initialising? (nil? @!message-reply)
-            tooling-enabled? (get-in config-opts [:tooling :enabled?])]
+      (let [chsk-status-open? @!chsk-status-open?
+            initialising? @!initialising?]
 
         (log/debug "render root")
 
