@@ -10,8 +10,12 @@
 
 (defn node [{:keys [config-opts !db emit-side-effect!] :as φ} path _]
   (let [log? (get-in config-opts [:tooling :log?])
-        !node (r/cursor !db path)
-        !state-browser-props (r/cursor !db [:tooling :state-browser-props])
+        !node (r/track #(get-in @!db path))
+        !collapsed? (r/track #(contains? (get-in @!db [:tooling :state-browser-props :collapsed]) path))
+        !mutated? (r/track #(contains? (get-in @!db [:tooling :state-browser-props :mutated :paths]) path))
+        !upstream-mutated? (r/track #(contains? (get-in @!db [:tooling :state-browser-props :mutated :upstream-paths]) path))
+        !focused? (r/track #(contains? (get-in @!db [:tooling :state-browser-props :focused :paths]) path))
+        !upstream-focused? (r/track #(contains? (get-in @!db [:tooling :state-browser-props :focused :upstream-paths]) path))
         toggle-collapsed #(emit-side-effect! [:tooling/toggle-node-collapsed {:path path}])
         toggle-focused #(emit-side-effect! [:tooling/toggle-node-focused {:path path}])]
 
@@ -20,14 +24,11 @@
     (fn [_ _ opts]
       (let [{:keys [tail-braces first? last?]} opts
             node @!node
-            {:keys [cursored mutated collapsed focused]} @!state-browser-props
-            collapsed? (contains? collapsed path)
-            cursored? (contains? (:paths cursored) path)
-            upstream-cursored? (contains? (:upstream-paths cursored) path)
-            mutated? (contains? (:paths mutated) path)
-            upstream-mutated? (contains? (:upstream-paths mutated) path)
-            focused?  (contains? (:paths focused) path)
-            upstream-focused? (contains? (:upstream-paths focused) path)
+            collapsed? @!collapsed?
+            mutated? @!mutated?
+            upstream-mutated? @!upstream-mutated?
+            focused? @!focused?
+            upstream-focused? @!upstream-focused?
             k (last path)
             v @!node
             collapsed-group-node? (and collapsed?
@@ -40,16 +41,13 @@
                             (cond-> #{:clickable}
                               focused? (conj :focused)
                               upstream-focused? (conj :upstream-focused)
-                              cursored? (conj :cursored)
-                              upstream-cursored? (conj :upstream-cursored)
                               mutated? (conj :mutated)
                               upstream-mutated? (conj :upstream-mutated)
                               first? (conj :first)))
             node-value-class (u/->class (cond-> #{}
                                           focused? (conj :focused)
                                           mutated? (conj :mutated)
-                                          upstream-mutated? (conj :upstream-mutated)
-                                          upstream-cursored? (conj :upstream-cursored)))]
+                                          upstream-mutated? (conj :upstream-mutated)))]
 
         (when log? (log/debug "render node:" path))
 
@@ -100,7 +98,7 @@
 
 (defn node-group [{:keys [config-opts !db] :as φ} path _ _]
   (let [log? (get-in config-opts [:tooling :log?])
-        !nodes (r/cursor !db path)]
+        !nodes (r/track #(get-in @!db path))]
 
     (when log? (log/debug "mount node-group:" path))
 
@@ -126,16 +124,15 @@
 
 
 (defn mutation-browser [{:keys [config-opts !db emit-side-effect!] :as φ}]
-  (let [!processed-mutations (r/cursor !db [:tooling :processed-mutations])
-        !unprocessed-mutations (r/cursor !db [:tooling :unprocessed-mutations])
+  (let [!processed-mutations (r/track #(get-in @!db [:tooling :processed-mutations]))
+        !real-time? (r/track #(empty? (get-in @!db [:tooling :unprocessed-mutations])))
         log? (get-in config-opts [:tooling :log?])]
 
     (when log? (log/debug "mount mutation-browser"))
 
     (fn []
       (let [processed-mutations @!processed-mutations
-            unprocessed-mutations @!unprocessed-mutations
-            real-time? (empty? unprocessed-mutations)
+            real-time? @!real-time?
             beginning-of-time? (empty? processed-mutations)]
 
         (when log? (log/debug "render mutation-browser"))
@@ -202,7 +199,7 @@
 
 (defn tooling [{:keys [config-opts !db emit-side-effect!] :as φ}]
   (let [log? (get-in config-opts [:tooling :log?])
-        !tooling-active? (r/cursor !db [:tooling :tooling-active?])]
+        !tooling-active? (r/track #(get-in @!db [:tooling :tooling-active?]))]
 
     (when log? (log/debug "mount tooling"))
 
