@@ -80,9 +80,7 @@
            :tooling {:tooling-active? true
                      :unprocessed-mutations '()
                      :processed-mutations '()
-                     :state-browser-props {:cursored {:paths #{}
-                                                      :upstream-paths #{}}
-                                           :mutated {:paths #{}
+                     :state-browser-props {:mutated {:paths #{}
                                                      :upstream-paths #{}}
                                            :collapsed #{[:tooling]}
                                            :focused {:paths #{}
