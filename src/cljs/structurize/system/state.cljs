@@ -1,18 +1,23 @@
 (ns structurize.system.state
   (:require [structurize.system.system-utils :as u]
             [cljs-time.core :as t]
-            [clojure.data :as d]
+            [clojure.data :as data]
+            [clojure.set :as set]
             [com.stuartsierra.component :as component]
             [reagent.core :as r]
             [taoensso.timbre :as log]))
 
 
-(defn build-diff [added removed]
-  (let [paths (set (concat (u/map-paths added) (u/map-paths removed)))]
-    (reduce
-     (fn [a path] (assoc a path {:before (get-in removed path) :after (get-in added path)}))
-     {}
-     paths)))
+(defn extract-excluded-mutation-paths [mutation-paths]
+
+  )
+
+
+(defn build-diff [added removed mutation-paths]
+  (reduce
+   (fn [a path] (assoc a path {:before (get-in removed path) :after (get-in added path)}))
+   {}
+   mutation-paths))
 
 
 (defn make-emit-mutation* [{:keys [config-opts !db]}]
@@ -39,10 +44,18 @@
           real-time? (swap! !db (fn [db]
                                   (let [post-Δ-db (Δ db)
                                         previous-mutation (first (get-in db [:tooling :processed-mutations]))
-                                        [added removed _] (d/diff post-Δ-db db)
-                                        mutation-paths (into #{} (u/map-paths added))
+                                        [added removed _] (data/diff post-Δ-db db)
+                                        mutation-paths (into #{} (concat (u/map-paths removed) (u/map-paths added)))
+                                        excluded-mutation-paths (into #{} (for [primary-path mutation-paths
+                                                                                secondary-path mutation-paths
+                                                                                :when (and (not= primary-path secondary-path)
+                                                                                           (> (count primary-path) (count secondary-path))
+                                                                                           (->> (map vector primary-path secondary-path)
+                                                                                                (remove (fn [[a b]] (= a b)))
+                                                                                                empty?))]
+                                                                            primary-path))
                                         upstream-mutation-paths (u/upstream-paths mutation-paths)
-                                        diff (build-diff added removed)
+                                        diff (build-diff added removed (set/difference mutation-paths excluded-mutation-paths))
                                         updated-props (-> props
                                                           (dissoc :Δ)
                                                           (assoc :processed (t/now)
@@ -52,10 +65,16 @@
                                                                  :upstream-mutation-paths upstream-mutation-paths))
                                         updated-mutation [id updated-props]]
 
-                                    (log/warn added)
-                                    (log/warn removed)
-                                    (log/warn mutation-paths)
-                                    (log/warn diff)
+                                    (log/warn "---------------------------------")
+                                    (log/warn "removed:" removed)
+                                    (log/warn "added:" added)
+                                    (log/warn "---------------------------------")
+                                    (log/warn "all paths:" mutation-paths)
+                                    (log/warn "---------------------------------")
+                                    (log/warn "excluded paths:" excluded-mutation-paths)
+                                    (log/warn "---------------------------------")
+                                    (log/warn "diff" diff)
+                                    (log/warn "---------------------------------")
 
                                     (-> post-Δ-db
                                         (update-in [:tooling :processed-mutations] (comp (partial take max-processed-mutations) (partial cons updated-mutation)))
@@ -70,7 +89,8 @@
 
 (defn make-db [config-opts]
   (r/atom {:playground {:heart 0
-                        :star 3}
+                        :star 3
+                        :edit :false}
            :location {:path nil
                       :handler :unknown
                       :query nil}
