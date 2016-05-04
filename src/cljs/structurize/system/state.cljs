@@ -8,9 +8,27 @@
             [taoensso.timbre :as log]))
 
 
-(defn extract-excluded-mutation-paths [mutation-paths]
+(defn map-paths [m]
+  (if (or (not (map? m)) (empty? m))
+    '(())
+    (for [[k v] m
+          subkey (map-paths v)]
+      (cons k subkey))))
 
-  )
+
+(defn build-mutation-paths [added removed]
+  (let [removed-paths (if removed (map-paths removed) [])
+        added-paths (if added (map-paths added) [])
+        mutation-paths (into #{} (concat removed-paths added-paths))
+        excluded-mutation-paths (into #{} (for [primary-path mutation-paths
+                                                secondary-path mutation-paths
+                                                :when (and (not= primary-path secondary-path)
+                                                           (> (count primary-path) (count secondary-path))
+                                                           (->> (map vector primary-path secondary-path)
+                                                                (remove (fn [[a b]] (= a b)))
+                                                                empty?))]
+                                            primary-path))]
+    (set/difference mutation-paths excluded-mutation-paths)))
 
 
 (defn build-diff [added removed mutation-paths]
@@ -45,17 +63,9 @@
                                   (let [post-Δ-db (Δ db)
                                         previous-mutation (first (get-in db [:tooling :processed-mutations]))
                                         [added removed _] (data/diff post-Δ-db db)
-                                        mutation-paths (into #{} (concat (u/map-paths removed) (u/map-paths added)))
-                                        excluded-mutation-paths (into #{} (for [primary-path mutation-paths
-                                                                                secondary-path mutation-paths
-                                                                                :when (and (not= primary-path secondary-path)
-                                                                                           (> (count primary-path) (count secondary-path))
-                                                                                           (->> (map vector primary-path secondary-path)
-                                                                                                (remove (fn [[a b]] (= a b)))
-                                                                                                empty?))]
-                                                                            primary-path))
+                                        mutation-paths (build-mutation-paths added removed)
                                         upstream-mutation-paths (u/upstream-paths mutation-paths)
-                                        diff (build-diff added removed (set/difference mutation-paths excluded-mutation-paths))
+                                        diff (build-diff added removed mutation-paths)
                                         updated-props (-> props
                                                           (dissoc :Δ)
                                                           (assoc :processed (t/now)
@@ -64,17 +74,6 @@
                                                                  :mutation-paths mutation-paths
                                                                  :upstream-mutation-paths upstream-mutation-paths))
                                         updated-mutation [id updated-props]]
-
-                                    (log/warn "---------------------------------")
-                                    (log/warn "removed:" removed)
-                                    (log/warn "added:" added)
-                                    (log/warn "---------------------------------")
-                                    (log/warn "all paths:" mutation-paths)
-                                    (log/warn "---------------------------------")
-                                    (log/warn "excluded paths:" excluded-mutation-paths)
-                                    (log/warn "---------------------------------")
-                                    (log/warn "diff" diff)
-                                    (log/warn "---------------------------------")
 
                                     (-> post-Δ-db
                                         (update-in [:tooling :processed-mutations] (comp (partial take max-processed-mutations) (partial cons updated-mutation)))
