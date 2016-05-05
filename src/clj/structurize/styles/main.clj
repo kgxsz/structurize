@@ -260,10 +260,8 @@
                   :border-radius "3px"
                   :height "100%"}
 
-      [:&.timed-mutation {:background-color (:light-yellow colours)
-                              :color (:dark-yellow colours)}]
-      [:&.no-timed-mutation {:background-color :transparent
-                                 :color (:white-b colours)}]
+      [:&.unprocessed-mutation {:background-color (:light-yellow colours)
+                          :color (:dark-yellow colours)}]
       [:&.processed-mutation {:background-color (:light-green colours)
                               :color (:dark-green colours)}]]
 

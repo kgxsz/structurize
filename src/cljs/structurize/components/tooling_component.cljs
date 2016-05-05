@@ -125,6 +125,7 @@
 
 (defn mutation-browser [{:keys [config-opts !db emit-side-effect!] :as φ}]
   (let [!processed-mutations (r/track #(get-in @!db [:tooling :processed-mutations]))
+        !next-mutation (r/track #(first (get-in @!db [:tooling :unprocessed-mutations])))
         !real-time? (r/track #(empty? (get-in @!db [:tooling :unprocessed-mutations])))
         log? (get-in config-opts [:tooling :log?])]
 
@@ -132,6 +133,7 @@
 
     (fn []
       (let [processed-mutations @!processed-mutations
+            next-mutation @!next-mutation
             real-time? @!real-time?
             beginning-of-time? (empty? processed-mutations)]
 
@@ -142,36 +144,30 @@
           [:div.time-control.control-play {:class (when real-time? :active)}
            [:span.icon.icon-control-play]]
 
+          [:div.time-control.control-next {:class (when-not real-time? (u/->class #{:active :clickable}))
+                                           :on-click (when-not real-time?
+                                                       (u/without-propagation
+                                                        #(emit-side-effect! [:tooling/forward-in-time])))}
+           [:span.icon.icon-control-next]]
+
           [:div.time-control.control-previous {:class (u/->class (cond-> #{}
                                                                    (not real-time?) (conj :active)
                                                                    (not beginning-of-time?) (conj :clickable)))
                                                :on-click (when-not beginning-of-time?
                                                            (u/without-propagation
                                                             #(emit-side-effect! [:tooling/back-in-time])))}
-           [:span.icon.icon-control-prev]]
+           [:span.icon.icon-control-prev]]]
 
-          [:div.time-control.control-next {:class (when-not real-time? (u/->class #{:active :clickable}))
-                                           :on-click (when-not real-time?
-                                                       (u/without-propagation
-                                                        #(emit-side-effect! [:tooling/forward-in-time])))}
-           [:span.icon.icon-control-next]]]
+         [:div.mutation-browser-divider]
 
-         #_(when time-mutations?
-             [:div.time-divider])
-
-         #_(when time-mutations?
+         (when-not real-time?
            [:div.mutation-container.timed-mutation
             [:div.mutation-caption
              [:span.mutation-caption-symbol "Δ"]
              [:span.mutation-caption-subscript "next"]]
             [:div.mutation-shell
-             (if no-timed-mutations?
-               [:div.mutation.no-timed-mutation
-                "no timed mutations"]
-               [:div.mutation.timed-mutation
-                (pr-str (first (last timed-mutations)))])]])
-
-         [:div.mutation-browser-divider]
+             [:div.mutation.unprocessed-mutation
+              (pr-str (first next-mutation))]]])
 
          [:div.processed-mutations
           (doall
