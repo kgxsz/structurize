@@ -2,20 +2,12 @@
   (:require [structurize.system.system-utils :as u]
             [cljs-time.core :as t]
             [clojure.data :as data]
-            [clojure.set :as set]
             [com.stuartsierra.component :as component]
             [reagent.core :as r]
             [taoensso.timbre :as log]))
 
-;; TODO - diffing is feeling wierd because of paths being nilled instead of being dissoc'd, maybe I should be saving the entire state?
-;; If I were to put the entire state tree into the first guy, and then assoc the changes onto the next guy, so on and so fourth, then
-;; I'd be sharing the same data structure right? But how do I get my hands on that diff? and how do I ignore the whole tooling side of things?
-;; I could apply the changes to the entire db within a swap, and  surreptitiously shove it directly into the mutation... it'll be shared memory!
-
 
 (defn map->paths
-
-  ;; TODO - make map paths deal with nils, and output a set of the paths
 
   "This function takes a map and returns a list of every possible path in the map.
    For example {:a 1 :b {:c 2 :d 3}} would give ((:a) (:b :c) (:b :d))."
@@ -31,23 +23,14 @@
 
 (defn make-mutation-paths
 
-  ;; TODO - make sure that you properly light up the excluded paths that show a map change
-  "This function finds every path  "
+  "This function finds the path to every mutation in the db."
 
-  [added removed]
+  [post-Δ-db pre-Δ-db]
 
-  (let [removed-paths (if removed (map->paths removed) [])
-        added-paths (if added (map->paths added) [])
-        mutation-paths (into #{} (concat removed-paths added-paths))
-        excluded-mutation-paths (into #{} (for [primary-path mutation-paths
-                                                secondary-path mutation-paths
-                                                :when (and (not= primary-path secondary-path)
-                                                           (> (count primary-path) (count secondary-path))
-                                                           (->> (map vector primary-path secondary-path)
-                                                                (remove (fn [[a b]] (= a b)))
-                                                                empty?))]
-                                            primary-path))]
-    (set/difference mutation-paths excluded-mutation-paths)))
+  (let [[added removed _] (data/diff post-Δ-db pre-Δ-db)
+        removed-paths (if removed (map->paths removed) [])
+        added-paths (if added (map->paths added) [])]
+     (into #{} (concat removed-paths added-paths))))
 
 
 (defn make-diff [added removed mutation-paths]
@@ -78,20 +61,13 @@
           tooling-disabled? (swap! !db Δ)
 
           ;; only swap if we're in real time, apply the mutation Δ and any tooling related information
-
-
-          ;; Start with the initial DB, and to get the next one by applying the mutation over the last db then swap it in.
-
-
           real-time? (swap! !db (fn [db]
                                   (let [[_ previous-props] (first (get-in db [:tooling :processed-mutations]))
                                         pre-Δ-db (:post-Δ-db previous-props (dissoc db :tooling))
                                         post-Δ-db (Δ pre-Δ-db)
-                                        [added removed _] (data/diff post-Δ-db pre-Δ-db)
 
-                                        mutation-paths (make-mutation-paths added removed)
+                                        mutation-paths (make-mutation-paths post-Δ-db pre-Δ-db)
                                         upstream-mutation-paths (u/upstream-paths mutation-paths)
-                                        #_diff #_(make-diff added removed mutation-paths)
                                         updated-props (-> props
                                                           (assoc :processed (t/now)
                                                                  :n (inc (:n previous-props 0))
