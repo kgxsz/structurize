@@ -7,18 +7,37 @@
             [reagent.core :as r]
             [taoensso.timbre :as log]))
 
+;; TODO - diffing is feeling wierd because of paths being nilled instead of being dissoc'd, maybe I should be saving the entire state?
+;; If I were to put the entire state tree into the first guy, and then assoc the changes onto the next guy, so on and so fourth, then
+;; I'd be sharing the same data structure right? But how do I get my hands on that diff? and how do I ignore the whole tooling side of things?
+;; I could apply the changes to the entire db within a swap, and  surreptitiously shove it directly into the mutation... it'll be shared memory!
 
-(defn map-paths [m]
+
+(defn map->paths
+
+  ;; TODO - make map paths deal with nils, and output a set of the paths
+
+  "This function takes a map and returns a list of every possible path in the map.
+   For example {:a 1 :b {:c 2 :d 3}} would give ((:a) (:b :c) (:b :d))."
+
+  [m]
+
   (if (or (not (map? m)) (empty? m))
     '(())
     (for [[k v] m
-          subkey (map-paths v)]
+          subkey (map->paths v)]
       (cons k subkey))))
 
 
-(defn build-mutation-paths [added removed]
-  (let [removed-paths (if removed (map-paths removed) [])
-        added-paths (if added (map-paths added) [])
+(defn make-mutation-paths
+
+  ;; TODO - make sure that you properly light up the excluded paths that show a map change
+  "This function finds every path  "
+
+  [added removed]
+
+  (let [removed-paths (if removed (map->paths removed) [])
+        added-paths (if added (map->paths added) [])
         mutation-paths (into #{} (concat removed-paths added-paths))
         excluded-mutation-paths (into #{} (for [primary-path mutation-paths
                                                 secondary-path mutation-paths
@@ -31,7 +50,7 @@
     (set/difference mutation-paths excluded-mutation-paths)))
 
 
-(defn build-diff [added removed mutation-paths]
+(defn make-diff [added removed mutation-paths]
   (reduce
    (fn [a path] (assoc a path {:before (get-in removed path) :after (get-in added path)}))
    {}
@@ -59,23 +78,33 @@
           tooling-disabled? (swap! !db Δ)
 
           ;; only swap if we're in real time, apply the mutation Δ and any tooling related information
+
+
+          ;; Start with the initial DB, and to get the next one by applying the mutation over the last db then swap it in.
+
+
           real-time? (swap! !db (fn [db]
-                                  (let [post-Δ-db (Δ db)
-                                        previous-mutation (first (get-in db [:tooling :processed-mutations]))
-                                        [added removed _] (data/diff post-Δ-db db)
-                                        mutation-paths (build-mutation-paths added removed)
+                                  (let [[_ previous-props] (first (get-in db [:tooling :processed-mutations]))
+                                        pre-Δ-db (:post-Δ-db previous-props (dissoc db :tooling))
+                                        post-Δ-db (Δ pre-Δ-db)
+                                        [added removed _] (data/diff post-Δ-db pre-Δ-db)
+
+                                        mutation-paths (make-mutation-paths added removed)
                                         upstream-mutation-paths (u/upstream-paths mutation-paths)
-                                        diff (build-diff added removed mutation-paths)
+                                        #_diff #_(make-diff added removed mutation-paths)
                                         updated-props (-> props
-                                                          (dissoc :Δ)
                                                           (assoc :processed (t/now)
-                                                                 :n (inc (:n (second previous-mutation) 0))
-                                                                 :diff diff
-                                                                 :mutation-paths mutation-paths
-                                                                 :upstream-mutation-paths upstream-mutation-paths))
+                                                                 :n (inc (:n previous-props 0))
+                                                                 :pre-Δ-db pre-Δ-db
+                                                                 :post-Δ-db post-Δ-db
+                                                                 :pre-Δ-mutation-paths (:post-Δ-mutation-paths previous-props)
+                                                                 :post-Δ-mutation-paths mutation-paths
+                                                                 :pre-Δ-upstream-mutation-paths (:post-Δ-upstream-mutation-paths previous-props)
+                                                                 :post-Δ-upstream-mutation-paths upstream-mutation-paths))
                                         updated-mutation [id updated-props]]
 
                                     (-> post-Δ-db
+                                        (assoc :tooling (:tooling db))
                                         (update-in [:tooling :processed-mutations] (comp (partial take max-processed-mutations) (partial cons updated-mutation)))
                                         (assoc-in [:tooling :state-browser-props :mutated :paths] mutation-paths)
                                         (assoc-in [:tooling :state-browser-props :mutated :upstream-paths] upstream-mutation-paths)))))
@@ -88,8 +117,7 @@
 
 (defn make-db [config-opts]
   (r/atom {:playground {:heart 0
-                        :star 3
-                        :edit :false}
+                        :star 3}
            :location {:path nil
                       :handler :unknown
                       :query nil}
@@ -101,7 +129,9 @@
                      :processed-mutations '()
                      :state-browser-props {:mutated {:paths #{}
                                                      :upstream-paths #{}}
-                                           :collapsed #{[:tooling]}
+                                           :collapsed #{[:tooling]
+                                                        [:tooling :unprocessed-mutations]
+                                                        [:tooling :processed-mutations]}
                                            :focused {:paths #{}
                                                      :upstream-paths #{}}}}}))
 

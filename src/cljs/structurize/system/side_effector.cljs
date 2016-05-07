@@ -50,28 +50,27 @@
   (emit-mutation! [:tooling/back-in-time {:Δ (fn [db]
                                                (let [processed-mutations (get-in db [:tooling :processed-mutations])
                                                      latest-processed-mutation (first processed-mutations)
-                                                     second-latest-processed-mutation (second processed-mutations)
-                                                     [_ {:keys [diff]}] latest-processed-mutation
-                                                     [_ {:keys [mutation-paths upstream-mutation-paths]}] second-latest-processed-mutation]
+                                                     [_ {:keys [pre-Δ-db pre-Δ-mutation-paths pre-Δ-upstream-mutation-paths]}] latest-processed-mutation]
                                                  (as-> db db
                                                    (update-in db [:tooling :unprocessed-mutations] conj latest-processed-mutation)
                                                    (update-in db [:tooling :processed-mutations] rest)
-                                                   (assoc-in db [:tooling :state-browser-props :mutated :paths] mutation-paths)
-                                                   (assoc-in db [:tooling :state-browser-props :mutated :upstream-paths] upstream-mutation-paths)
-                                                   (reduce (fn [db [path {:keys [before]}]] (assoc-in db path before)) db diff))))}]))
+                                                   (assoc-in db [:tooling :state-browser-props :mutated :paths] pre-Δ-mutation-paths)
+                                                   (assoc-in db [:tooling :state-browser-props :mutated :upstream-paths]  pre-Δ-upstream-mutation-paths)
+                                                   (merge db pre-Δ-db)
+                                                   #_(reduce (fn [db [path {:keys [before]}]] (assoc-in db path before)) db diff))))}]))
 
 
 (defmethod process-side-effect :tooling/forward-in-time
   [{:keys [emit-mutation!]} id args]
   (emit-mutation! [:tooling/forward-in-time {:Δ (fn [db]
                                                   (let [next-unprocessed-mutation (first (get-in db [:tooling :unprocessed-mutations]))
-                                                        [_ {:keys [mutation-paths upstream-mutation-paths diff]}] next-unprocessed-mutation]
+                                                        [_ {:keys [post-Δ-db post-Δ-mutation-paths post-Δ-upstream-mutation-paths]}] next-unprocessed-mutation]
                                                     (as-> db db
                                                       (update-in db [:tooling :processed-mutations] conj next-unprocessed-mutation)
                                                       (update-in db [:tooling :unprocessed-mutations] rest)
-                                                      (assoc-in db [:tooling :state-browser-props :mutated :paths] mutation-paths)
-                                                      (assoc-in db [:tooling :state-browser-props :mutated :upstream-paths] upstream-mutation-paths)
-                                                      (reduce (fn [db [path {:keys [after]}]] (assoc-in db path after)) db diff))))}]))
+                                                      (assoc-in db [:tooling :state-browser-props :mutated :paths]  post-Δ-mutation-paths)
+                                                      (assoc-in db [:tooling :state-browser-props :mutated :upstream-paths] post-Δ-upstream-mutation-paths)
+                                                      (merge db post-Δ-db))))}]))
 
 
 (defmethod process-side-effect :general/general-init
