@@ -40,7 +40,7 @@
    mutation-paths))
 
 
-(defn make-emit-mutation* [{:keys [config-opts !db]}]
+(defn make-emit-mutation [{:keys [config-opts !db]}]
   (let [log? (get-in config-opts [:general :tooling :log?])
         tooling-disabled? (not (get-in config-opts [:tooling :enabled?]))
         max-processed-mutations (get-in config-opts [:tooling :max-processed-mutations])]
@@ -123,6 +123,6 @@
     (let [!db (make-db config-opts)]
       (assoc component
              :!db !db
-             :emit-mutation! (make-emit-mutation* {:config-opts config-opts :!db !db}))))
+             :emit-mutation! (make-emit-mutation {:config-opts config-opts :!db !db}))))
 
   (stop [component] component))

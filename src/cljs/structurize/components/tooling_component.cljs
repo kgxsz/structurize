@@ -57,9 +57,9 @@
 
 
          [:div.node-key {:class node-key-class
-                         :on-mouse-over (fn [e] (toggle-focused) (.stopPropagation e))
-                         :on-mouse-out (fn [e] (toggle-focused) (.stopPropagation e))
-                         :on-click (fn [e] (toggle-collapsed) (.stopPropagation e))}
+                         :on-mouse-over (u/without-propagation toggle-focused)
+                         :on-mouse-out (u/without-propagation toggle-focused)
+                         :on-click (u/without-propagation toggle-collapsed)}
 
           (pr-str k)]
 
