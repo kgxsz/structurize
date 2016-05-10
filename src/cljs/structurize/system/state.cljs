@@ -33,13 +33,6 @@
      (into #{} (concat removed-paths added-paths))))
 
 
-(defn make-diff [added removed mutation-paths]
-  (reduce
-   (fn [a path] (assoc a path {:before (get-in removed path) :after (get-in added path)}))
-   {}
-   mutation-paths))
-
-
 (defn make-emit-mutation [{:keys [config-opts !db]}]
   (let [log? (get-in config-opts [:general :tooling :log?])
         tooling-disabled? (not (get-in config-opts [:tooling :enabled?]))
@@ -65,7 +58,6 @@
                                   (let [[_ previous-props] (first (get-in db [:tooling :processed-mutations]))
                                         pre-Δ-db (:post-Δ-db previous-props (dissoc db :tooling))
                                         post-Δ-db (Δ pre-Δ-db)
-
                                         mutation-paths (make-mutation-paths post-Δ-db pre-Δ-db)
                                         upstream-mutation-paths (u/upstream-paths mutation-paths)
                                         updated-props (-> props

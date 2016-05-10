@@ -36,12 +36,11 @@
        [:span.button-text "sign in with GitHub"]])))
 
 
-(defn sign-out [{:keys [state emit-side-effect!] :as Φ}]
-  (let [{:keys [!db]} state]
-    (log/debug "mount/render sign-out")
-    [:div.button.clickable {:on-click (u/without-propagation #(emit-side-effect! [:general/sign-out]))}
-     [:span.button-icon.icon-exit]
-     [:span.button-text "sign out"]]))
+(defn sign-out [{:keys [!db emit-side-effect!] :as Φ}]
+  (log/debug "render sign-out")
+  [:div.button.clickable {:on-click (u/without-propagation #(emit-side-effect! [:general/sign-out]))}
+   [:span.button-icon.icon-exit]
+   [:span.button-text "sign out"]])
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; top level pages
@@ -187,22 +186,30 @@
 
   (let [tooling-enabled? (get-in config-opts [:tooling :enabled?])
         !chsk-status-open? (r/track #(= :open (get-in @!db [:comms :chsk-status])))
-        !initialising? (r/track #(nil? (get-in @!db [:comms :message :general/init :reply])))]
+        !comms (r/track #(get-in @!db [:comms]))
+        !message-reply (r/track #(get-in @!db [:comms :message :general/init :reply]))
+        !message-status (r/track #(get-in @!db [:comms :message :general/init :status]))]
 
     (log/debug "mount root")
 
     (fn []
+      ;; TODO - clean up this nonsense to only what I need
       (let [chsk-status-open? @!chsk-status-open?
-            initialising? @!initialising?]
+            message-sent? (= :sent @!message-status)
+            reply-received? (= :reply-received @!message-status)
+            message-reply @!message-reply
+            uninitialised? (nil? @!message-reply)
+            initialising? (= :sent @!message-status)]
 
         (log/debug "render root")
 
-        (when (and chsk-status-open? initialising?)
+           (when (and uninitialised? (not initialising?) chsk-status-open?)
           (emit-side-effect! [:general/general-init]))
+
 
         [:div.top-level-container
 
-         (if initialising?
+         (if (or uninitialised? initialising?)
            [loading Φ]
            [page Φ])
 

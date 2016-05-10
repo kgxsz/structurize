@@ -52,12 +52,11 @@
                                                      latest-processed-mutation (first processed-mutations)
                                                      [_ {:keys [pre-Δ-db pre-Δ-mutation-paths pre-Δ-upstream-mutation-paths]}] latest-processed-mutation]
                                                  (as-> db db
+                                                   (merge db pre-Δ-db)
                                                    (update-in db [:tooling :unprocessed-mutations] conj latest-processed-mutation)
                                                    (update-in db [:tooling :processed-mutations] rest)
                                                    (assoc-in db [:tooling :state-browser-props :mutated :paths] pre-Δ-mutation-paths)
-                                                   (assoc-in db [:tooling :state-browser-props :mutated :upstream-paths]  pre-Δ-upstream-mutation-paths)
-                                                   (merge db pre-Δ-db)
-                                                   #_(reduce (fn [db [path {:keys [before]}]] (assoc-in db path before)) db diff))))}]))
+                                                   (assoc-in db [:tooling :state-browser-props :mutated :upstream-paths]  pre-Δ-upstream-mutation-paths))))}]))
 
 
 (defmethod process-side-effect :tooling/forward-in-time
@@ -66,11 +65,11 @@
                                                   (let [next-unprocessed-mutation (first (get-in db [:tooling :unprocessed-mutations]))
                                                         [_ {:keys [post-Δ-db post-Δ-mutation-paths post-Δ-upstream-mutation-paths]}] next-unprocessed-mutation]
                                                     (as-> db db
+                                                      (merge db post-Δ-db)
                                                       (update-in db [:tooling :processed-mutations] conj next-unprocessed-mutation)
                                                       (update-in db [:tooling :unprocessed-mutations] rest)
                                                       (assoc-in db [:tooling :state-browser-props :mutated :paths]  post-Δ-mutation-paths)
-                                                      (assoc-in db [:tooling :state-browser-props :mutated :upstream-paths] post-Δ-upstream-mutation-paths)
-                                                      (merge db post-Δ-db))))}]))
+                                                      (assoc-in db [:tooling :state-browser-props :mutated :upstream-paths] post-Δ-upstream-mutation-paths))))}]))
 
 
 (defmethod process-side-effect :general/general-init
@@ -130,11 +129,15 @@
 
 
 (defn make-emit-side-effect
+
+  ;; TODO - decouple this through a channel
   "Returns a function that receives a side-effect and processes it appropriately via multimethods"
+
   [{:keys [config-opts !db] :as Φ}]
+
   (fn [[id args :as side-effect]]
     (let [tooling? (= (namespace id) "tooling")
-          real-time? (empty? (get-in @!db [:tooling :unprocessed-mutations]))]
+          real-time? true #_(empty? (get-in @!db [:tooling :unprocessed-mutations]))]
 
       (if real-time?
 
