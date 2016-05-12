@@ -3,7 +3,9 @@
             [structurize.system.system-utils :as u]
             [bidi.bidi :as b]
             [com.stuartsierra.component :as component]
-            [taoensso.timbre :as log]))
+            [cljs.core.async :as a]
+            [taoensso.timbre :as log])
+  (:require-macros [cljs.core.async.macros :refer [go go-loop]]))
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; multi-method side-effect handling
@@ -128,26 +130,28 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; side-effector setup
 
 
-(defn make-emit-side-effect
+(defn listen-for-side-effects
 
-  ;; TODO - decouple this through a channel
-  "Returns a function that receives a side-effect and processes it appropriately via multimethods"
+  [{:keys [config-opts !db] :as Φ} <side-effects]
 
-  [{:keys [config-opts !db] :as Φ}]
+  (let [log-tooling? (get-in config-opts [:general :tooling :log?])]
 
-  (fn [[id args :as side-effect]]
-    (let [tooling? (= (namespace id) "tooling")
-          real-time? true #_(empty? (get-in @!db [:tooling :unprocessed-mutations]))]
+    (go-loop []
+      (let [[id args :as side-effect] (a/<! <side-effects)
+            tooling? (= (namespace id) "tooling")
+            real-time? (empty? (get-in @!db [:tooling :unprocessed-mutations]))]
 
-      (if real-time?
+        (if real-time?
 
-        (let [log? (or (not tooling?) (get-in config-opts [:general :tooling :log?]))]
-          (when log? (log/debug "emitting side-effect:" id))
-          (process-side-effect Φ id args))
+          (let [log? (or (not tooling?) (get-in config-opts [:general :tooling :log?]))]
+            (when log? (log/debug "emitting side-effect:" id))
+            (process-side-effect Φ id args))
 
-        (if tooling?
-          (process-side-effect Φ id args)
-          (log/debug "while time travelling, ignoring side-effect:" id))))))
+          (if tooling?
+            (process-side-effect Φ id args)
+            (log/debug "while time travelling, ignoring side-effect:" id))))
+
+      (recur))))
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; component setup
@@ -158,13 +162,18 @@
 
   (start [component]
     (log/info "initialising side-effector")
-    (let [Φ {:config-opts config-opts
+    (let [<side-effects (a/chan)
+          Φ {:config-opts config-opts
              :!db (:!db state)
              :emit-mutation! (:emit-mutation! state)
              :send! (:send! comms)
              :post! (:post! comms)
              :change-location! (:change-location! browser)}]
+
+      (log/info "begin listening for side effects")
+      (listen-for-side-effects Φ <side-effects)
+
       (assoc component
-             :emit-side-effect! (make-emit-side-effect Φ))))
+             :emit-side-effect! (fn [side-effect] (go (a/>! <side-effects side-effect))))))
 
   (stop [component] component))
