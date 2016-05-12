@@ -186,26 +186,20 @@
 
   (let [tooling-enabled? (get-in config-opts [:tooling :enabled?])
         !chsk-status-open? (r/track #(= :open (get-in @!db [:comms :chsk-status])))
-        !comms (r/track #(get-in @!db [:comms]))
-        !message-reply (r/track #(get-in @!db [:comms :message :general/init :reply]))
-        !message-status (r/track #(get-in @!db [:comms :message :general/init :status]))]
+        !uninitialised? (r/track #(nil? (get-in @!db [:comms :message :general/init :reply])))
+        !initialising (r/track #(= :sent (get-in @!db [:comms :message :general/init :status])))]
 
     (log/debug "mount root")
 
     (fn []
-      ;; TODO - clean up this nonsense to only what I need
       (let [chsk-status-open? @!chsk-status-open?
-            message-sent? (= :sent @!message-status)
-            reply-received? (= :reply-received @!message-status)
-            message-reply @!message-reply
-            uninitialised? (nil? @!message-reply)
-            initialising? (= :sent @!message-status)]
+            uninitialised? @!uninitialised?
+            initialising? @!initialising?]
 
         (log/debug "render root")
 
-           (when (and uninitialised? (not initialising?) chsk-status-open?)
+        (when (and uninitialised? (not initialising?) chsk-status-open?)
           (emit-side-effect! [:general/general-init]))
-
 
         [:div.top-level-container
 
