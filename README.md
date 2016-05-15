@@ -2,6 +2,8 @@
 
 #####A repository to mess around with Component, Sente, and other goods.
 [![Stories in Ready](https://badge.waffle.io/kgxsz/structurize.svg?label=ready&title=Ready)](http://waffle.io/kgxsz/structurize)
+[![Build Status](https://travis-ci.org/kgxsz/structurize.svg?branch=master)](https://travis-ci.org/kgxsz/structurize)
+
 
 ## Local development setup
 - Ensure that you have setup the private configuration file: `~/.lein/structurize/config.edn`.
@@ -14,5 +16,7 @@
   - connect to port `5000`.
   - then: `(use 'figwheel-sidecar.repl-api)`.
   - finally: `(cljs-repl)`.
-- To build a the standalone jar: `lein uberjar`.
-- To run the standalone jar: `java -jar target/structurize-standalone.jar`.
+
+## In the cloud
+- We compile and test on Travis with: `lein with-profile travis test`.
+- We run on Heroku with: `lein with-profile heroku run -m structurize.main`.
