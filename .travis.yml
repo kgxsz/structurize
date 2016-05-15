@@ -1,0 +1,12 @@
+language: clojure
+jdk: oraclejdk8
+
+script:
+  - lein uberjar
+
+# deploy:
+#   provider: heroku
+#   api_key:
+#     secure: YRohjFf+NkZodlKu84yLKtyX23T/lZGQVnLh28+o5bePPmglM8jpKwkBqnQIc9H7TFhxvdJXBC0zysLMg51SNAQoPFIGx+iNIjkZsxfgFxlw2xDps9Z5P09y4LDGSX0tJSiPe2ZX4gh1PF8a+TyEnF+oX06omOIdK9bFw0ekyjs=
+#   app: kgxsz-movie-buff
+#   skip_cleanup: true
