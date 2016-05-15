@@ -16,3 +16,6 @@
   (if refresh-all?
     (refresh-all :after 'structurize.main/start!)
     (refresh :after 'structurize.main/start!)))
+
+(defn -main [& args]
+  (start!))
