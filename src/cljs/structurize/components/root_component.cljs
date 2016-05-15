@@ -8,7 +8,6 @@
   (:require-macros [cljs.core.async.macros :refer [go]]))
 
 
-
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; components
 
 
@@ -187,7 +186,7 @@
   (let [tooling-enabled? (get-in config-opts [:tooling :enabled?])
         !chsk-status-open? (r/track #(= :open (get-in @!db [:comms :chsk-status])))
         !uninitialised? (r/track #(nil? (get-in @!db [:comms :message :general/init :reply])))
-        !initialising (r/track #(= :sent (get-in @!db [:comms :message :general/init :status])))]
+        !initialising? (r/track #(= :sent (get-in @!db [:comms :message :general/init :status])))]
 
     (log/debug "mount root")
 

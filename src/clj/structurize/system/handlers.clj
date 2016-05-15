@@ -29,7 +29,7 @@
                     [:meta {:name "viewport" :content "width = device-width, initial-scale = 1.0, user-scalable = no"}]
                     [:link {:type "text/css" :href "https://fonts.googleapis.com/css?family=Fira+Mono|Raleway:300" :rel "stylesheet"}]
                     (include-css "/css/icomoon.css")
-                    (include-css "/css/style.css")]
+                    (include-css "/css/structurize.css")]
                    [:body
                     [:div#root
                      [:div.loading
