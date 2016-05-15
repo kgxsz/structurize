@@ -56,7 +56,7 @@
                                       :compiler {:output-to "resources/public/css/structurize.css"
                                                  :pretty-print? true}}]}
 
-                   :Figwheel {:repl false
+                   :figwheel {:repl false
                               :nrepl-port 5000
                               :css-dirs ["resources/public/css"]}}
 
