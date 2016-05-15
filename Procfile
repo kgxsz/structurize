@@ -1,1 +1,1 @@
-web: lein with-profile heroku run -m structurize.main
+web: java -jar target/structurize-standalone.jar

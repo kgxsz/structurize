@@ -2,4 +2,4 @@ language: clojure
 jdk: oraclejdk8
 
 script:
-  - lein with-profile travis test
+  - lein uberjar

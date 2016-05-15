@@ -22,13 +22,14 @@
 
   :min-lein-version "2.0.0"
 
-  :plugins [[lein-garden "0.2.6"]
-            [lein-cljsbuild "1.1.3"]]
-
   :clean-targets ^{:protect false} ["target/"
                                     "resources/public/js/out"
                                     "resources/public/js/structurize.js"
                                     "resources/public/css/structurize.css"]
+
+  :plugins [[lein-garden "0.2.6"]]
+
+  :uberjar-name "structurize-standalone.jar"
 
   :profiles {:dev {:source-paths ["src/clj" "env/dev"]
 
@@ -37,7 +38,7 @@
                    :plugins [[lein-figwheel "0.5.0-2"]]
 
                    :repl-options {:init-ns structurize.main
-                                  :init (structurize.main/-main)
+                                  :init (structurize.main/start!)
                                   :port 4000}
 
                    :cljsbuild {:builds [{:id "structurize"
@@ -55,51 +56,30 @@
                                       :compiler {:output-to "resources/public/css/structurize.css"
                                                  :pretty-print? true}}]}
 
-                   :figwheel {:repl false
+                   :Figwheel {:repl false
                               :nrepl-port 5000
                               :css-dirs ["resources/public/css"]}}
 
-             :travis {:source-paths ["src/clj" "env/prod"]
+             :uberjar {:source-paths ["src/clj" "env/prod"]
 
-                      :aot :all
+                       :aot :all
 
-                      :main structurize.main
+                       :main structurize.main
 
-                      :hooks [leiningen.cljsbuild
-                              leiningen.garden]
+                       :plugins  [[lein-cljsbuild "1.1.3"]]
 
-                      :cljsbuild {:builds [{:id "structurize"
-                                            :source-paths ["src/cljs" "env/prod"]
-                                            :compiler {:output-to "resources/public/js/structurize.js"
-                                                       :main "structurize.runner"
-                                                       :asset-path "/js/out"
-                                                       :optimizations :advanced}}]}
+                       :hooks [leiningen.cljsbuild
+                               leiningen.garden]
 
-                      :garden {:builds [{:id "main"
-                                         :source-paths ["src/clj"]
-                                         :stylesheet structurize.styles.main/main
-                                         :compiler {:output-to "resources/public/css/structurize.css"
-                                                    :pretty-print? false}}]}}
+                       :cljsbuild {:builds [{:id "structurize"
+                                             :source-paths ["src/cljs" "env/prod"]
+                                             :compiler {:output-to "resources/public/js/structurize.js"
+                                                        :main "structurize.runner"
+                                                        :asset-path "/js/out"
+                                                        :optimizations :advanced}}]}
 
-
-             :heroku {:source-paths ["src/clj" "env/prod"]
-
-                      :aot :all
-
-                      :main structurize.main
-
-                      :hooks [leiningen.cljsbuild
-                              leiningen.garden]
-
-                      :cljsbuild {:builds [{:id "structurize"
-                                            :source-paths ["src/cljs" "env/prod"]
-                                            :compiler {:output-to "resources/public/js/structurize.js"
-                                                       :main "structurize.runner"
-                                                       :asset-path "/js/out"
-                                                       :optimizations :advanced}}]}
-
-                      :garden {:builds [{:id "main"
-                                         :source-paths ["src/clj"]
-                                         :stylesheet structurize.styles.main/main
-                                         :compiler {:output-to "resources/public/css/structurize.css"
-                                                    :pretty-print? true}}]}}})
+                       :garden {:builds [{:id "main"
+                                          :source-paths ["src/clj"]
+                                          :stylesheet structurize.styles.main/main
+                                          :compiler {:output-to "resources/public/css/structurize.css"
+                                                     :pretty-print? false}}]}}})
