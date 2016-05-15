@@ -7,7 +7,9 @@
 (defn load-config []
   (let [home (System/getProperty "user.home")
         public-config (-> "resources/config.edn" slurp edn/read-string)
-        private-config (-> (str home "/.lein/structurize/config.edn") slurp edn/read-string)]
+        private-config (try
+                         (-> (str home "/.lein/structurize/config.edn") slurp edn/read-string)
+                         (catch java.io.FileNotFoundException e {}))]
     (merge public-config private-config)))
 
 
@@ -19,12 +21,12 @@
     (let [config (load-config)]
       (assoc component
              :github-auth {:client-id (:github-auth-client-id config)
-                           :client-secret (:github-auth-client-secret config)
+                           :client-secret (or (System/getenv "GITHUB_AUTH_CLIENT_SECRET") (:github-auth-client-secret config))
                            :scope "user:email"}
 
              :comms {:chsk-opts {:packer :edn}}
 
-             :server {:http-kit-opts {:port (:port config)}
+             :server {:http-kit-opts {:port (or (System/getenv "PORT") (:port config))}
                       :middleware-opts {:params {:urlencoded true
                                                  :nested true
                                                  :keywordize true}
