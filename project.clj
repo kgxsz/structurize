@@ -20,6 +20,8 @@
                  [reagent "0.6.0-alpha"]
                  [com.cemerick/url "0.1.1"]]
 
+  :min-lein-version "2.0.0"
+
   :plugins [[lein-garden "0.2.6"]
             [lein-cljsbuild "1.1.3"]]
 
