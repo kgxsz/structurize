@@ -15,7 +15,13 @@
                  [org.clojure/data.json "0.2.6"]
                  [clj-time "0.11.0"]
                  [garden "1.3.2"]
-                 [camel-snake-kebab "0.3.2"]]
+                 [camel-snake-kebab "0.3.2"]
+                 [com.andrewmcveigh/cljs-time "0.4.0"]
+                 [reagent "0.6.0-alpha"]
+                 [com.cemerick/url "0.1.1"]]
+
+  :plugins [[lein-garden "0.2.6"]
+            [lein-cljsbuild "1.1.3"]]
 
   :clean-targets ^{:protect false} ["target/"
                                     "resources/public/js/out"
@@ -24,16 +30,12 @@
 
   :profiles {:dev {:source-paths ["src/clj" "env/dev"]
 
-                   :dependencies [[org.clojure/tools.namespace "0.2.11"]
-                                  [com.andrewmcveigh/cljs-time "0.4.0"]
-                                  [reagent "0.6.0-alpha"]
-                                  [com.cemerick/url "0.1.1"]]
+                   :dependencies [[org.clojure/tools.namespace "0.2.11"]]
 
-                   :plugins [[lein-figwheel "0.5.0-2"]
-                             [lein-garden "0.2.6"]]
+                   :plugins [[lein-figwheel "0.5.0-2"]]
 
                    :repl-options {:init-ns structurize.main
-                                  :init (structurize.main/start!)
+                                  :init (structurize.main/-main)
                                   :port 4000}
 
                    :cljsbuild {:builds [{:id "structurize"
@@ -53,36 +55,49 @@
 
                    :figwheel {:repl false
                               :nrepl-port 5000
-                              :css-dirs ["dev-resources/public/css"]}}
+                              :css-dirs ["resources/public/css"]}}
 
-             :uberjar {:source-paths ["src/clj" "env/prod"]
+             :travis {:source-paths ["src/clj" "env/prod"]
 
-                       :uberjar-name "structurize-standalone.jar"
+                      :aot :all
 
-                       :aot :all
+                      :main structurize.main
 
-                       :main structurize.main
+                      :hooks [leiningen.cljsbuild
+                              leiningen.garden]
 
-                       :dependencies [[org.clojure/tools.namespace "0.2.11"]
-                                      [com.andrewmcveigh/cljs-time "0.4.0"]
-                                      [reagent "0.6.0-alpha"]
-                                      [com.cemerick/url "0.1.1"]]
+                      :cljsbuild {:builds [{:id "structurize"
+                                            :source-paths ["src/cljs" "env/prod"]
+                                            :compiler {:output-to "resources/public/js/structurize.js"
+                                                       :main "structurize.runner"
+                                                       :asset-path "/js/out"
+                                                       :optimizations :advanced}}]}
 
-                       :plugins  [[lein-cljsbuild "1.1.3"]
-                                  [lein-garden "0.2.6"]]
+                      :garden {:builds [{:id "main"
+                                         :source-paths ["src/clj"]
+                                         :stylesheet structurize.styles.main/main
+                                         :compiler {:output-to "resources/public/css/structurize.css"
+                                                    :pretty-print? false}}]}}
 
-                       :hooks [leiningen.cljsbuild
-                               leiningen.garden]
 
-                       :cljsbuild {:builds [{:id "structurize"
-                                             :source-paths ["src/cljs" "env/prod"]
-                                             :compiler {:output-to "resources/public/js/structurize.js"
-                                                        :main "structurize.runner"
-                                                        :asset-path "/js/out"
-                                                        :optimizations :advanced}}]}
+             :heroku {:source-paths ["src/clj" "env/prod"]
 
-                       :garden {:builds [{:id "main"
-                                          :source-paths ["src/clj"]
-                                          :stylesheet structurize.styles.main/main
-                                          :compiler {:output-to "resources/public/css/structurize.css"
-                                                     :pretty-print? true}}]}}})
+                      :aot :all
+
+                      :main structurize.main
+
+                      :hooks [leiningen.cljsbuild
+                              leiningen.garden]
+
+                      :cljsbuild {:builds [{:id "structurize"
+                                            :source-paths ["src/cljs" "env/prod"]
+                                            :compiler {:output-to "resources/public/js/structurize.js"
+                                                       :main "structurize.runner"
+                                                       :asset-path "/js/out"
+                                                       :optimizations :advanced}}]}
+
+                      :garden {:builds [{:id "main"
+                                         :source-paths ["src/clj"]
+                                         :stylesheet structurize.styles.main/main
+                                         :compiler {:output-to "resources/public/css/structurize.css"
+                                                    :pretty-print? true}}]}}})
