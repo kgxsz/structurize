@@ -58,7 +58,7 @@
            :line-height 1.5
            :color (:white-b colours)
            :background-color (:white-b colours)
-           :background-image "url(\"/images/blurred-background-b.jpg\")"
+           :background-image "url(\"/images/blurred-background.jpg\")"
            :background-repeat :no-repeat
            :background-position [:center :center]
            :background-attachements :fixed
