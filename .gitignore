@@ -13,7 +13,9 @@ pom.xml.asc
 /classes/
 /target/
 /checkouts/
-/dev-resources/public/
+/resources/public/js/out
+/resources/public/js/structurize.js
+/resources/public/css/structurize.css
 .lein-deps-sum
 .lein-repl-history
 .lein-plugins/
