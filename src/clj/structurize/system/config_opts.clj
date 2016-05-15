@@ -20,13 +20,13 @@
     (log/info "initialising config-opts")
     (let [config (load-config)]
       (assoc component
-             :github-auth {:client-id (:github-auth-client-id config)
+             :github-auth {:client-id (or (System/getenv "GITHUB_AUTH_CLIENT_ID") (:github-auth-client-id config))
                            :client-secret (or (System/getenv "GITHUB_AUTH_CLIENT_SECRET") (:github-auth-client-secret config))
                            :scope "user:email"}
 
              :comms {:chsk-opts {:packer :edn}}
 
-             :server {:http-kit-opts {:port (or (System/getenv "PORT") (:port config))}
+             :server {:http-kit-opts {:port (or (edn/read-string (System/getenv "PORT")) (:port config))}
                       :middleware-opts {:params {:urlencoded true
                                                  :nested true
                                                  :keywordize true}
