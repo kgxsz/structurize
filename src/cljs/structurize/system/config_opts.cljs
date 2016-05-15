@@ -10,7 +10,6 @@
   (start [component]
     (log/info "initialising config-opts")
     (assoc component
-           :host (:host config)
            :tooling {:enabled? true
                      :log? false
                      :max-processed-mutations 50}

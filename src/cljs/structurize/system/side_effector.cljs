@@ -86,10 +86,10 @@
 
 
 (defmethod process-side-effect :general/redirect-to-github
-  [{:keys [config-opts change-location!]} id args]
+  [{:keys [config-opts change-location! !db]} id args]
   (let [host (get-in config-opts [:host])
-        {:keys [client-id attempt-id scope]} args
-        redirect-uri (str host (b/path-for routes :sign-in-with-github))]
+        {:keys [client-id attempt-id scope redirect-uri]} (get-in @!db [:comms :message :sign-in/init-sign-in-with-github :reply])
+        redirect-uri (str redirect-uri (b/path-for routes :sign-in-with-github))]
 
     (change-location! {:prefix "https://github.com"
                        :path "/login/oauth/authorize"

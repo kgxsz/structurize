@@ -22,6 +22,7 @@
       (assoc component
              :github-auth {:client-id (or (System/getenv "GITHUB_AUTH_CLIENT_ID") (:github-auth-client-id config))
                            :client-secret (or (System/getenv "GITHUB_AUTH_CLIENT_SECRET") (:github-auth-client-secret config))
+                           :redirect-uri (or (System/getenv "GITHUB_AUTH_REDIRECT_URI") (:github-auth-redirect-uri config))
                            :scope "user:email"}
 
              :comms {:chsk-opts {:packer :edn}}

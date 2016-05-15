@@ -17,12 +17,13 @@
   [{:keys [config-opts db]} {:keys [uid ?reply-fn] [id ?data] :event}]
 
   (let [client-id (get-in config-opts [:github-auth :client-id])
+        redirect-uri (get-in config-opts [:github-auth :redirect-uri])
         attempt-id (str (java.util.UUID/randomUUID))
         scope (get-in config-opts [:github-auth :scope])]
 
     (log/debug "initialising GitHub sign in for attempt:" attempt-id)
     (swap! db assoc-in [:sign-in-with-github attempt-id] {:initialised-at (time/now) :client-id client-id})
-    (?reply-fn [id {:attempt-id attempt-id :client-id client-id :scope scope}])))
+    (?reply-fn [id {:attempt-id attempt-id :client-id client-id :scope scope :redirect-uri redirect-uri}])))
 
 
 (defmethod handler :general/init
