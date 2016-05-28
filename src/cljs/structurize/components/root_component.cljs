@@ -43,16 +43,25 @@
 (defn home-page [{:keys [config-opts !db emit-side-effect!] :as Φ}]
   (let [!me (r/track #(get-in @!db [:comms :message :general/init :reply :me]))
         !star (r/track #(get-in @!db [:playground :star]))
-        !heart (r/track #(get-in @!db [:playground :heart]))]
+        !heart (r/track #(get-in @!db [:playground :heart]))
+        !ping (r/track #(get-in @!db [:playground :ping]))
+        !pong (r/track #(get-in @!db [:comms :message :playground/ping :reply :pong] 0))
+        !reply-received? (r/track #(= :reply-received (get-in @!db [:comms :message :playground/ping :status])))]
 
     (log/debug "mount home-page")
 
     (fn []
       (let [me @!me
             star @!star
-            heart @!heart]
+            heart @!heart
+            ping @!ping
+            pong @!pong
+            reply-received? @!reply-received?]
 
         (log/debug "render home-page")
+
+        (when reply-received?
+          (emit-side-effect! [:playground/pong {}]))
 
         [:div.page
 
@@ -68,19 +77,27 @@
            [:h1.hero-caption "Hello there"]])
 
          [:div.options-section
+
           (if me
             [sign-out Φ]
             [sign-in-with-github Φ])
+
           [:div.button.clickable {:on-click (u/without-propagation
                                              #(emit-side-effect! [:playground/inc-item {:path [:playground :star]
                                                                                         :item-name "star"}]))}
            [:span.button-icon.icon-star]
            [:span.button-text star]]
+
           [:div.button.clickable {:on-click (u/without-propagation
                                              #(emit-side-effect! [:playground/inc-item {:path [:playground :heart]
                                                                                         :item-name "heart"}]))}
            [:span.button-icon.icon-heart]
-           [:span.button-text heart]]]]))))
+           [:span.button-text heart]]
+
+          [:div.button.clickable {:on-click (u/without-propagation
+                                             #(emit-side-effect! [:playground/ping {}]))}
+           [:span.button-icon.icon-heart-pulse]
+           [:spam.button-text pong]]]]))))
 
 
 (defn sign-in-with-github-page [{:keys [!db emit-side-effect!] :as Φ}]

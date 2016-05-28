@@ -171,7 +171,7 @@
 
          [:div.processed-mutations
           (doall
-           (for [[id {:keys [emitted-at processed-at n] :as props}] processed-mutations]
+           (for [[id {:keys [n] :as props}] processed-mutations]
              [:div.mutation-container {:key n}
               [:div.mutation-caption
                [:span.mutation-caption-symbol "Δ"]

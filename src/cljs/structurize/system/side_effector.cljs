@@ -17,61 +17,67 @@
 (defmethod process-side-effect :tooling/toggle-tooling-active
   [{:keys [emit-mutation!]} id args]
 
-  (emit-mutation! [:tooling/toggle-tooling-active {:Δ (fn [db] (update-in db [:tooling :tooling-active?] not))}]))
+  (emit-mutation! [:tooling/toggle-tooling-active
+                   {:Δ (fn [db] (update-in db [:tooling :tooling-active?] not))}]))
 
 
 (defmethod process-side-effect :tooling/toggle-node-collapsed
   [{:keys [emit-mutation!]} id args]
   (let [{:keys [path]} args]
-    (emit-mutation! [:tooling/toggle-node-collapsed {:Δ (fn [db]
-                                                          (update-in db [:tooling :state-browser-props :collapsed] #(if (contains? % path)
-                                                                                                                      (disj % path)
-                                                                                                                      (conj % path))))}])))
+    (emit-mutation! [:tooling/toggle-node-collapsed
+                     {:Δ (fn [db]
+                           (update-in db [:tooling :state-browser-props :collapsed] #(if (contains? % path)
+                                                                                       (disj % path)
+                                                                                       (conj % path))))}])))
 
 
 (defmethod process-side-effect :tooling/toggle-node-cursored
   [{:keys [emit-mutation!]} id args]
   (let [{:keys [path]} args]
-    (emit-mutation! [:tooling/toggle-node-cursored {:Δ (fn [db]
-                                                         (-> db
-                                                             (update-in [:tooling :state-browser-props :cursored :paths] #(if (empty? %) #{path} #{}))
-                                                             (update-in [:tooling :state--browser-props :cursored :upstream-paths] #(if (empty? %) (u/upstream-paths #{path}) #{}))))}])))
+    (emit-mutation! [:tooling/toggle-node-cursored
+                     {:Δ (fn [db]
+                           (-> db
+                               (update-in [:tooling :state-browser-props :cursored :paths] #(if (empty? %) #{path} #{}))
+                               (update-in [:tooling :state--browser-props :cursored :upstream-paths] #(if (empty? %) (u/upstream-paths #{path}) #{}))))}])))
 
 
 (defmethod process-side-effect :tooling/toggle-node-focused
   [{:keys [emit-mutation!]} id args]
   (let [{:keys [path]} args]
-    (emit-mutation! [:tooling/toggle-node-focused {:Δ (fn [db]
-                                                        (-> db
-                                                            (update-in [:tooling :state-browser-props :focused :paths] #(if (empty? %) #{path} #{}))
-                                                            (update-in [:tooling :state-browser-props :focused :upstream-paths] #(if (empty? %) (u/upstream-paths #{path}) #{}))))}])))
+    (emit-mutation! [:tooling/toggle-node-focused
+                     {:Δ (fn [db]
+                           (-> db
+                               (update-in [:tooling :state-browser-props :focused :paths] #(if (empty? %) #{path} #{}))
+                               (update-in [:tooling :state-browser-props :focused :upstream-paths] #(if (empty? %) (u/upstream-paths #{path}) #{}))))}])))
 
 
 (defmethod process-side-effect :tooling/back-in-time
   [{:keys [emit-mutation!]} id args]
-  (emit-mutation! [:tooling/back-in-time {:Δ (fn [db]
-                                               (let [processed-mutations (get-in db [:tooling :processed-mutations])
-                                                     latest-processed-mutation (first processed-mutations)
-                                                     [_ {:keys [pre-Δ-db pre-Δ-mutation-paths pre-Δ-upstream-mutation-paths]}] latest-processed-mutation]
-                                                 (as-> db db
-                                                   (merge db pre-Δ-db)
-                                                   (update-in db [:tooling :unprocessed-mutations] conj latest-processed-mutation)
-                                                   (update-in db [:tooling :processed-mutations] rest)
-                                                   (assoc-in db [:tooling :state-browser-props :mutated :paths] pre-Δ-mutation-paths)
-                                                   (assoc-in db [:tooling :state-browser-props :mutated :upstream-paths]  pre-Δ-upstream-mutation-paths))))}]))
+  (emit-mutation! [:tooling/back-in-time
+                   {:Δ (fn [db]
+                         (let [processed-mutations (get-in db [:tooling :processed-mutations])
+                               latest-processed-mutation (first processed-mutations)
+                               [_ {:keys [pre-Δ-db pre-Δ-mutation-paths pre-Δ-upstream-mutation-paths]}] latest-processed-mutation]
+                           (as-> db db
+                             (merge db pre-Δ-db)
+                             (update-in db [:tooling :unprocessed-mutations] conj latest-processed-mutation)
+                             (update-in db [:tooling :processed-mutations] rest)
+                             (assoc-in db [:tooling :state-browser-props :mutated :paths] pre-Δ-mutation-paths)
+                             (assoc-in db [:tooling :state-browser-props :mutated :upstream-paths]  pre-Δ-upstream-mutation-paths))))}]))
 
 
 (defmethod process-side-effect :tooling/forward-in-time
   [{:keys [emit-mutation!]} id args]
-  (emit-mutation! [:tooling/forward-in-time {:Δ (fn [db]
-                                                  (let [next-unprocessed-mutation (first (get-in db [:tooling :unprocessed-mutations]))
-                                                        [_ {:keys [post-Δ-db post-Δ-mutation-paths post-Δ-upstream-mutation-paths]}] next-unprocessed-mutation]
-                                                    (as-> db db
-                                                      (merge db post-Δ-db)
-                                                      (update-in db [:tooling :processed-mutations] conj next-unprocessed-mutation)
-                                                      (update-in db [:tooling :unprocessed-mutations] rest)
-                                                      (assoc-in db [:tooling :state-browser-props :mutated :paths]  post-Δ-mutation-paths)
-                                                      (assoc-in db [:tooling :state-browser-props :mutated :upstream-paths] post-Δ-upstream-mutation-paths))))}]))
+  (emit-mutation! [:tooling/forward-in-time
+                   {:Δ (fn [db]
+                         (let [next-unprocessed-mutation (first (get-in db [:tooling :unprocessed-mutations]))
+                               [_ {:keys [post-Δ-db post-Δ-mutation-paths post-Δ-upstream-mutation-paths]}] next-unprocessed-mutation]
+                           (as-> db db
+                             (merge db post-Δ-db)
+                             (update-in db [:tooling :processed-mutations] conj next-unprocessed-mutation)
+                             (update-in db [:tooling :unprocessed-mutations] rest)
+                             (assoc-in db [:tooling :state-browser-props :mutated :paths]  post-Δ-mutation-paths)
+                             (assoc-in db [:tooling :state-browser-props :mutated :upstream-paths] post-Δ-upstream-mutation-paths))))}]))
 
 
 (defmethod process-side-effect :general/general-init
@@ -120,6 +126,19 @@
   (let [{:keys [path item-name]} args
         mutation-id (keyword  (str "playground/inc-" item-name))]
     (emit-mutation! [mutation-id {:Δ (fn [db] (update-in db path inc))}])))
+
+
+(defmethod process-side-effect :playground/ping
+  [{:keys [!db send! emit-mutation!]} id args]
+  (let [ping (get-in @!db [:playground :ping])]
+    (emit-mutation! [:playground/ping {:Δ (fn [db] (update-in db [:playground :ping] inc))}])
+    (send! [:playground/ping {:ping (inc ping)}])))
+
+
+(defmethod process-side-effect :playground/pong
+  [{:keys [!db send! emit-mutation!]} id args]
+  (let [pong (get-in @!db [:comms :message :playground/ping :reply :pong])]
+    (emit-mutation! [:playground/pong {:Δ (fn [db] (assoc-in db [:playground :pong] pong))}])))
 
 
 (defmethod process-side-effect :default
