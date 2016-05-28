@@ -28,9 +28,13 @@
   []
 
   (let [config (load-config)]
-    (fn [kw]
-      (or (-> kw name csk/->SCREAMING_SNAKE_CASE System/getenv edn/read-string)
-          (get config kw)))))
+    (fn [kw {:keys [type]}]
+      (if-let [v (-> kw name csk/->SCREAMING_SNAKE_CASE System/getenv)]
+        (case type
+          :integer (edn/read-string v)
+          :string v
+          v)
+        (get config kw)))))
 
 
 (defrecord ConfigOpts []
@@ -40,14 +44,14 @@
     (log/info "initialising config-opts")
     (let [config (make-config)]
       (assoc component
-             :github-auth {:client-id (config :github-auth-client-id)
-                           :client-secret (config :github-auth-client-secret)
-                           :redirect-uri (config :github-auth-redirect-uri)
+             :github-auth {:client-id (config :github-auth-client-id {})
+                           :client-secret (config :github-auth-client-secret {})
+                           :redirect-uri (config :github-auth-redirect-uri {})
                            :scope "user:email"}
 
              :comms {:chsk-opts {:packer :edn}}
 
-             :server {:http-kit-opts {:port (config :port)}
+             :server {:http-kit-opts {:port (config :port {:type :integer})}
                       :middleware-opts {:params {:urlencoded true
                                                  :nested true
                                                  :keywordize true}
