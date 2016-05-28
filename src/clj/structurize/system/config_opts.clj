@@ -1,10 +1,17 @@
 (ns structurize.system.config-opts
   (:require [clojure.edn :as edn]
             [com.stuartsierra.component :as component]
-            [taoensso.timbre :as log]))
+            [taoensso.timbre :as log]
+            [camel-snake-kebab.core :as csk]))
 
 
-(defn load-config []
+(defn load-config
+
+  "Loads pubic and private config from hardocded locations, then merges them.
+   If no private file is present, will simply give an empty map in its place."
+
+  []
+
   (let [home (System/getProperty "user.home")
         public-config (-> "resources/config.edn" slurp edn/read-string)
         private-config (try
@@ -13,21 +20,34 @@
     (merge public-config private-config)))
 
 
+(defn make-config
+
+  "Returns a function that takes a kw and first checks if an env var exists,
+   before going to the config map to get a value."
+
+  []
+
+  (let [config (load-config)]
+    (fn [kw]
+      (or (-> kw name csk/->SCREAMING_SNAKE_CASE System/getenv edn/read-string)
+          (get config kw)))))
+
+
 (defrecord ConfigOpts []
   component/Lifecycle
 
   (start [component]
     (log/info "initialising config-opts")
-    (let [config (load-config)]
+    (let [config (make-config)]
       (assoc component
-             :github-auth {:client-id (or (System/getenv "GITHUB_AUTH_CLIENT_ID") (:github-auth-client-id config))
-                           :client-secret (or (System/getenv "GITHUB_AUTH_CLIENT_SECRET") (:github-auth-client-secret config))
-                           :redirect-uri (or (System/getenv "GITHUB_AUTH_REDIRECT_URI") (:github-auth-redirect-uri config))
+             :github-auth {:client-id (config :github-auth-client-id)
+                           :client-secret (config :github-auth-client-secret)
+                           :redirect-uri (config :github-auth-redirect-uri)
                            :scope "user:email"}
 
              :comms {:chsk-opts {:packer :edn}}
 
-             :server {:http-kit-opts {:port (or (edn/read-string (System/getenv "PORT")) (:port config))}
+             :server {:http-kit-opts {:port (config :port)}
                       :middleware-opts {:params {:urlencoded true
                                                  :nested true
                                                  :keywordize true}
