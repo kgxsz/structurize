@@ -12,22 +12,13 @@
 
 
 (defn sign-in-with-github [{:keys [config-opts !db emit-side-effect!] :as Φ}]
-  (log/debug "mount sign-in-with-github")
 
-  (let [!reply-received? (r/track #(= :reply-received (get-in @!db [:comms :message :sign-in/init-sign-in-with-github :status])))]
+  (log/debug "render sign-in-with-github")
 
-    (fn []
-      (let [reply-received? @!reply-received?]
-
-        (log/debug "render sign-in-with-github")
-
-        (when reply-received?
-          (emit-side-effect! [:general/redirect-to-github])))
-
-      [:div.button.clickable {:on-click (u/without-propagation
-                                         #(emit-side-effect! [:general/init-sign-in-with-github]))}
-       [:span.button-icon.icon-github]
-       [:span.button-text "sign in with GitHub"]])))
+  [:div.button.clickable {:on-click (u/without-propagation
+                                     #(emit-side-effect! [:general/init-sign-in-with-github]))}
+   [:span.button-icon.icon-github]
+   [:span.button-text "sign in with GitHub"]])
 
 
 (defn sign-out [{:keys [!db emit-side-effect!] :as Φ}]

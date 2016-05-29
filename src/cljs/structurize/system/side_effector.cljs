@@ -162,23 +162,17 @@
     (change-location! {:path path})))
 
 
-(defmethod process-side-effect :general/redirect-to-github
-  [{:keys [config-opts change-location! !db]} id props]
-  (let [host (get-in config-opts [:host])
-        {:keys [client-id attempt-id scope redirect-uri]} (get-in @!db [:comms :message :sign-in/init-sign-in-with-github :reply])
-        redirect-uri (str redirect-uri (b/path-for routes :sign-in-with-github))]
-
-    (change-location! {:prefix "https://github.com"
-                       :path "/login/oauth/authorize"
-                       :query {:client_id client-id
-                               :state attempt-id
-                               :scope scope
-                               :redirect_uri redirect-uri}})))
-
-
 (defmethod process-side-effect :general/init-sign-in-with-github
-  [{:keys [send!]} id props]
-  (send! [:sign-in/init-sign-in-with-github {}]))
+  [{:keys [send! change-location!]} id props]
+  (send! [:sign-in/init-sign-in-with-github {}]
+         {:on-success (fn [[id {:keys [client-id attempt-id scope redirect-uri]}]]
+                        (let [redirect-uri (str redirect-uri (b/path-for routes :sign-in-with-github))]
+                          (change-location! {:prefix "https://github.com"
+                                             :path "/login/oauth/authorize"
+                                             :query {:client_id client-id
+                                                     :state attempt-id
+                                                     :scope scope
+                                                     :redirect_uri redirect-uri}})))}))
 
 
 (defmethod process-side-effect :general/sign-in-with-github
@@ -206,7 +200,7 @@
     (emit-mutation! [:playground/ping {:Δ (fn [db] (update-in db [:playground :ping] inc))}])
 
     (send! [:playground/ping {:ping (inc ping)}]
-           {:on-success (fn [[id payload :as reply]] (emit-mutation! [:playground/pong
+           {:on-success (fn [[id payload]] (emit-mutation! [:playground/pong
                                                                      {:Δ (fn [db] (assoc-in db [:playground :pong] (:pong payload)))}]))
             :on-failure (fn [reply] (emit-mutation! [:playground/ping-failed
                                                     {:Δ (fn [db] (assoc-in db [:playground :ping-status] :failed))}]))})))
