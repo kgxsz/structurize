@@ -32,7 +32,6 @@
       (if-let [v (-> kw name csk/->SCREAMING_SNAKE_CASE System/getenv)]
         (case type
           :integer (edn/read-string v)
-          :string v
           v)
         (get config kw)))))
 
