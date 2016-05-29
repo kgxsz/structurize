@@ -19,7 +19,7 @@
     (log/info "initialising renderer")
     (render-root! {:config-opts config-opts
                    :!db (:!db state)
-                   :emit-side-effect! (:emit-side-effect side-effect-bus)})
+                   :emit-side-effect! (:emit-side-effect! side-effect-bus)})
     component)
 
   (stop [component] component))

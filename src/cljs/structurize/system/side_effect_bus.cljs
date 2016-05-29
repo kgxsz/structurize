@@ -14,6 +14,6 @@
 
       (assoc component
              :<side-effects <side-effects
-             :emit-side-effect (fn [side-effect] (go (a/>! <side-effects side-effect))))))
+             :emit-side-effect! (fn [side-effect] (go (a/>! <side-effects side-effect))))))
 
   (stop [component] component))

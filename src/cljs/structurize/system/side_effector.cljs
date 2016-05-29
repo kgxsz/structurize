@@ -95,6 +95,11 @@
                              (assoc-in [:tooling :state-browser-props :mutated :upstream-paths] post-Δ-upstream-mutation-paths))))}]))
 
 
+(defmethod process-side-effect :browser/change-location
+  [{:keys [emit-mutation!]} id args]
+  (let [{:keys [location]} args]
+    (emit-mutation! [:browser/change-location {:Δ (fn [db] (assoc db :location location))}])))
+
 (defmethod process-side-effect :general/general-init
   [{:keys [send!]} id args]
   (send! [:general/init]))

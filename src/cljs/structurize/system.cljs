@@ -21,7 +21,7 @@
       (component/system-using
        {:side-effect-bus [:config-opts]
         :state [:config-opts]
-        :browser [:config-opts :state :side-effect-bus]
+        :browser [:config-opts :side-effect-bus]
         :comms [:config-opts :state :side-effect-bus]
         :side-effector [:config-opts :side-effect-bus :browser :comms :state]
         :renderer [:config-opts :state :side-effect-bus]})))
