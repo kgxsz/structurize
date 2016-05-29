@@ -31,16 +31,6 @@
                                                                                        (conj % path))))}])))
 
 
-(defmethod process-side-effect :tooling/toggle-node-cursored
-  [{:keys [emit-mutation!]} id props]
-  (let [{:keys [path]} props]
-    (emit-mutation! [:tooling/toggle-node-cursored
-                     {:Δ (fn [db]
-                           (-> db
-                               (update-in [:tooling :state-browser-props :cursored :paths] #(if (empty? %) #{path} #{}))
-                               (update-in [:tooling :state--browser-props :cursored :upstream-paths] #(if (empty? %) (u/upstream-paths #{path}) #{}))))}])))
-
-
 (defmethod process-side-effect :tooling/toggle-node-focused
   [{:keys [emit-mutation!]} id props]
   (let [{:keys [path]} props]
@@ -51,7 +41,7 @@
                                (update-in [:tooling :state-browser-props :focused :upstream-paths] #(if (empty? %) (u/upstream-paths #{path}) #{}))))}])))
 
 
-(defmethod process-side-effect :tooling/back-in-time
+(defmethod process-side-effect :tooling/go-back-in-time
   [{:keys [emit-mutation!]} id props]
   (emit-mutation! [:tooling/back-in-time
                    {:Δ (fn [db]
@@ -66,7 +56,7 @@
                              (assoc-in [:tooling :state-browser-props :mutated :upstream-paths]  pre-Δ-upstream-mutation-paths))))}]))
 
 
-(defmethod process-side-effect :tooling/forward-in-time
+(defmethod process-side-effect :tooling/go-forward-in-time
   [{:keys [emit-mutation!]} id props]
   (emit-mutation! [:tooling/forward-in-time
                    {:Δ (fn [db]
@@ -80,7 +70,7 @@
                              (assoc-in [:tooling :state-browser-props :mutated :upstream-paths] post-Δ-upstream-mutation-paths))))}]))
 
 
-(defmethod process-side-effect :tooling/real-time
+(defmethod process-side-effect :tooling/stop-time-travelling
   [{:keys [emit-mutation!]} id props]
   (emit-mutation! [:tooling/real-time
                    {:Δ (fn [db]
@@ -113,47 +103,52 @@
   [{:keys [emit-mutation!]} id props]
   (let [{:keys [message-id]} props]
     (emit-mutation! [:comms/message-sent
-                     {:Δ (fn [db] (assoc-in db [:comms :message message-id :status] :sent))}])))
+                     {:Δ (fn [db] (assoc-in db [:comms :message message-id] {:status :sent}))}])))
 
 
 (defmethod process-side-effect :comms/message-reply-received
   [{:keys [emit-mutation!]} id props]
-  (let [{:keys [message-id payload]} props]
+  (let [{:keys [message-id reply on-success]} props]
     (emit-mutation! [:comms/message-reply-received
                      {:Δ (fn [db] (-> db
                                      (assoc-in [:comms :message message-id :status] :reply-received)
-                                     (assoc-in [:comms :message message-id :reply] payload)))}])))
+                                     (assoc-in [:comms :message message-id :reply] (second reply))))}])
+    (when on-success (on-success reply))))
 
 
 (defmethod process-side-effect :comms/message-failed
   [{:keys [emit-mutation!]} id props]
-  (let [{:keys [message-id reply]} props]
+  (let [{:keys [message-id reply on-failure]} props]
     (emit-mutation! [:comms/message-failed {:Δ (fn [db] (-> db
-                                                            (assoc-in [:comms :message message-id :status] :failed)
-                                                            (assoc-in [:comms :message message-id :reply] reply)))}])))
+                                                           (assoc-in [:comms :message message-id :status] :failed)
+                                                           (assoc-in [:comms :message message-id :reply] reply)))}])
+    (when on-failure (on-failure reply))))
+
 
 (defmethod process-side-effect :comms/post-sent
   [{:keys [emit-mutation!]} id props]
   (let [{:keys [path]} props]
-    (emit-mutation! [:comms/post-sent {:Δ (fn [db] (assoc-in db [:comms :post path :status] :sent))}])))
+    (emit-mutation! [:comms/post-sent {:Δ (fn [db] (assoc-in db [:comms :post path] {:status :sent}))}])))
 
 
 (defmethod process-side-effect :comms/post-response-received
   [{:keys [emit-mutation!]} id props]
-  (let [{:keys [path response]} props]
+  (let [{:keys [path response on-success]} props]
     (emit-mutation! [:comms/post-response-received {:Δ (fn [db] (-> db
-                                                                    (assoc-in [:comms :post path :status] :response-received)
-                                                                    (assoc-in [:comms :post path :response] (:?content response))
-                                                                    (assoc-in [:comms :chsk-status] :closed)
-                                                                    (assoc-in [:comms :message :general/init] nil)))}])))
+                                                                   (assoc-in [:comms :post path :status] :response-received)
+                                                                   (assoc-in [:comms :post path :response] (:?content response))
+                                                                   (assoc-in [:comms :chsk-status] :closed)
+                                                                   (assoc-in [:comms :message :general/init] nil)))}])
+    (when on-success (on-success response))))
 
 
 (defmethod process-side-effect :comms/post-failed
   [{:keys [emit-mutation!]} id props]
-  (let [{:keys [path response]} props]
+  (let [{:keys [path response on-failure]} props]
     (emit-mutation! [:comms/post-failed {:Δ (fn [db] (-> db
-                                                         (assoc-in [:comms :post path :status] :failed)
-                                                         (assoc-in [:comms :post path :response] response)))}])))
+                                                        (assoc-in [:comms :post path :status] :failed)
+                                                        (assoc-in [:comms :post path :response] response)))}])
+    (when on-failure (on-failure response))))
 
 
 (defmethod process-side-effect :general/general-init
@@ -205,10 +200,16 @@
 
 
 (defmethod process-side-effect :playground/ping
-  [{:keys [!db send! emit-mutation!]} id props]
+  [{:keys [!db send! emit-mutation!] :as Φ} id props]
   (let [ping (get-in @!db [:playground :ping])]
+
     (emit-mutation! [:playground/ping {:Δ (fn [db] (update-in db [:playground :ping] inc))}])
-    (send! [:playground/ping {:ping (inc ping)}])))
+
+    (send! [:playground/ping {:ping (inc ping)}]
+           {:on-success (fn [[id payload :as reply]] (emit-mutation! [:playground/pong
+                                                                     {:Δ (fn [db] (assoc-in db [:playground :pong] (:pong payload)))}]))
+            :on-failure (fn [reply] (emit-mutation! [:playground/ping-failed
+                                                    {:Δ (fn [db] (assoc-in db [:playground :ping-status] :failed))}]))})))
 
 
 (defmethod process-side-effect :default

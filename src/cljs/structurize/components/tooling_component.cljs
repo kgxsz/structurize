@@ -144,13 +144,13 @@
           [:div.time-control.control-play {:class (if real-time? :active :clickable)
                                            :on-click (when-not real-time?
                                                        (u/without-propagation
-                                                        #(emit-side-effect! [:tooling/real-time])))}
+                                                        #(emit-side-effect! [:tooling/stop-time-travelling])))}
            [:span.icon.icon-control-play]]
 
           [:div.time-control.control-next {:class (when-not real-time? (u/->class #{:active :clickable}))
                                            :on-click (when-not real-time?
                                                        (u/without-propagation
-                                                        #(emit-side-effect! [:tooling/forward-in-time])))}
+                                                        #(emit-side-effect! [:tooling/go-forward-in-time])))}
            [:span.icon.icon-control-next]]
 
           [:div.time-control.control-previous {:class (u/->class (cond-> #{}
@@ -158,7 +158,7 @@
                                                                    (not beginning-of-time?) (conj :clickable)))
                                                :on-click (when-not beginning-of-time?
                                                            (u/without-propagation
-                                                            #(emit-side-effect! [:tooling/back-in-time])))}
+                                                            #(emit-side-effect! [:tooling/go-back-in-time])))}
            [:span.icon.icon-control-prev]]]
 
          [:div.mutation-browser-divider]

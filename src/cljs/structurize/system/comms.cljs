@@ -22,7 +22,7 @@
 
 (defmethod process-received-message :default
   [_ _ {:keys [id]}]
-  (log/debug "failed to process received message:" id))
+  (log/debug "no handler for received message:" id))
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; comms setup
@@ -49,7 +49,7 @@
 
   [send-fn emit-side-effect!]
 
-  (fn [[id _ :as message] {:keys [timeout]}]
+  (fn [[id _ :as message] {:keys [timeout on-success on-failure]}]
     (log/debug "dispatching message to server:" id)
     (emit-side-effect! [:comms/message-sent {:message-id id}])
 
@@ -58,12 +58,12 @@
       (or timeout 10000)
       (fn [reply]
         (if (sente/cb-success? reply)
-          (let [[id ?payload] reply]
-            (log/debug "received a reply message from server:" id)
-            (emit-side-effect! [:comms/message-reply-received {:message-id id :payload ?payload}]))
+          (let [[id _] reply]
+            (log/debug "received a message reply from server:" id)
+            (emit-side-effect! [:comms/message-reply-received {:message-id id :reply reply :on-success on-success}]))
           (do
             (log/warn "message failed with:" reply)
-            (emit-side-effect! [:comms/message-failed {:message-id id :reply reply}])))))))
+            (emit-side-effect! [:comms/message-failed {:message-id id :reply reply :on-failure on-failure}])))))))
 
 
 (defn make-post
@@ -82,7 +82,7 @@
 
   [chsk chsk-state emit-side-effect!]
 
-  (fn [[path params] {:keys [timeout]}]
+  (fn [[path params] {:keys [timeout on-success on-failure]}]
     (log/debug "dispatching post to server:" path)
 
     (emit-side-effect! [:comms/post-sent {:path path}])
@@ -96,14 +96,14 @@
        (if (:success? response)
          (do
            (log/debug "received a post response from server:" path)
-           (emit-side-effect! [:comms/post-response-received {:path path :response response}])
+           (emit-side-effect! [:comms/post-response-received {:path path :response response :on-success on-success}])
 
            ;; we reconnect the websocket connection here to pick up any changes
            ;; in the session that may have come about with the post request
            (sente/chsk-reconnect! chsk))
          (do
            (log/warn "post failed with:" response)
-           (emit-side-effect! [:comms/post-failed {:path path :response response}])))))))
+           (emit-side-effect! [:comms/post-failed {:path path :response response :on-failure on-failure}])))))))
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; component setup
@@ -114,8 +114,7 @@
 
   (start [component]
     (log/info "initialising comms")
-    (let [emit-mutation! (:emit-mutation! state)
-          emit-side-effect! (:emit-side-effect! side-effect-bus)
+    (let [emit-side-effect! (:emit-side-effect! side-effect-bus)
           chsk-opts (get-in config-opts [:comms :chsk-opts])
           {:keys [chsk ch-recv send-fn] chsk-state :state} (sente/make-channel-socket! "/chsk" chsk-opts)]
 

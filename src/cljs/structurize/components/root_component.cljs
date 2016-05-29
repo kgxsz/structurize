@@ -44,7 +44,7 @@
   (let [!me (r/track #(get-in @!db [:comms :message :general/init :reply :me]))
         !star (r/track #(get-in @!db [:playground :star]))
         !heart (r/track #(get-in @!db [:playground :heart]))
-        !pong (r/track #(get-in @!db [:comms :message :playground/ping :reply :pong] 0))]
+        !pong (r/track #(get-in @!db [:playground :pong]))]
 
     (log/debug "mount home-page")
 

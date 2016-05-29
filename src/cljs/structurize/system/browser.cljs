@@ -27,7 +27,7 @@
           location (merge {:path path
                            :query (->> query query->map (m/map-keys keyword))}
                           (b/match-route routes path))]
-      (log/debug "received navigation from browser:" token)
+      (log/debug "receiving navigation from browser:" token)
       (when-not (.-isNavigation g-event) (js/window.scrollTo 0 0))
       (emit-side-effect! [:browser/change-location {:location location}]))))
 
