@@ -9,9 +9,6 @@
   (r/render [root Φ] (js/document.getElementById "root")))
 
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; component setup
-
-
 (defrecord Renderer [config-opts state side-effect-bus]
   component/Lifecycle
 

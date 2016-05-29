@@ -22,7 +22,7 @@
        {:side-effect-bus [:config-opts]
         :state [:config-opts]
         :browser [:config-opts :side-effect-bus]
-        :comms [:config-opts :state :side-effect-bus]
+        :comms [:config-opts :side-effect-bus]
         :side-effector [:config-opts :side-effect-bus :browser :comms :state]
         :renderer [:config-opts :state :side-effect-bus]})))
 

@@ -13,8 +13,8 @@
 
 
 (defmethod process-received-message :chsk/state
-  [config-opts emit-mutation! {:keys [event id ?data send-fn] :as event-message}]
-  (emit-mutation! [:comms/chsk-status-update {:Δ (fn [db] (assoc-in db [:comms :chsk-status] (if (:open? ?data) :open :closed)))}]))
+  [config-opts emit-side-effect! {:keys [event id ?data send-fn] :as event-message}]
+  (emit-side-effect! [:comms/chsk-status-update {:status (if (:open? ?data) :open :closed)}]))
 
 
 (defmethod process-received-message :chsk/handshake
@@ -30,11 +30,11 @@
 
 (defn make-receive-message
   "Returns a function that receives a message and processes it appropriately via multimethods"
-  [config-opts emit-mutation!]
+  [config-opts emit-side-effect!]
 
   (fn [{:keys [event id ?data send-fn] :as event-message}]
     (log/debug "received message from server:" id)
-    (process-received-message config-opts emit-mutation! event-message)))
+    (process-received-message config-opts emit-side-effect! event-message)))
 
 
 (defn make-send
@@ -47,11 +47,11 @@
    message - the sente message, in the form of a vector, with id
    timeout - in milliseconds"
 
-  [send-fn emit-mutation!]
+  [send-fn emit-side-effect!]
 
   (fn [[id _ :as message] {:keys [timeout]}]
     (log/debug "dispatching message to server:" id)
-    (emit-mutation! [:comms/message-sent {:Δ (fn [db] (assoc-in db [:comms :message id :status] :sent))}])
+    (emit-side-effect! [:comms/message-sent {:message-id id}])
 
     (send-fn
       message
@@ -60,14 +60,10 @@
         (if (sente/cb-success? reply)
           (let [[id ?payload] reply]
             (log/debug "received a reply message from server:" id)
-            (emit-mutation! [:comms/message-reply-received {:Δ (fn [db] (-> db
-                                                                 (assoc-in [:comms :message id :status] :reply-received)
-                                                                 (assoc-in [:comms :message id :reply] ?payload)))}]))
+            (emit-side-effect! [:comms/message-reply-received {:message-id id :payload ?payload}]))
           (do
             (log/warn "message failed with:" reply)
-            (emit-mutation! [:comms/message-failed {:Δ (fn [db] (-> db
-                                                         (assoc-in [:comms :message id :status] :failed)
-                                                         (assoc-in [:comms :message id :reply] reply)))}])))))))
+            (emit-side-effect! [:comms/message-failed {:message-id id :reply reply}])))))))
 
 
 (defn make-post
@@ -84,11 +80,12 @@
    params - map of params to post
    timeout - in milliseconds"
 
-  [chsk chsk-state emit-mutation!]
+  [chsk chsk-state emit-side-effect!]
 
   (fn [[path params] {:keys [timeout]}]
     (log/debug "dispatching post to server:" path)
-    (emit-mutation! [:comms/post-sent {:Δ (fn [db] (assoc-in db [:comms :post path :status] :sent))}])
+
+    (emit-side-effect! [:comms/post-sent {:path path}])
 
     (sente/ajax-lite
      path
@@ -99,40 +96,35 @@
        (if (:success? response)
          (do
            (log/debug "received a post response from server:" path)
-           (emit-mutation! [:comms/post-response-received {:Δ (fn [db] (-> db
-                                                                (assoc-in [:comms :post path :status] :response-received)
-                                                                (assoc-in [:comms :post path :response] (:?content response))
-                                                                (assoc-in [:comms :chsk-status] :closed)
-                                                                (assoc-in [:comms :message :general/init] nil)))}])
+           (emit-side-effect! [:comms/post-response-received {:path path :response response}])
 
            ;; we reconnect the websocket connection here to pick up any changes
            ;; in the session that may have come about with the post request
            (sente/chsk-reconnect! chsk))
          (do
            (log/warn "post failed with:" response)
-           (emit-mutation! [:comms/post-failed {:Δ (fn [db] (-> db
-                                                     (assoc-in [:comms :post path :status] :failed)
-                                                     (assoc-in [:comms :post path :response] response)))}])))))))
+           (emit-side-effect! [:comms/post-failed {:path path :response response}])))))))
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; component setup
 
 
-(defrecord Comms [config-opts state side-effect-bus]
+(defrecord Comms [config-opts side-effect-bus]
   component/Lifecycle
 
   (start [component]
     (log/info "initialising comms")
     (let [emit-mutation! (:emit-mutation! state)
+          emit-side-effect! (:emit-side-effect! side-effect-bus)
           chsk-opts (get-in config-opts [:comms :chsk-opts])
           {:keys [chsk ch-recv send-fn] chsk-state :state} (sente/make-channel-socket! "/chsk" chsk-opts)]
 
       (log/info "begin listening for messages from server")
-      (sente/start-chsk-router! ch-recv (make-receive-message config-opts emit-mutation!))
+      (sente/start-chsk-router! ch-recv (make-receive-message config-opts emit-side-effect!))
 
       (assoc component
-             :send! (make-send send-fn emit-mutation!)
-             :post! (make-post chsk chsk-state emit-mutation!))))
+             :send! (make-send send-fn emit-side-effect!)
+             :post! (make-post chsk chsk-state emit-side-effect!))))
 
   (stop [component] component))
 

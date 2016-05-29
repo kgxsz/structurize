@@ -15,15 +15,15 @@
 
 
 (defmethod process-side-effect :tooling/toggle-tooling-active
-  [{:keys [emit-mutation!]} id args]
+  [{:keys [emit-mutation!]} id props]
 
   (emit-mutation! [:tooling/toggle-tooling-active
                    {:Δ (fn [db] (update-in db [:tooling :tooling-active?] not))}]))
 
 
 (defmethod process-side-effect :tooling/toggle-node-collapsed
-  [{:keys [emit-mutation!]} id args]
-  (let [{:keys [path]} args]
+  [{:keys [emit-mutation!]} id props]
+  (let [{:keys [path]} props]
     (emit-mutation! [:tooling/toggle-node-collapsed
                      {:Δ (fn [db]
                            (update-in db [:tooling :state-browser-props :collapsed] #(if (contains? % path)
@@ -32,8 +32,8 @@
 
 
 (defmethod process-side-effect :tooling/toggle-node-cursored
-  [{:keys [emit-mutation!]} id args]
-  (let [{:keys [path]} args]
+  [{:keys [emit-mutation!]} id props]
+  (let [{:keys [path]} props]
     (emit-mutation! [:tooling/toggle-node-cursored
                      {:Δ (fn [db]
                            (-> db
@@ -42,8 +42,8 @@
 
 
 (defmethod process-side-effect :tooling/toggle-node-focused
-  [{:keys [emit-mutation!]} id args]
-  (let [{:keys [path]} args]
+  [{:keys [emit-mutation!]} id props]
+  (let [{:keys [path]} props]
     (emit-mutation! [:tooling/toggle-node-focused
                      {:Δ (fn [db]
                            (-> db
@@ -52,7 +52,7 @@
 
 
 (defmethod process-side-effect :tooling/back-in-time
-  [{:keys [emit-mutation!]} id args]
+  [{:keys [emit-mutation!]} id props]
   (emit-mutation! [:tooling/back-in-time
                    {:Δ (fn [db]
                          (let [processed-mutations (get-in db [:tooling :processed-mutations])
@@ -67,7 +67,7 @@
 
 
 (defmethod process-side-effect :tooling/forward-in-time
-  [{:keys [emit-mutation!]} id args]
+  [{:keys [emit-mutation!]} id props]
   (emit-mutation! [:tooling/forward-in-time
                    {:Δ (fn [db]
                          (let [next-unprocessed-mutation (first (get-in db [:tooling :unprocessed-mutations]))
@@ -81,38 +81,94 @@
 
 
 (defmethod process-side-effect :tooling/real-time
-  [{:keys [emit-mutation!]} id args]
+  [{:keys [emit-mutation!]} id props]
   (emit-mutation! [:tooling/real-time
                    {:Δ (fn [db]
                          (let [latest-unprocessed-mutation (last (get-in db [:tooling :unprocessed-mutations]))
                                unprocessed-mutations (get-in db [:tooling :unprocessed-mutations])
                                [_ {:keys [post-Δ-db post-Δ-mutation-paths post-Δ-upstream-mutation-paths]}] latest-unprocessed-mutation]
                            (-> db
-                             (merge post-Δ-db)
-                             (update-in [:tooling :processed-mutations] (partial concat (reverse unprocessed-mutations)))
-                             (assoc-in [:tooling :unprocessed-mutations] '())
-                             (assoc-in [:tooling :state-browser-props :mutated :paths] post-Δ-mutation-paths)
-                             (assoc-in [:tooling :state-browser-props :mutated :upstream-paths] post-Δ-upstream-mutation-paths))))}]))
+                               (merge post-Δ-db)
+                               (update-in [:tooling :processed-mutations] (partial concat (reverse unprocessed-mutations)))
+                               (assoc-in [:tooling :unprocessed-mutations] '())
+                               (assoc-in [:tooling :state-browser-props :mutated :paths] post-Δ-mutation-paths)
+                               (assoc-in [:tooling :state-browser-props :mutated :upstream-paths] post-Δ-upstream-mutation-paths))))}]))
 
 
 (defmethod process-side-effect :browser/change-location
-  [{:keys [emit-mutation!]} id args]
-  (let [{:keys [location]} args]
-    (emit-mutation! [:browser/change-location {:Δ (fn [db] (assoc db :location location))}])))
+  [{:keys [emit-mutation!]} id props]
+  (let [{:keys [location]} props]
+    (emit-mutation! [:browser/change-location
+                     {:Δ (fn [db] (assoc db :location location))}])))
+
+
+(defmethod process-side-effect :comms/chsk-status-update
+  [{:keys [emit-mutation!]} id props]=
+  (let [{:keys [status]} props]
+    (emit-mutation! [:comms/chsk-status-update
+                     {:Δ (fn [db] (assoc-in db [:comms :chsk-status] status))}])))
+
+
+(defmethod process-side-effect :comms/message-sent
+  [{:keys [emit-mutation!]} id props]
+  (let [{:keys [message-id]} props]
+    (emit-mutation! [:comms/message-sent
+                     {:Δ (fn [db] (assoc-in db [:comms :message message-id :status] :sent))}])))
+
+
+(defmethod process-side-effect :comms/message-reply-received
+  [{:keys [emit-mutation!]} id props]
+  (let [{:keys [message-id payload]} props]
+    (emit-mutation! [:comms/message-reply-received
+                     {:Δ (fn [db] (-> db
+                                     (assoc-in [:comms :message message-id :status] :reply-received)
+                                     (assoc-in [:comms :message message-id :reply] payload)))}])))
+
+
+(defmethod process-side-effect :comms/message-failed
+  [{:keys [emit-mutation!]} id props]
+  (let [{:keys [message-id reply]} props]
+    (emit-mutation! [:comms/message-failed {:Δ (fn [db] (-> db
+                                                            (assoc-in [:comms :message message-id :status] :failed)
+                                                            (assoc-in [:comms :message message-id :reply] reply)))}])))
+
+(defmethod process-side-effect :comms/post-sent
+  [{:keys [emit-mutation!]} id props]
+  (let [{:keys [path]} props]
+    (emit-mutation! [:comms/post-sent {:Δ (fn [db] (assoc-in db [:comms :post path :status] :sent))}])))
+
+
+(defmethod process-side-effect :comms/post-response-received
+  [{:keys [emit-mutation!]} id props]
+  (let [{:keys [path response]} props]
+    (emit-mutation! [:comms/post-response-received {:Δ (fn [db] (-> db
+                                                                    (assoc-in [:comms :post path :status] :response-received)
+                                                                    (assoc-in [:comms :post path :response] (:?content response))
+                                                                    (assoc-in [:comms :chsk-status] :closed)
+                                                                    (assoc-in [:comms :message :general/init] nil)))}])))
+
+
+(defmethod process-side-effect :comms/post-failed
+  [{:keys [emit-mutation!]} id props]
+  (let [{:keys [path response]} props]
+    (emit-mutation! [:comms/post-failed {:Δ (fn [db] (-> db
+                                                         (assoc-in [:comms :post path :status] :failed)
+                                                         (assoc-in [:comms :post path :response] response)))}])))
+
 
 (defmethod process-side-effect :general/general-init
-  [{:keys [send!]} id args]
+  [{:keys [send!]} id props]
   (send! [:general/init]))
 
 
 (defmethod process-side-effect :general/change-location
-  [{:keys [change-location!]} id args]
-  (let [{:keys [path]} args]
+  [{:keys [change-location!]} id props]
+  (let [{:keys [path]} props]
     (change-location! {:path path})))
 
 
 (defmethod process-side-effect :general/redirect-to-github
-  [{:keys [config-opts change-location! !db]} id args]
+  [{:keys [config-opts change-location! !db]} id props]
   (let [host (get-in config-opts [:host])
         {:keys [client-id attempt-id scope redirect-uri]} (get-in @!db [:comms :message :sign-in/init-sign-in-with-github :reply])
         redirect-uri (str redirect-uri (b/path-for routes :sign-in-with-github))]
@@ -126,30 +182,30 @@
 
 
 (defmethod process-side-effect :general/init-sign-in-with-github
-  [{:keys [send!]} id args]
+  [{:keys [send!]} id props]
   (send! [:sign-in/init-sign-in-with-github {}]))
 
 
 (defmethod process-side-effect :general/sign-in-with-github
-  [{:keys [post! change-location!]} id args]
+  [{:keys [post! change-location!]} id props]
   (change-location! {:query {} :replace? true})
-  (post! ["/sign-in/github" args]))
+  (post! ["/sign-in/github" props]))
 
 
 (defmethod process-side-effect :general/sign-out
-  [{:keys [post!]} id args]
+  [{:keys [post!]} id props]
   (post! ["/sign-out" {}]))
 
 
 (defmethod process-side-effect :playground/inc-item
-  [{:keys [emit-mutation!]} id args]
-  (let [{:keys [path item-name]} args
+  [{:keys [emit-mutation!]} id props]
+  (let [{:keys [path item-name]} props
         mutation-id (keyword  (str "playground/inc-" item-name))]
     (emit-mutation! [mutation-id {:Δ (fn [db] (update-in db path inc))}])))
 
 
 (defmethod process-side-effect :playground/ping
-  [{:keys [!db send! emit-mutation!]} id args]
+  [{:keys [!db send! emit-mutation!]} id props]
   (let [ping (get-in @!db [:playground :ping])]
     (emit-mutation! [:playground/ping {:Δ (fn [db] (update-in db [:playground :ping] inc))}])
     (send! [:playground/ping {:ping (inc ping)}])))
@@ -170,19 +226,22 @@
   (let [log-tooling? (get-in config-opts [:general :tooling :log?])]
 
     (go-loop []
-      (let [[id args :as side-effect] (a/<! <side-effects)
+      (let [[id props :as side-effect] (a/<! <side-effects)
             tooling? (= (namespace id) "tooling")
+            comms? (= (namespace id) "comms")
+            browser? (= (namespace id) "browser")
             real-time? (empty? (get-in @!db [:tooling :unprocessed-mutations]))]
 
-        (if real-time?
+        (cond
+          tooling? (do
+                     (when log-tooling? (log/debug "emitting side-effect:" id))
+                     (process-side-effect Φ id props))
 
-          (let [log? (or (not tooling?) (get-in config-opts [:general :tooling :log?]))]
-            (when log? (log/debug "emitting side-effect:" id))
-            (process-side-effect Φ id args))
+          (or comms? browser? real-time?) (do
+                                            (log/debug "emitting side-effect:" id)
+                                            (process-side-effect Φ id props))
 
-          (if tooling?
-            (process-side-effect Φ id args)
-            (log/debug "while time travelling, ignoring side-effect:" id))))
+          :else (log/debug "while time travelling, ignoring side-effect:" id)))
 
       (recur))))
 
