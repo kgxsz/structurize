@@ -89,8 +89,7 @@
 (defn make-db [config-opts]
   (r/atom {:playground {:heart 0
                         :star 3
-                        :ping 0
-                        :pong 0}
+                        :ping 0}
            :location {:path nil
                       :handler :unknown
                       :query nil}

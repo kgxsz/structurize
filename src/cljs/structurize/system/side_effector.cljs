@@ -135,12 +135,6 @@
     (send! [:playground/ping {:ping (inc ping)}])))
 
 
-(defmethod process-side-effect :playground/pong
-  [{:keys [!db send! emit-mutation!]} id args]
-  (let [pong (get-in @!db [:comms :message :playground/ping :reply :pong])]
-    (emit-mutation! [:playground/pong {:Δ (fn [db] (assoc-in db [:playground :pong] pong))}])))
-
-
 (defmethod process-side-effect :default
   [_ id _]
   (log/debug "failed to process side-effect:" id))

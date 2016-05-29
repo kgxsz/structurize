@@ -44,9 +44,7 @@
   (let [!me (r/track #(get-in @!db [:comms :message :general/init :reply :me]))
         !star (r/track #(get-in @!db [:playground :star]))
         !heart (r/track #(get-in @!db [:playground :heart]))
-        !ping (r/track #(get-in @!db [:playground :ping]))
-        !pong (r/track #(get-in @!db [:comms :message :playground/ping :reply :pong] 0))
-        !reply-received? (r/track #(= :reply-received (get-in @!db [:comms :message :playground/ping :status])))]
+        !pong (r/track #(get-in @!db [:comms :message :playground/ping :reply :pong] 0))]
 
     (log/debug "mount home-page")
 
@@ -54,14 +52,9 @@
       (let [me @!me
             star @!star
             heart @!heart
-            ping @!ping
-            pong @!pong
-            reply-received? @!reply-received?]
+            pong @!pong]
 
         (log/debug "render home-page")
-
-        (when reply-received?
-          (emit-side-effect! [:playground/pong {}]))
 
         [:div.page
 
