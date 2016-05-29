@@ -141,7 +141,10 @@
 
         [:div.browser.mutation-browser
          [:div.time-controls
-          [:div.time-control.control-play {:class (when real-time? :active)}
+          [:div.time-control.control-play {:class (if real-time? :active :clickable)
+                                           :on-click (when-not real-time?
+                                                       (u/without-propagation
+                                                        #(emit-side-effect! [:tooling/real-time])))}
            [:span.icon.icon-control-play]]
 
           [:div.time-control.control-next {:class (when-not real-time? (u/->class #{:active :clickable}))
