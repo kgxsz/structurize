@@ -6,7 +6,7 @@
 (defn reload! []
   (renderer/render-root! {:config-opts (:config-opts system)
                           :!db (get-in system [:state :!db])
-                          :emit-side-effect! (get-in system [:side-effector :emit-side-effect!])}))
+                          :emit-side-effect! (get-in system [:side-effect-bus :emit-side-effect])}))
 
 
 (defn ^:export start []

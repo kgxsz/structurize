@@ -118,7 +118,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; component setup
 
 
-(defrecord Comms [config-opts state]
+(defrecord Comms [config-opts state side-effect-bus]
   component/Lifecycle
 
   (start [component]

@@ -185,13 +185,12 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; component setup
 
 
-(defrecord SideEffector [config-opts browser comms state]
+(defrecord SideEffector [config-opts side-effect-bus browser comms state]
   component/Lifecycle
 
   (start [component]
     (log/info "initialising side-effector")
-    (let [<side-effects (a/chan)
-          Φ {:config-opts config-opts
+    (let [Φ {:config-opts config-opts
              :!db (:!db state)
              :emit-mutation! (:emit-mutation! state)
              :send! (:send! comms)
@@ -199,9 +198,8 @@
              :change-location! (:change-location! browser)}]
 
       (log/info "begin listening for side effects")
-      (listen-for-side-effects Φ <side-effects)
+      (listen-for-side-effects Φ (:<side-effects side-effect-bus))
 
-      (assoc component
-             :emit-side-effect! (fn [side-effect] (go (a/>! <side-effects side-effect))))))
+      component))
 
   (stop [component] component))

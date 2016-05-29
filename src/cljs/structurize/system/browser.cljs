@@ -86,7 +86,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; component setup
 
 
-(defrecord Browser [config-opts state]
+(defrecord Browser [config-opts state side-effect-bus]
   component/Lifecycle
 
   (start [component]
