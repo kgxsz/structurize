@@ -198,15 +198,13 @@
         [:span {:pointer-events :none}]
         [:&.first {:margin-left 0}]
         [:&.mutated :&.upstream-mutated {:color (:light-green colours)}]
-        [:&.cursored {:background-color (:light-blue colours)
-                      :color (:dark-blue colours)}]
-        [:&.focused :&.upstream-focused :&.upstream-cursored {:background-color (:dark-blue colours)
-                                                              :color (:light-blue colours)}]]
+        [:&.focused :&.upstream-focused {:background-color (:dark-blue colours)
+                                         :color (:light-blue colours)}]]
 
        [:.node-value
         [:&.mutated :&.upstream-mutated {:color (:light-green colours)}]
-        [:&.focused :&.upstream-cursored {:background-color (:light-blue colours)
-                                          :color (:dark-blue colours)}]]
+        [:&.focused {:background-color (:light-blue colours)
+                     :color (:dark-blue colours)}]]
 
        [:.node-group
         [:&.mutated
