@@ -47,7 +47,8 @@
             node-value-class (u/->class (cond-> #{}
                                           focused? (conj :focused)
                                           mutated? (conj :mutated)
-                                          upstream-mutated? (conj :upstream-mutated)))]
+                                          upstream-mutated? (conj :upstream-mutated)))
+            node-group-class (if focused? :focused)]
 
         (when log? (log/debug "render node:" path))
 
@@ -88,9 +89,9 @@
                                          :on-mouse-out (u/without-propagation toggle-focused)}
                         (pr-str v)]
 
-           last? [node-group φ path {:class node-value-class} {:tail-braces (str tail-braces "}")}]
+           last? [node-group φ path {:class node-group-class} {:tail-braces (str tail-braces "}")}]
 
-           :else [node-group φ path {:class node-value-class} {:tail-braces "}"}])
+           :else [node-group φ path {:class node-group-class} {:tail-braces "}"}])
 
          [:div.node-brace {:class (when-not show-tail-braces? :hidden)}
           tail-braces]]))))
