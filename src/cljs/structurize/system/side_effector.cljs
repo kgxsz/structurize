@@ -101,9 +101,11 @@
       (emit-mutation! [:general/app-initialising
                        {:Δ (fn [db] (assoc db :app-status :initialising))}])
       (send! [:general/init]
-             {:on-success (fn [reply]
+             {:on-success (fn [[_ {:keys [me]}]]
                             (emit-mutation! [:general/app-initialised
-                                             {:Δ (fn [db] (assoc db :app-status :initialised))}]))
+                                             {:Δ (fn [db] (-> db
+                                                             (assoc :me me)
+                                                             (assoc :app-status :initialised)))}]))
               :on-failure (fn [reply]
                             (emit-mutation! [:general/app-initialisation-failed
                                              {:Δ (fn [db] (assoc db :app-status :initialisation-failed))}]))}))
@@ -186,10 +188,14 @@
                                                      :redirect_uri redirect-uri}})))}))
 
 
-(defmethod process-side-effect :general/sign-in-with-github
-  [{:keys [post! change-location!]} id props]
-  (change-location! {:query {} :replace? true})
-  (post! ["/sign-in/github" props]))
+(defmethod process-side-effect :general/mount-sign-in-with-github-page
+  [{:keys [!db post! change-location!]} id props]
+  (let [{:keys [code] attempt-id :state} (get-in @!db [:location :query])]
+    (change-location! {:query {} :replace? true})
+    (when (and code attempt-id)
+      (post! ["/sign-in/github" {:code code :attempt-id attempt-id}]
+             {:on-success (fn [response]
+                            (change-location! {:path (b/path-for routes :home)}))}))))
 
 
 (defmethod process-side-effect :general/sign-out
@@ -200,7 +206,7 @@
 (defmethod process-side-effect :playground/inc-item
   [{:keys [emit-mutation!]} id props]
   (let [{:keys [path item-name]} props
-        mutation-id (keyword  (str "playground/inc-" item-name))]
+        mutation-id (keyword (str "playground/inc-" item-name))]
     (emit-mutation! [mutation-id {:Δ (fn [db] (update-in db path inc))}])))
 
 

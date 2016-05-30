@@ -1,7 +1,7 @@
 (ns structurize.components.root-component
-  (:require [structurize.components.component-utils :as u]
+  (:require [structurize.routes :refer [routes]]
+            [structurize.components.component-utils :as u]
             [structurize.components.tooling-component :refer [tooling]]
-            [structurize.routes :refer [routes]]
             [bidi.bidi :as b]
             [reagent.core :as r]
             [taoensso.timbre :as log])
@@ -54,7 +54,7 @@
   [with-page-status Φ
 
    (fn []
-     (let [!me (r/track #(get-in @!db [:comms :message :general/init :reply :me]))
+     (let [!me (r/track #(:me @!db))
            !star (r/track #(get-in @!db [:playground :star]))
            !heart (r/track #(get-in @!db [:playground :heart]))
            !pong (r/track #(get-in @!db [:playground :pong]))]
@@ -107,28 +107,20 @@
 
 
 (defn sign-in-with-github-page [{:keys [!db emit-side-effect!] :as Φ}]
-
   [with-page-status Φ
 
    (fn []
-     (let [!query (r/track #(get-in @!db [:location :query]))
-           !response-received? (r/track #(= :response-received (get-in @!db [:comms :post "/sign-in/github" :status])))
-           !post-failed? (r/track #(= :failed (get-in @!db [:comms :post "/sign-in/github" :status])))]
+     (let [!query (r/track #(get-in @!db [:location :query]))]
 
        (log/debug "mount sign-in-with-github-page")
+       (emit-side-effect! [:general/mount-sign-in-with-github-page])
 
        (fn []
-         (let [{:keys [code error] attempt-id :state} @!query
-               response-received? @!response-received?
-               post-failed? @!post-failed?]
+         (let [{:keys [error]} @!query]
 
            (log/debug "render sign-in-with-github-page")
 
-           (cond
-             (and code attempt-id) (emit-side-effect! [:general/sign-in-with-github {:code code, :attempt-id attempt-id}])
-             response-received? (emit-side-effect! [:general/change-location {:path (b/path-for routes :home)}]))
-
-           (if (or error post-failed?)
+           (if error
 
              [:div.page
               [:div.hero
@@ -170,44 +162,6 @@
                                           #(emit-side-effect! [:general/change-location {:path (b/path-for routes :home)}]))}
         [:span.button-icon.icon-home]
         [:span.button-text "go home"]]]])])
-
-
-
-
-
-#_(defn root
-
-  "The root is responsible for mounting the top level components.
-   It will send a message to the server to receive the initialising data required by the top
-   level components. It will wait until a reply is received before mounting the page. "
-
-  [{:keys [config-opts !db emit-side-effect!] :as Φ}]
-
-  (let [tooling-enabled? (get-in config-opts [:tooling :enabled?])
-        !chsk-status-open? (r/track #(= :open (get-in @!db [:comms :chsk-status])))
-        !uninitialised? (r/track #(nil? (get-in @!db [:comms :message :general/init :reply])))
-        !initialising? (r/track #(= :sent (get-in @!db [:comms :message :general/init :status])))]
-
-    (log/debug "mount root")
-
-    (fn []
-      (let [chsk-status-open? @!chsk-status-open?
-            uninitialised? @!uninitialised?
-            initialising? @!initialising?]
-
-        (log/debug "render root")
-
-        (when (and uninitialised? (not initialising?) chsk-status-open?)
-          (emit-side-effect! [:general/general-init]))
-
-        [:div.top-level-container
-
-         (if (or uninitialised? initialising?)
-           [loading Φ]
-           [page φ])
-
-         (when tooling-enabled?
-           [tooling Φ])]))))
 
 
 (defn root
