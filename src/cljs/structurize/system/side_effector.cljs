@@ -93,10 +93,23 @@
 
 
 (defmethod process-side-effect :comms/chsk-status-update
-  [{:keys [emit-mutation!]} id props]=
-  (let [{:keys [status]} props]
+  [{:keys [!db emit-mutation! send!]} id props]
+  (let [{chsk-status :status} props
+        app-uninitialised? (= :uninitialised (:app-status @!db))]
+
+    (when (and (= :open chsk-status) app-uninitialised?)
+      (emit-mutation! [:general/app-initialising
+                       {:Δ (fn [db] (assoc db :app-status :initialising))}])
+      (send! [:general/init]
+             {:on-success (fn [reply]
+                            (emit-mutation! [:general/app-initialised
+                                             {:Δ (fn [db] (assoc db :app-status :initialised))}]))
+              :on-failure (fn [reply]
+                            (emit-mutation! [:general/app-initialisation-failed
+                                             {:Δ (fn [db] (assoc db :app-status :initialisation-failed))}]))}))
+
     (emit-mutation! [:comms/chsk-status-update
-                     {:Δ (fn [db] (assoc-in db [:comms :chsk-status] status))}])))
+                     {:Δ (fn [db] (assoc-in db [:comms :chsk-status] chsk-status))}])))
 
 
 (defmethod process-side-effect :comms/message-sent
@@ -119,41 +132,39 @@
 (defmethod process-side-effect :comms/message-failed
   [{:keys [emit-mutation!]} id props]
   (let [{:keys [message-id reply on-failure]} props]
-    (emit-mutation! [:comms/message-failed {:Δ (fn [db] (-> db
-                                                           (assoc-in [:comms :message message-id :status] :failed)
-                                                           (assoc-in [:comms :message message-id :reply] reply)))}])
+    (emit-mutation! [:comms/message-failed
+                     {:Δ (fn [db] (-> db
+                                     (assoc-in [:comms :message message-id :status] :failed)
+                                     (assoc-in [:comms :message message-id :reply] reply)))}])
     (when on-failure (on-failure reply))))
 
 
 (defmethod process-side-effect :comms/post-sent
   [{:keys [emit-mutation!]} id props]
   (let [{:keys [path]} props]
-    (emit-mutation! [:comms/post-sent {:Δ (fn [db] (assoc-in db [:comms :post path] {:status :sent}))}])))
+    (emit-mutation! [:comms/post-sent
+                     {:Δ (fn [db] (assoc-in db [:comms :post path] {:status :sent}))}])))
 
 
 (defmethod process-side-effect :comms/post-response-received
   [{:keys [emit-mutation!]} id props]
   (let [{:keys [path response on-success]} props]
-    (emit-mutation! [:comms/post-response-received {:Δ (fn [db] (-> db
-                                                                   (assoc-in [:comms :post path :status] :response-received)
-                                                                   (assoc-in [:comms :post path :response] (:?content response))
-                                                                   (assoc-in [:comms :chsk-status] :closed)
-                                                                   (assoc-in [:comms :message :general/init] nil)))}])
+    (emit-mutation! [:comms/post-response-received
+                     {:Δ (fn [db] (-> db
+                                     (assoc-in [:comms :post path :status] :response-received)
+                                     (assoc-in [:comms :post path :response] (:?content response))
+                                     (assoc :app-status :uninitialised)))}])
     (when on-success (on-success response))))
 
 
 (defmethod process-side-effect :comms/post-failed
   [{:keys [emit-mutation!]} id props]
   (let [{:keys [path response on-failure]} props]
-    (emit-mutation! [:comms/post-failed {:Δ (fn [db] (-> db
-                                                        (assoc-in [:comms :post path :status] :failed)
-                                                        (assoc-in [:comms :post path :response] response)))}])
+    (emit-mutation! [:comms/post-failed
+                     {:Δ (fn [db] (-> db
+                                     (assoc-in [:comms :post path :status] :failed)
+                                     (assoc-in [:comms :post path :response] response)))}])
     (when on-failure (on-failure response))))
-
-
-(defmethod process-side-effect :general/general-init
-  [{:keys [send!]} id props]
-  (send! [:general/init]))
 
 
 (defmethod process-side-effect :general/change-location
@@ -165,7 +176,7 @@
 (defmethod process-side-effect :general/init-sign-in-with-github
   [{:keys [send! change-location!]} id props]
   (send! [:sign-in/init-sign-in-with-github {}]
-         {:on-success (fn [[id {:keys [client-id attempt-id scope redirect-uri]}]]
+         {:on-success (fn [[_ {:keys [client-id attempt-id scope redirect-uri]}]]
                         (let [redirect-uri (str redirect-uri (b/path-for routes :sign-in-with-github))]
                           (change-location! {:prefix "https://github.com"
                                              :path "/login/oauth/authorize"
@@ -197,18 +208,20 @@
   [{:keys [!db send! emit-mutation!] :as Φ} id props]
   (let [ping (get-in @!db [:playground :ping])]
 
-    (emit-mutation! [:playground/ping {:Δ (fn [db] (update-in db [:playground :ping] inc))}])
+    (emit-mutation! [:playground/ping
+                     {:Δ (fn [db] (update-in db [:playground :ping] inc))}])
 
     (send! [:playground/ping {:ping (inc ping)}]
-           {:on-success (fn [[id payload]] (emit-mutation! [:playground/pong
-                                                                     {:Δ (fn [db] (assoc-in db [:playground :pong] (:pong payload)))}]))
+           {:on-success (fn [[id payload ]]
+                          (emit-mutation! [:playground/pong
+                                           {:Δ (fn [db] (assoc-in db [:playground :pong] (:pong payload)))}]))
             :on-failure (fn [reply] (emit-mutation! [:playground/ping-failed
                                                     {:Δ (fn [db] (assoc-in db [:playground :ping-status] :failed))}]))})))
 
 
 (defmethod process-side-effect :default
   [_ id _]
-  (log/debug "failed to process side-effect:" id))
+  (log/warn "failed to process side-effect:" id))
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; side-effector setup

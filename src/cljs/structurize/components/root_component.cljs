@@ -12,9 +12,7 @@
 
 
 (defn sign-in-with-github [{:keys [config-opts !db emit-side-effect!] :as Φ}]
-
   (log/debug "render sign-in-with-github")
-
   [:div.button.clickable {:on-click (u/without-propagation
                                      #(emit-side-effect! [:general/init-sign-in-with-github]))}
    [:span.button-icon.icon-github]
@@ -28,150 +26,156 @@
    [:span.button-text "sign out"]])
 
 
+(defn with-page-status [{:keys [!db emit-side-effect!] :as φ} page]
+  (let [!app-initialised? (r/track #(= :initialised (:app-status @!db)))
+        !chsk-status-initialising? (r/track #(= :initialising (get-in @!db [:comms :chsk-status])))]
+
+    (log/debug "mount with-page-status")
+
+    (fn []
+      (let [app-initialised? @!app-initialised?
+            chsk-status-initialising? @!chsk-status-initialising?]
+
+        (log/debug "render with-page-status")
+
+        (if (or (not app-initialised?)
+                chsk-status-initialising?)
+          [:div.loading
+           [:span.icon.icon-coffee-cup]
+           [:h5.loading-caption "loading"]]
+          [page])))))
+
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; top level pages
 
 
 (defn home-page [{:keys [config-opts !db emit-side-effect!] :as Φ}]
-  (let [!me (r/track #(get-in @!db [:comms :message :general/init :reply :me]))
-        !star (r/track #(get-in @!db [:playground :star]))
-        !heart (r/track #(get-in @!db [:playground :heart]))
-        !pong (r/track #(get-in @!db [:playground :pong]))]
 
-    (log/debug "mount home-page")
+  [with-page-status Φ
 
-    (fn []
-      (let [me @!me
-            star @!star
-            heart @!heart
-            pong @!pong]
+   (fn []
+     (let [!me (r/track #(get-in @!db [:comms :message :general/init :reply :me]))
+           !star (r/track #(get-in @!db [:playground :star]))
+           !heart (r/track #(get-in @!db [:playground :heart]))
+           !pong (r/track #(get-in @!db [:playground :pong]))]
 
-        (log/debug "render home-page")
+       (log/debug "mount home-page")
 
-        [:div.page
+       (fn []
+         (let [me @!me
+               star @!star
+               heart @!heart
+               pong @!pong]
 
-         (if me
-           [:div.hero
-            [:div.hero-visual
-             [:img.large-avatar {:src (:avatar-url me)}]]
-            [:h1.hero-caption "Hello @" (:login me)]]
+           (log/debug "render home-page")
 
-           [:div.hero
-           [:div.hero-visual
-            [:span.icon.icon-mustache]]
-           [:h1.hero-caption "Hello there"]])
+           [:div.page
 
-         [:div.options-section
+            (if me
+              [:div.hero
+               [:div.hero-visual
+                [:img.large-avatar {:src (:avatar-url me)}]]
+               [:h1.hero-caption "Hello @" (:login me)]]
 
-          (if me
-            [sign-out Φ]
-            [sign-in-with-github Φ])
+              [:div.hero
+               [:div.hero-visual
+                [:span.icon.icon-mustache]]
+               [:h1.hero-caption "Hello there"]])
 
-          [:div.button.clickable {:on-click (u/without-propagation
-                                             #(emit-side-effect! [:playground/inc-item {:path [:playground :star]
-                                                                                        :item-name "star"}]))}
-           [:span.button-icon.icon-star]
-           [:span.button-text star]]
+            [:div.options-section
 
-          [:div.button.clickable {:on-click (u/without-propagation
-                                             #(emit-side-effect! [:playground/inc-item {:path [:playground :heart]
-                                                                                        :item-name "heart"}]))}
-           [:span.button-icon.icon-heart]
-           [:span.button-text heart]]
+             (if me
+               [sign-out Φ]
+               [sign-in-with-github Φ])
 
-          [:div.button.clickable {:on-click (u/without-propagation
-                                             #(emit-side-effect! [:playground/ping {}]))}
-           [:span.button-icon.icon-heart-pulse]
-           [:spam.button-text pong]]]]))))
+             [:div.button.clickable {:on-click (u/without-propagation
+                                                #(emit-side-effect! [:playground/inc-item {:path [:playground :star]
+                                                                                           :item-name "star"}]))}
+              [:span.button-icon.icon-star]
+              [:span.button-text star]]
+
+             [:div.button.clickable {:on-click (u/without-propagation
+                                                #(emit-side-effect! [:playground/inc-item {:path [:playground :heart]
+                                                                                           :item-name "heart"}]))}
+              [:span.button-icon.icon-heart]
+              [:span.button-text heart]]
+
+             [:div.button.clickable {:on-click (u/without-propagation
+                                                #(emit-side-effect! [:playground/ping {}]))}
+              [:span.button-icon.icon-heart-pulse]
+              [:spam.button-text pong]]]]))))])
 
 
 (defn sign-in-with-github-page [{:keys [!db emit-side-effect!] :as Φ}]
-  (let [!query (r/track #(get-in @!db [:location :query]))
-        !response-received? (r/track #(= :response-received (get-in @!db [:comms :post "/sign-in/github" :status])))
-        !post-failed? (r/track #(= :failed (get-in @!db [:comms :post "/sign-in/github" :status])))]
 
-    (log/debug "mount sign-in-with-github-page")
+  [with-page-status Φ
 
-    (fn []
-      (let [{:keys [code error] attempt-id :state} @!query
-            response-received? @!response-received?
-            post-failed? @!post-failed?]
+   (fn []
+     (let [!query (r/track #(get-in @!db [:location :query]))
+           !response-received? (r/track #(= :response-received (get-in @!db [:comms :post "/sign-in/github" :status])))
+           !post-failed? (r/track #(= :failed (get-in @!db [:comms :post "/sign-in/github" :status])))]
 
-        (log/debug "render sign-in-with-github-page")
+       (log/debug "mount sign-in-with-github-page")
 
-        (cond
-          (and code attempt-id) (emit-side-effect! [:general/sign-in-with-github {:code code, :attempt-id attempt-id}])
-          response-received? (emit-side-effect! [:general/change-location {:path (b/path-for routes :home)}]))
+       (fn []
+         (let [{:keys [code error] attempt-id :state} @!query
+               response-received? @!response-received?
+               post-failed? @!post-failed?]
 
-        (if (or error post-failed?)
+           (log/debug "render sign-in-with-github-page")
 
-          [:div.page
-           [:div.hero
-            [:div.hero-visual
-             [:span.icon.icon-github]
-             [:span.hero-visual-divider "+"]
-             [:span.icon.icon-poop]]
-            [:h1.hero-caption "Sign in with GitHub failed"]]
+           (cond
+             (and code attempt-id) (emit-side-effect! [:general/sign-in-with-github {:code code, :attempt-id attempt-id}])
+             response-received? (emit-side-effect! [:general/change-location {:path (b/path-for routes :home)}]))
 
-           [:div.options-section
-            [:div.button.clickable {:on-click (u/without-propagation
-                                               #(emit-side-effect! [:general/change-location {:path (b/path-for routes :home)}]))}
-             [:span.button-icon.icon-home]
-             [:span.button-text "go home"]]]]
+           (if (or error post-failed?)
 
-          [:div.page.sign-in-with-github-page
-           [:div.hero
-            [:div.hero-visual
-             [:span.icon.icon-github]
-             [:span.hero-visual-divider "+"]
-             [:span.icon.icon-clock]]
-            [:h1.hero-caption "Signing you in with GitHub"]]])))))
+             [:div.page
+              [:div.hero
+               [:div.hero-visual
+                [:span.icon.icon-github]
+                [:span.hero-visual-divider "+"]
+                [:span.icon.icon-poop]]
+               [:h1.hero-caption "Sign in with GitHub failed"]]
+
+              [:div.options-section
+               [:div.button.clickable {:on-click (u/without-propagation
+                                                  #(emit-side-effect! [:general/change-location {:path (b/path-for routes :home)}]))}
+                [:span.button-icon.icon-home]
+                [:span.button-text "go home"]]]]
+
+             [:div.page.sign-in-with-github-page
+              [:div.hero
+               [:div.hero-visual
+                [:span.icon.icon-github]
+                [:span.hero-visual-divider "+"]
+                [:span.icon.icon-clock]]
+               [:h1.hero-caption "Signing you in with GitHub"]]])))))])
 
 
 (defn unknown-page [{:keys [emit-side-effect!] :as Φ}]
-  (log/debug "render unkown-page")
+  [with-page-status Φ
 
-  [:div.page
-   [:div.hero
-    [:div.hero-visual
-     [:span.icon.icon-poop]]
-    [:h1.hero-caption "Looks like you're lost"]]
+   (fn []
+     (log/debug "render unkown-page")
 
-   [:div.options-section
-    [:div.button.clickable {:on-click (u/without-propagation
-                                       #(emit-side-effect! [:general/change-location {:path (b/path-for routes :home)}]))}
-     [:span.button-icon.icon-home]
-     [:span.button-text "go home"]]]])
+     [:div.page
+      [:div.hero
+       [:div.hero-visual
+        [:span.icon.icon-poop]]
+       [:h1.hero-caption "Looks like you're lost"]]
 
-
-(defn loading [φ]
-  (log/debug "render loading")
-  [:div.loading
-   [:span.icon.icon-coffee-cup]
-   [:h5.loading-caption "loading"]])
+      [:div.options-section
+       [:div.button.clickable {:on-click (u/without-propagation
+                                          #(emit-side-effect! [:general/change-location {:path (b/path-for routes :home)}]))}
+        [:span.button-icon.icon-home]
+        [:span.button-text "go home"]]]])])
 
 
-(defn page
-
-  "The page is charged with mounting the relevant page, given the current handler."
-
-  [{:keys [!db] :as Φ}]
-
-  (log/debug "mount page-container")
-
-  (let [!handler (r/track #(get-in @!db [:location :handler]))]
-
-    (fn []
-      (let [handler @!handler]
-
-        (log/debug "render page-container")
-
-        (case handler
-          :home [home-page Φ]
-          :sign-in-with-github [sign-in-with-github-page Φ]
-          :unknown [unknown-page Φ])))))
 
 
-(defn root
+
+#_(defn root
 
   "The root is responsible for mounting the top level components.
    It will send a message to the server to receive the initialising data required by the top
@@ -200,7 +204,32 @@
 
          (if (or uninitialised? initialising?)
            [loading Φ]
-           [page Φ])
+           [page φ])
+
+         (when tooling-enabled?
+           [tooling Φ])]))))
+
+
+(defn root
+
+  [{:keys [config-opts !db emit-side-effect!] :as Φ}]
+
+  (let [tooling-enabled? (get-in config-opts [:tooling :enabled?])
+        !handler (r/track #(get-in @!db [:location :handler]))]
+
+    (log/debug "mount root")
+
+    (fn []
+      (let [handler @!handler]
+
+        (log/debug "render root")
+
+        [:div.viewport
+
+         (case handler
+           :home [home-page Φ]
+           :sign-in-with-github [sign-in-with-github-page Φ]
+           :unknown [unknown-page Φ])
 
          (when tooling-enabled?
            [tooling Φ])]))))

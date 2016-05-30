@@ -94,7 +94,8 @@
            :location {:path nil
                       :handler :unknown
                       :query nil}
-           :comms {:chsk-status :init
+           :app-status :uninitialised
+           :comms {:chsk-status :initialising
                    :message {}
                    :post {}}
            :tooling {:tooling-active? true
