@@ -45,7 +45,7 @@
       (assoc component
              :github-auth {:client-id (config :github-auth-client-id {})
                            :client-secret (config :github-auth-client-secret {})
-                           :redirect-uri (config :github-auth-redirect-uri {})
+                           :redirect-prefix (config :github-auth-redirect-prefix {})
                            :scope "user:email"}
 
              :comms {:chsk-opts {:packer :edn}}

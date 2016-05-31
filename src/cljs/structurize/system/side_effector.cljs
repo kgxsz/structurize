@@ -182,8 +182,8 @@
   (emit-mutation! [:auth/initialise-sign-in-with-github
                    {:Δ (fn [db] (assoc-in db [:auth :sign-in-with-github-status] :initialising))}])
   (send! [:auth/initialise-sign-in-with-github {}]
-         {:on-success (fn [[_ {:keys [client-id attempt-id scope redirect-uri]}]]
-                        (let [redirect-uri (str redirect-uri (b/path-for routes :sign-in-with-github))]
+         {:on-success (fn [[_ {:keys [client-id attempt-id scope redirect-prefix]}]]
+                        (let [redirect-uri (str redirect-prefix (b/path-for routes :sign-in-with-github))]
                           (change-location! {:prefix "https://github.com"
                                              :path "/login/oauth/authorize"
                                              :query {:client_id client-id
