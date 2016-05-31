@@ -164,15 +164,6 @@
 
          [:div.mutation-browser-divider]
 
-         (when-not real-time?
-           [:div.mutation-container.timed-mutation
-            [:div.mutation-caption
-             [:span.mutation-caption-symbol "Δ"]
-             [:span.mutation-caption-subscript "next"]]
-            [:div.mutation-shell
-             [:div.mutation.unprocessed-mutation
-              (pr-str (first next-mutation))]]])
-
          [:div.processed-mutations
           (doall
            (for [[id {:keys [n] :as props}] processed-mutations]

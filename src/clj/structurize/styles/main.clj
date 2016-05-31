@@ -258,8 +258,6 @@
                   :border-radius "3px"
                   :height "100%"}
 
-      [:&.unprocessed-mutation {:background-color (:light-yellow colours)
-                          :color (:dark-yellow colours)}]
       [:&.processed-mutation {:background-color (:light-green colours)
                               :color (:dark-green colours)}]]
 
