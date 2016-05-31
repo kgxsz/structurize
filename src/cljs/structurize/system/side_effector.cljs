@@ -108,9 +108,7 @@
                             (emit-mutation! [:general/app-initialised
                                              {:Δ (fn [db] (cond-> db
                                                            me (assoc-in [:auth :me] me)
-                                                           me (assoc-in [:auth :sign-in-with-github-status] :signed-in)
-                                                           (nil? me) (assoc-in [:auth :sign-in-with-github-status] :not-signed-in)
-                                                           true (assoc :app-status :initialised)))}])) 
+                                                           true (assoc :app-status :initialised)))}]))
               :on-failure (fn [reply]
                             (emit-mutation! [:general/app-initialisation-failed
                                              {:Δ (fn [db] (assoc db :app-status :initialisation-failed))}]))}))))
@@ -179,8 +177,6 @@
 
 (defmethod process-side-effect :auth/initialise-sign-in-with-github
   [{:keys [send! emit-mutation! change-location!]} id props]
-  (emit-mutation! [:auth/initialise-sign-in-with-github
-                   {:Δ (fn [db] (assoc-in db [:auth :sign-in-with-github-status] :initialising))}])
   (send! [:auth/initialise-sign-in-with-github {}]
          {:on-success (fn [[_ {:keys [client-id attempt-id scope redirect-prefix]}]]
                         (let [redirect-uri (str redirect-prefix (b/path-for routes :sign-in-with-github))]
@@ -192,14 +188,12 @@
                                                      :redirect_uri redirect-uri}})))
           :on-failure (fn [reply]
                         (emit-mutation! [:auth/sign-in-with-github-failed
-                                         {:Δ (fn [db] (assoc-in db [:auth :sign-in-with-github-status] :failed))}]))}))
+                                         {:Δ (fn [db] (assoc-in db [:auth :sign-in-with-github-failed?] true))}]))}))
 
 
 (defmethod process-side-effect :auth/mount-sign-in-with-github-page
   [{:keys [!db post! emit-mutation! change-location!]} id props]
   (let [{:keys [code] attempt-id :state} (get-in @!db [:location :query])]
-    (emit-mutation! [:auth/sign-in-with-github
-                     {:Δ (fn [db] (assoc-in db [:auth :sign-in-with-github-status] :signing-in))}])
     (change-location! {:query {} :replace? true})
     (when (and code attempt-id)
       (post! ["/sign-in/github" {:code code :attempt-id attempt-id}]
@@ -207,7 +201,7 @@
                             (change-location! {:path (b/path-for routes :home)}))
               :on-failure (fn [response]
                             (emit-mutation! [:auth/sign-in-with-github-failed
-                                             {:Δ (fn [db] (assoc-in db [:auth :sign-in-with-github-status] :failed))}]))}))))
+                                             {:Δ (fn [db] (assoc-in db [:auth :sign-in-with-github-failed?] true))}]))}))))
 
 
 (defmethod process-side-effect :auth/sign-out
