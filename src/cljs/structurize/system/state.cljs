@@ -98,6 +98,7 @@
            :comms {:chsk-status :initialising
                    :message {}
                    :post {}}
+           :auth {}
            :tooling {:tooling-active? true
                      :unprocessed-mutations '()
                      :processed-mutations '()

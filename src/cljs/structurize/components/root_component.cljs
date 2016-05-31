@@ -14,14 +14,14 @@
 (defn sign-in-with-github [{:keys [config-opts !db emit-side-effect!] :as Φ}]
   (log/debug "render sign-in-with-github")
   [:div.button.clickable {:on-click (u/without-propagation
-                                     #(emit-side-effect! [:general/init-sign-in-with-github]))}
+                                     #(emit-side-effect! [:auth/initialise-sign-in-with-github]))}
    [:span.button-icon.icon-github]
    [:span.button-text "sign in with GitHub"]])
 
 
 (defn sign-out [{:keys [!db emit-side-effect!] :as Φ}]
   (log/debug "render sign-out")
-  [:div.button.clickable {:on-click (u/without-propagation #(emit-side-effect! [:general/sign-out]))}
+  [:div.button.clickable {:on-click (u/without-propagation #(emit-side-effect! [:auth/sign-out]))}
    [:span.button-icon.icon-exit]
    [:span.button-text "sign out"]])
 
@@ -54,7 +54,7 @@
   [with-page-status Φ
 
    (fn []
-     (let [!me (r/track #(:me @!db))
+     (let [!me (r/track #(get-in @!db [:auth :me]))
            !star (r/track #(get-in @!db [:playground :star]))
            !heart (r/track #(get-in @!db [:playground :heart]))
            !pong (r/track #(get-in @!db [:playground :pong]))]
@@ -110,13 +110,14 @@
   [with-page-status Φ
 
    (fn []
-     (let [!query (r/track #(get-in @!db [:location :query]))]
+     (let [!query (r/track #(get-in @!db [:location :query]))
+           !sign-in-with-github-failed? (r/track #(= :failed (get-in @!db [:auth :sign-in-with-github-status])))]
 
        (log/debug "mount sign-in-with-github-page")
-       (emit-side-effect! [:general/mount-sign-in-with-github-page])
+       (emit-side-effect! [:auth/mount-sign-in-with-github-page])
 
        (fn []
-         (let [{:keys [error]} @!query]
+         (let [error (or (:error @!query) @!sign-in-with-github-failed?) ]
 
            (log/debug "render sign-in-with-github-page")
 

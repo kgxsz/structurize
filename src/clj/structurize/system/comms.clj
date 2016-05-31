@@ -13,7 +13,7 @@
 (defmulti handler (fn [_ event-message] (:id event-message)))
 
 
-(defmethod handler :sign-in/init-sign-in-with-github
+(defmethod handler :auth/initialise-sign-in-with-github
   [{:keys [config-opts db]} {:keys [uid ?reply-fn] [id ?data] :event}]
 
   (let [client-id (get-in config-opts [:github-auth :client-id])
@@ -26,7 +26,7 @@
     (?reply-fn [id {:attempt-id attempt-id :client-id client-id :scope scope :redirect-uri redirect-uri}])))
 
 
-(defmethod handler :general/init
+(defmethod handler :general/initialise-app
   [{:keys [config-opts db]} {:keys [uid ?reply-fn] [id ?data] :event}]
   (let [user (some-> (get-in @db [:users uid]) (select-keys [:name :email :login :avatar-url]))]
     (?reply-fn [id {:me user}])))

@@ -97,21 +97,23 @@
   (let [{chsk-status :status} props
         app-uninitialised? (= :uninitialised (:app-status @!db))]
 
+    (emit-mutation! [:comms/chsk-status-update
+                     {:Δ (fn [db] (assoc-in db [:comms :chsk-status] chsk-status))}])
+
     (when (and (= :open chsk-status) app-uninitialised?)
       (emit-mutation! [:general/app-initialising
                        {:Δ (fn [db] (assoc db :app-status :initialising))}])
-      (send! [:general/init]
+      (send! [:general/initialise-app]
              {:on-success (fn [[_ {:keys [me]}]]
                             (emit-mutation! [:general/app-initialised
-                                             {:Δ (fn [db] (-> db
-                                                             (assoc :me me)
-                                                             (assoc :app-status :initialised)))}]))
+                                             {:Δ (fn [db] (cond-> db
+                                                           me (assoc-in [:auth :me] me)
+                                                           me (assoc-in [:auth :sign-in-with-github-status] :signed-in)
+                                                           (nil? me) (assoc-in [:auth :sign-in-with-github-status] :not-signed-in)
+                                                           true (assoc :app-status :initialised)))}])) 
               :on-failure (fn [reply]
                             (emit-mutation! [:general/app-initialisation-failed
-                                             {:Δ (fn [db] (assoc db :app-status :initialisation-failed))}]))}))
-
-    (emit-mutation! [:comms/chsk-status-update
-                     {:Δ (fn [db] (assoc-in db [:comms :chsk-status] chsk-status))}])))
+                                             {:Δ (fn [db] (assoc db :app-status :initialisation-failed))}]))}))))
 
 
 (defmethod process-side-effect :comms/message-sent
@@ -175,9 +177,11 @@
     (change-location! {:path path})))
 
 
-(defmethod process-side-effect :general/init-sign-in-with-github
-  [{:keys [send! change-location!]} id props]
-  (send! [:sign-in/init-sign-in-with-github {}]
+(defmethod process-side-effect :auth/initialise-sign-in-with-github
+  [{:keys [send! emit-mutation! change-location!]} id props]
+  (emit-mutation! [:auth/initialise-sign-in-with-github
+                   {:Δ (fn [db] (assoc-in db [:auth :sign-in-with-github-status] :initialising))}])
+  (send! [:auth/initialise-sign-in-with-github {}]
          {:on-success (fn [[_ {:keys [client-id attempt-id scope redirect-uri]}]]
                         (let [redirect-uri (str redirect-uri (b/path-for routes :sign-in-with-github))]
                           (change-location! {:prefix "https://github.com"
@@ -185,22 +189,37 @@
                                              :query {:client_id client-id
                                                      :state attempt-id
                                                      :scope scope
-                                                     :redirect_uri redirect-uri}})))}))
+                                                     :redirect_uri redirect-uri}})))
+          :on-failure (fn [reply]
+                        (emit-mutation! [:auth/sign-in-with-github-failed
+                                         {:Δ (fn [db] (assoc-in db [:auth :sign-in-with-github-status] :failed))}]))}))
 
 
-(defmethod process-side-effect :general/mount-sign-in-with-github-page
-  [{:keys [!db post! change-location!]} id props]
+(defmethod process-side-effect :auth/mount-sign-in-with-github-page
+  [{:keys [!db post! emit-mutation! change-location!]} id props]
   (let [{:keys [code] attempt-id :state} (get-in @!db [:location :query])]
+    (emit-mutation! [:auth/sign-in-with-github
+                     {:Δ (fn [db] (assoc-in db [:auth :sign-in-with-github-status] :signing-in))}])
     (change-location! {:query {} :replace? true})
     (when (and code attempt-id)
       (post! ["/sign-in/github" {:code code :attempt-id attempt-id}]
              {:on-success (fn [response]
-                            (change-location! {:path (b/path-for routes :home)}))}))))
+                            (change-location! {:path (b/path-for routes :home)}))
+              :on-failure (fn [response]
+                            (emit-mutation! [:auth/sign-in-with-github-failed
+                                             {:Δ (fn [db] (assoc-in db [:auth :sign-in-with-github-status] :failed))}]))}))))
 
 
-(defmethod process-side-effect :general/sign-out
-  [{:keys [post!]} id props]
-  (post! ["/sign-out" {}]))
+(defmethod process-side-effect :auth/sign-out
+  [{:keys [post! emit-mutation!]} id props]
+  (post! ["/sign-out" {}]
+         {:on-success (fn [response]
+                        (emit-mutation! [:auth/sign-out
+                                         {:Δ (fn [db] (assoc db :auth {}))}]))
+          :on-failure (fn [response]
+                        (emit-mutation! [:auth/sign-out-failed
+                                         {:Δ (fn [db] (assoc-in db [:auth :sign-out-status] :failed))}]))}))
+
 
 
 (defmethod process-side-effect :playground/inc-item
@@ -251,9 +270,11 @@
                      (when log-tooling? (log/debug "emitting side-effect:" id))
                      (process-side-effect Φ id props))
 
-          (or comms? browser? real-time?) (do
-                                            (log/debug "emitting side-effect:" id)
-                                            (process-side-effect Φ id props))
+          real-time? (do
+                       (log/debug "emitting side-effect:" id)
+                       (process-side-effect Φ id props))
+
+          (or comms? browser?) (log/debug "while time travelling, queueing side-effect:" id)
 
           :else (log/debug "while time travelling, ignoring side-effect:" id)))
 
