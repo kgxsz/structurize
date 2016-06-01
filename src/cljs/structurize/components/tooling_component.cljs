@@ -185,7 +185,7 @@
     (fn []
       (when log? (log/debug "render state-browser"))
       [:div.browser.state-browser
-       [node-group φ [] {:tail-braces "}"}]])))
+       [node-group φ [] {} {:tail-braces "}"}]])))
 
 
 (defn tooling [{:keys [config-opts !db emit-side-effect!] :as φ}]
