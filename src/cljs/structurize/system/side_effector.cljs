@@ -48,12 +48,12 @@
                          (let [processed-mutations (get-in db [:tooling :processed-mutations])
                                latest-processed-mutation (first processed-mutations)
                                [_ {:keys [pre-Δ-db pre-Δ-mutation-paths pre-Δ-upstream-mutation-paths]}] latest-processed-mutation]
-                           (-> db
-                             (merge pre-Δ-db)
-                             (update-in [:tooling :unprocessed-mutations] conj latest-processed-mutation)
-                             (update-in [:tooling :processed-mutations] rest)
-                             (assoc-in [:tooling :state-browser-props :mutated :paths] pre-Δ-mutation-paths)
-                             (assoc-in [:tooling :state-browser-props :mutated :upstream-paths]  pre-Δ-upstream-mutation-paths))))}]))
+                           (-> pre-Δ-db
+                               (assoc :tooling (:tooling db))
+                               (update-in [:tooling :unprocessed-mutations] conj latest-processed-mutation)
+                               (update-in [:tooling :processed-mutations] rest)
+                               (assoc-in [:tooling :state-browser-props :mutated :paths] pre-Δ-mutation-paths)
+                               (assoc-in [:tooling :state-browser-props :mutated :upstream-paths]  pre-Δ-upstream-mutation-paths))))}]))
 
 
 (defmethod process-side-effect :tooling/go-forward-in-time
@@ -62,12 +62,12 @@
                    {:Δ (fn [db]
                          (let [next-unprocessed-mutation (first (get-in db [:tooling :unprocessed-mutations]))
                                [_ {:keys [post-Δ-db post-Δ-mutation-paths post-Δ-upstream-mutation-paths]}] next-unprocessed-mutation]
-                           (-> db
-                             (merge post-Δ-db)
-                             (update-in [:tooling :processed-mutations] conj next-unprocessed-mutation)
-                             (update-in [:tooling :unprocessed-mutations] rest)
-                             (assoc-in [:tooling :state-browser-props :mutated :paths]  post-Δ-mutation-paths)
-                             (assoc-in [:tooling :state-browser-props :mutated :upstream-paths] post-Δ-upstream-mutation-paths))))}]))
+                           (-> post-Δ-db
+                               (assoc :tooling (:tooling db))
+                               (update-in [:tooling :processed-mutations] conj next-unprocessed-mutation)
+                               (update-in [:tooling :unprocessed-mutations] rest)
+                               (assoc-in [:tooling :state-browser-props :mutated :paths]  post-Δ-mutation-paths)
+                               (assoc-in [:tooling :state-browser-props :mutated :upstream-paths] post-Δ-upstream-mutation-paths))))}]))
 
 
 (defmethod process-side-effect :tooling/stop-time-travelling
@@ -77,8 +77,8 @@
                          (let [latest-unprocessed-mutation (last (get-in db [:tooling :unprocessed-mutations]))
                                unprocessed-mutations (get-in db [:tooling :unprocessed-mutations])
                                [_ {:keys [post-Δ-db post-Δ-mutation-paths post-Δ-upstream-mutation-paths]}] latest-unprocessed-mutation]
-                           (-> db
-                               (merge post-Δ-db)
+                           (-> post-Δ-db
+                               (assoc :tooling (:tooling db))
                                (update-in [:tooling :processed-mutations] (partial concat (reverse unprocessed-mutations)))
                                (assoc-in [:tooling :unprocessed-mutations] '())
                                (assoc-in [:tooling :state-browser-props :mutated :paths] post-Δ-mutation-paths)
@@ -228,12 +228,16 @@
   (let [ping (get-in @!db [:playground :ping])]
 
     (emit-mutation! [:playground/ping
-                     {:Δ (fn [db] (update-in db [:playground :ping] inc))}])
+                     {:Δ (fn [db] (-> db
+                                     (update-in [:playground :ping] inc)
+                                     (assoc :test 0)))}])
 
     (send! [:playground/ping {:ping (inc ping)}]
            {:on-success (fn [[id payload ]]
                           (emit-mutation! [:playground/pong
-                                           {:Δ (fn [db] (assoc-in db [:playground :pong] (:pong payload)))}]))
+                                           {:Δ (fn [db] (-> db
+                                                           (assoc-in [:playground :pong] (:pong payload))
+                                                           (dissoc :test)))}]))
             :on-failure (fn [reply] (emit-mutation! [:playground/ping-failed
                                                     {:Δ (fn [db] (assoc-in db [:playground :ping-status] :failed))}]))})))
 

@@ -40,8 +40,7 @@
 
     (fn [[id {:keys [Δ] :as props} :as mutation]]
 
-      (let [tooling-mutation? (= (namespace id) "tooling")
-            real-time? (empty? (get-in @!db [:tooling :unprocessed-mutations]))]
+      (let [tooling-mutation? (= (namespace id) "tooling")]
 
         (when (or (not tooling-mutation?) log?)
           (log/debug "processing mutation:" id))
@@ -54,9 +53,7 @@
           tooling-disabled? (swap! !db Δ)
 
           :else (swap! !db (fn [db]
-                             (let [[_ previous-props] (if real-time?
-                                                        (first (get-in db [:tooling :processed-mutations]))
-                                                        (last (get-in db [:tooling :unprocessed-mutations])))
+                             (let [[_ previous-props] (first (get-in db [:tooling :processed-mutations]))
                                    pre-Δ-db (:post-Δ-db previous-props (dissoc db :tooling))
                                    post-Δ-db (Δ pre-Δ-db)
                                    mutation-paths (make-mutation-paths post-Δ-db pre-Δ-db)
@@ -72,15 +69,11 @@
                                                             :post-Δ-upstream-mutation-paths upstream-mutation-paths))
                                    updated-mutation [id updated-props]]
 
-                               (if real-time?
-
-                                 (-> post-Δ-db
-                                     (assoc :tooling (:tooling db))
-                                     (update-in [:tooling :processed-mutations] (comp (partial take max-processed-mutations) (partial cons updated-mutation)))
-                                     (assoc-in [:tooling :state-browser-props :mutated :paths] mutation-paths)
-                                     (assoc-in [:tooling :state-browser-props :mutated :upstream-paths] upstream-mutation-paths))
-
-                                 (update-in db [:tooling :unprocessed-mutations] concat [updated-mutation]))))))))))
+                               (-> post-Δ-db
+                                   (assoc :tooling (:tooling db))
+                                   (update-in [:tooling :processed-mutations] (comp (partial take max-processed-mutations) (partial cons updated-mutation)))
+                                   (assoc-in [:tooling :state-browser-props :mutated :paths] mutation-paths)
+                                   (assoc-in [:tooling :state-browser-props :mutated :upstream-paths] upstream-mutation-paths))))))))))
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; db setup
