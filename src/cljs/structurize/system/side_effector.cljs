@@ -228,16 +228,12 @@
   (let [ping (get-in @!db [:playground :ping])]
 
     (emit-mutation! [:playground/ping
-                     {:Δ (fn [db] (-> db
-                                     (update-in [:playground :ping] inc)
-                                     (assoc :test 0)))}])
+                     {:Δ (fn [db] (update-in db [:playground :ping] inc))}])
 
     (send! [:playground/ping {:ping (inc ping)}]
-           {:on-success (fn [[id payload ]]
+           {:on-success (fn [[id payload]]
                           (emit-mutation! [:playground/pong
-                                           {:Δ (fn [db] (-> db
-                                                           (assoc-in [:playground :pong] (:pong payload))
-                                                           (dissoc :test)))}]))
+                                           {:Δ (fn [db] (assoc-in db [:playground :pong] (:pong payload)))}]))
             :on-failure (fn [reply] (emit-mutation! [:playground/ping-failed
                                                     {:Δ (fn [db] (assoc-in db [:playground :ping-status] :failed))}]))})))
 
