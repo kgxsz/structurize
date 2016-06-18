@@ -13,6 +13,7 @@
                  [com.taoensso/sente "1.8.0-beta1"]
                  [com.taoensso/timbre "4.1.4"]
                  [org.clojure/data.json "0.2.6"]
+                 [traversy "0.4.0"]
                  [clj-time "0.11.0"]
                  [garden "1.3.2"]
                  [camel-snake-kebab "0.3.2"]
