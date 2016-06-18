@@ -105,6 +105,36 @@
                                                      :upstream-paths #{}}}}}))
 
 
+(defn make-app [config-opts]
+  (r/atom {0 {:playground {:heart 0
+                           :star 3
+                           :ping 0
+                           :pong 0}
+              :location {:path nil
+                         :handler :unknown
+                         :query nil}
+              :app-status :uninitialised
+              :comms {:chsk-status :initialising
+                      :message {}
+                      :post {}}
+              :auth {}}}))
+
+(defn make-tooling [config-opts]
+  (r/atom {:track 0
+           :view 0
+           :mutate 0
+           :tooling-active? true
+           :unprocessed-mutations '()
+           :processed-mutations '()
+           :state-browser-props {:mutated {:paths #{}
+                                           :upstream-paths #{}}
+                                 :collapsed #{[:tooling]
+                                              [:tooling :unprocessed-mutations]
+                                              [:tooling :processed-mutations]}
+                                 :focused {:paths #{}
+                                           :upstream-paths #{}}}}))
+
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; component setup
 
 
@@ -113,9 +143,32 @@
 
   (start [component]
     (log/info "initialising state")
-    (let [!db (make-db config-opts)]
+    (let [!db (make-db config-opts)
+          !app (make-app config-opts)]
       (assoc component
              :!db !db
+             :!app !app
+             :!tooling !tooling
+
+             :track-single (fn [+lens]
+                             @(r/track
+                               (let [app @!app]
+                                 (l/view-single app (l/*> (l/in [(:track app)]) +lens)))))
+
+             :track (fn [+lens]
+                      @(r/track
+                        (let [app @!app]
+                          (l/view app (l/*> (l/*> (l/in [(:track app)]) +lens))))))
+
+             :view-single (fn [+lens]
+                            @(r/track
+                              (let [app @!app]
+                                (l/view app (l/*> (l/*> (l/in [(:view app)]) +lens))))))
+
+             :view (fn [+lens]
+                     (let [app @!app]
+                       (l/view app (l/*> (l/in [(:view app)]) +lens))))
+
              :emit-mutation! (make-emit-mutation {:config-opts config-opts :!db !db}))))
 
   (stop [component] component))
