@@ -2,6 +2,7 @@
   (:require [structurize.routes :refer [routes]]
             [structurize.system.system-utils :as u]
             [bidi.bidi :as b]
+            [traversy.lens :as l]
             [com.stuartsierra.component :as component]
             [cljs.core.async :as a]
             [taoensso.timbre :as log])
@@ -89,45 +90,45 @@
   [{:keys [emit-mutation!]} id props]
   (let [{:keys [location]} props]
     (emit-mutation! [:browser/change-location
-                     {:Δ (fn [db] (assoc db :location location))}])))
+                     {:Δ (fn [app] (assoc app :location location))}])))
 
 
 (defmethod process-side-effect :comms/chsk-status-update
-  [{:keys [!db emit-mutation! send!]} id props]
+  [{:keys [view-single emit-mutation! send!]} id props]
   (let [{chsk-status :status} props
-        app-uninitialised? (= :uninitialised (:app-status @!db))]
+        app-uninitialised? (= :uninitialised (view-single (l/in [:app-status])))]
 
     (emit-mutation! [:comms/chsk-status-update
-                     {:Δ (fn [db] (assoc-in db [:comms :chsk-status] chsk-status))}])
+                     {:Δ (fn [app] (assoc-in app [:comms :chsk-status] chsk-status))}])
 
     (when (and (= :open chsk-status) app-uninitialised?)
       (emit-mutation! [:general/app-initialising
-                       {:Δ (fn [db] (assoc db :app-status :initialising))}])
+                       {:Δ (fn [app] (assoc app :app-status :initialising))}])
       (send! [:general/initialise-app]
              {:on-success (fn [[_ {:keys [me]}]]
                             (emit-mutation! [:general/app-initialised
-                                             {:Δ (fn [db] (cond-> db
-                                                           me (assoc-in [:auth :me] me)
-                                                           true (assoc :app-status :initialised)))}]))
+                                             {:Δ (fn [app] (cond-> app
+                                                            me (assoc-in [:auth :me] me)
+                                                            true (assoc :app-status :initialised)))}]))
               :on-failure (fn [reply]
                             (emit-mutation! [:general/app-initialisation-failed
-                                             {:Δ (fn [db] (assoc db :app-status :initialisation-failed))}]))}))))
+                                             {:Δ (fn [app] (assoc app :app-status :initialisation-failed))}]))}))))
 
 
 (defmethod process-side-effect :comms/message-sent
   [{:keys [emit-mutation!]} id props]
   (let [{:keys [message-id]} props]
     (emit-mutation! [:comms/message-sent
-                     {:Δ (fn [db] (assoc-in db [:comms :message message-id] {:status :sent}))}])))
+                     {:Δ (fn [app] (assoc-in app [:comms :message message-id] {:status :sent}))}])))
 
 
 (defmethod process-side-effect :comms/message-reply-received
   [{:keys [emit-mutation!]} id props]
   (let [{:keys [message-id reply on-success]} props]
     (emit-mutation! [:comms/message-reply-received
-                     {:Δ (fn [db] (-> db
-                                     (assoc-in [:comms :message message-id :status] :reply-received)
-                                     (assoc-in [:comms :message message-id :reply] (second reply))))}])
+                     {:Δ (fn [app] (-> app
+                                      (assoc-in [:comms :message message-id :status] :reply-received)
+                                      (assoc-in [:comms :message message-id :reply] (second reply))))}])
     (when on-success (on-success reply))))
 
 
@@ -135,7 +136,7 @@
   [{:keys [emit-mutation!]} id props]
   (let [{:keys [message-id reply on-failure]} props]
     (emit-mutation! [:comms/message-failed
-                     {:Δ (fn [db] (-> db
+                     {:Δ (fn [app] (-> app
                                      (assoc-in [:comms :message message-id :status] :failed)
                                      (assoc-in [:comms :message message-id :reply] reply)))}])
     (when on-failure (on-failure reply))))
@@ -145,14 +146,14 @@
   [{:keys [emit-mutation!]} id props]
   (let [{:keys [path]} props]
     (emit-mutation! [:comms/post-sent
-                     {:Δ (fn [db] (assoc-in db [:comms :post path] {:status :sent}))}])))
+                     {:Δ (fn [app] (assoc-in app [:comms :post path] {:status :sent}))}])))
 
 
 (defmethod process-side-effect :comms/post-response-received
   [{:keys [emit-mutation!]} id props]
   (let [{:keys [path response on-success]} props]
     (emit-mutation! [:comms/post-response-received
-                     {:Δ (fn [db] (-> db
+                     {:Δ (fn [app] (-> app
                                      (assoc-in [:comms :post path :status] :response-received)
                                      (assoc-in [:comms :post path :response] (:?content response))
                                      (assoc :app-status :uninitialised)))}])
@@ -163,7 +164,7 @@
   [{:keys [emit-mutation!]} id props]
   (let [{:keys [path response on-failure]} props]
     (emit-mutation! [:comms/post-failed
-                     {:Δ (fn [db] (-> db
+                     {:Δ (fn [app] (-> app
                                      (assoc-in [:comms :post path :status] :failed)
                                      (assoc-in [:comms :post path :response] response)))}])
     (when on-failure (on-failure response))))
@@ -188,12 +189,12 @@
                                                      :redirect_uri redirect-uri}})))
           :on-failure (fn [reply]
                         (emit-mutation! [:auth/sign-in-with-github-failed
-                                         {:Δ (fn [db] (assoc-in db [:auth :sign-in-with-github-failed?] true))}]))}))
+                                         {:Δ (fn [app] (assoc-in app [:auth :sign-in-with-github-failed?] true))}]))}))
 
 
 (defmethod process-side-effect :auth/mount-sign-in-with-github-page
-  [{:keys [!db post! emit-mutation! change-location!]} id props]
-  (let [{:keys [code] attempt-id :state} (get-in @!db [:location :query])]
+  [{:keys [view-single post! emit-mutation! change-location!]} id props]
+  (let [{:keys [code] attempt-id :state} (view-single (l/in [:location :query]))]
     (change-location! {:query {} :replace? true})
     (when (and code attempt-id)
       (post! ["/sign-in/github" {:code code :attempt-id attempt-id}]
@@ -201,7 +202,7 @@
                             (change-location! {:path (b/path-for routes :home)}))
               :on-failure (fn [response]
                             (emit-mutation! [:auth/sign-in-with-github-failed
-                                             {:Δ (fn [db] (assoc-in db [:auth :sign-in-with-github-failed?] true))}]))}))))
+                                             {:Δ (fn [app] (assoc-in app [:auth :sign-in-with-github-failed?] true))}]))}))))
 
 
 (defmethod process-side-effect :auth/sign-out
@@ -209,10 +210,10 @@
   (post! ["/sign-out" {}]
          {:on-success (fn [response]
                         (emit-mutation! [:auth/sign-out
-                                         {:Δ (fn [db] (assoc db :auth {}))}]))
+                                         {:Δ (fn [app] (assoc app :auth {}))}]))
           :on-failure (fn [response]
                         (emit-mutation! [:auth/sign-out-failed
-                                         {:Δ (fn [db] (assoc-in db [:auth :sign-out-status] :failed))}]))}))
+                                         {:Δ (fn [app] (assoc-in app [:auth :sign-out-status] :failed))}]))}))
 
 
 
@@ -220,22 +221,22 @@
   [{:keys [emit-mutation!]} id props]
   (let [{:keys [path item-name]} props
         mutation-id (keyword (str "playground/inc-" item-name))]
-    (emit-mutation! [mutation-id {:Δ (fn [db] (update-in db path inc))}])))
+    (emit-mutation! [mutation-id {:Δ (fn [app] (update-in app path inc))}])))
 
 
 (defmethod process-side-effect :playground/ping
-  [{:keys [!db send! emit-mutation!] :as Φ} id props]
-  (let [ping (get-in @!db [:playground :ping])]
+  [{:keys [view-single send! emit-mutation!] :as Φ} id props]
+  (let [ping (view-single (l/in [:playground :ping]))]
 
     (emit-mutation! [:playground/ping
-                     {:Δ (fn [db] (update-in db [:playground :ping] inc))}])
+                     {:Δ (fn [app] (update-in app [:playground :ping] inc))}])
 
     (send! [:playground/ping {:ping (inc ping)}]
            {:on-success (fn [[id payload]]
                           (emit-mutation! [:playground/pong
-                                           {:Δ (fn [db] (assoc-in db [:playground :pong] (:pong payload)))}]))
+                                           {:Δ (fn [app] (assoc-in app [:playground :pong] (:pong payload)))}]))
             :on-failure (fn [reply] (emit-mutation! [:playground/ping-failed
-                                                    {:Δ (fn [db] (assoc-in db [:playground :ping-status] :failed))}]))})))
+                                                    {:Δ (fn [app] (assoc-in app [:playground :ping-status] :failed))}]))})))
 
 
 (defmethod process-side-effect :default
@@ -257,7 +258,8 @@
             tooling? (= (namespace id) "tooling")
             comms? (= (namespace id) "comms")
             browser? (= (namespace id) "browser")
-            real-time? (empty? (get-in @!db [:tooling :unprocessed-mutations]))]
+            ;; TODO - read tooling here
+            real-time? true #_(empty? (get-in @!db [:tooling :unprocessed-mutations]))]
 
         (cond
           tooling? (do
@@ -284,7 +286,8 @@
   (start [component]
     (log/info "initialising side-effector")
     (let [Φ {:config-opts config-opts
-             :!db (:!db state)
+             :view-single (:view-single state)
+             :view (:view state)
              :emit-mutation! (:emit-mutation! state)
              :send! (:send! comms)
              :post! (:post! comms)
