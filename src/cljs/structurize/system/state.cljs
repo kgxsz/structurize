@@ -34,7 +34,7 @@
      (into #{} (concat removed-paths added-paths))))
 
 
-(defn make-emit-mutation [{:keys [config-opts !db]}]
+#_(defn make-emit-mutation* [{:keys [config-opts !db]}]
   (let [log? (get-in config-opts [:general :tooling :log?])
         tooling-disabled? (not (get-in config-opts [:tooling :enabled?]))
         max-processed-mutations (get-in config-opts [:tooling :max-processed-mutations])]
@@ -75,6 +75,15 @@
                                    (update-in [:tooling :processed-mutations] (comp (partial take max-processed-mutations) (partial cons updated-mutation)))
                                    (assoc-in [:tooling :state-browser-props :mutated :paths] mutation-paths)
                                    (assoc-in [:tooling :state-browser-props :mutated :upstream-paths] upstream-mutation-paths))))))))))
+
+
+(defn make-emit-mutation [{:keys [config-opts !app !tooling]}]
+
+  (fn [[id {:keys [Δ] :as props} :as mutation]]
+    (let [view-index (:view-index @!tooling)
+          app (get @!app view-index)]
+      (log/debug "processing mutation:" id)
+      (swap! !app assoc view-index (Δ app)))))
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; db setup
@@ -119,13 +128,12 @@
                       :post {}}
               :auth {}}}))
 
+
 (defn make-tooling [config-opts]
-  (r/atom {:track 0
-           :view 0
-           :mutate 0
+  (r/atom {:track-index 0
+           :view-index 0
            :tooling-active? true
-           :unprocessed-mutations '()
-           :processed-mutations '()
+           :mutations {}
            :state-browser-props {:mutated {:paths #{}
                                            :upstream-paths #{}}
                                  :collapsed #{[:tooling]
@@ -140,35 +148,32 @@
 
 (defrecord State [config-opts]
   component/Lifecycle
-
   (start [component]
     (log/info "initialising state")
     (let [!db (make-db config-opts)
-          !app (make-app config-opts)]
+          !app (make-app config-opts)
+          !tooling (make-tooling config-opts)]
       (assoc component
              :!db !db
-             :!app !app
+             :!rendered-app (r/cursor !app [])
              :!tooling !tooling
 
-             :track-single (fn [+lens]
-                             @(r/track
-                               (let [app @!app]
-                                 (l/view-single app (l/*> (l/in [(:track app)]) +lens)))))
+             :track-single (fn track-single
+                             ([+lens]
+                              (track-single +lens identity))
+                             ([+lens f]
+                              @(r/track #(f (l/view-single @!app (l/*> (l/in [(:track-index @!tooling)]) +lens))))))
 
              :track (fn [+lens]
                       @(r/track
-                        (let [app @!app]
-                          (l/view app (l/*> (l/*> (l/in [(:track app)]) +lens))))))
+                        (l/view @!app (l/*> (l/in [(:track-index @!tooling)]) +lens))))
 
              :view-single (fn [+lens]
-                            @(r/track
-                              (let [app @!app]
-                                (l/view app (l/*> (l/*> (l/in [(:view app)]) +lens))))))
+                            (l/view-single @!app (l/*> (l/in [(:view-index @!tooling)]) +lens)))
 
              :view (fn [+lens]
-                     (let [app @!app]
-                       (l/view app (l/*> (l/in [(:view app)]) +lens))))
+                     (l/view @!app (l/*> (l/in [(:view-index @!tooling)]) +lens)))
 
-             :emit-mutation! (make-emit-mutation {:config-opts config-opts :!db !db}))))
+             :emit-mutation! (make-emit-mutation {:config-opts config-opts :!app !app :!tooling !tooling}))))
 
   (stop [component] component))
