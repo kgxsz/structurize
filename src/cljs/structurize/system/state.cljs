@@ -77,34 +77,38 @@
                                    (assoc-in [:tooling :state-browser-props :mutated :upstream-paths] upstream-mutation-paths))))))))))
 
 
-(defn make-emit-mutation [{:keys [config-opts !app !tooling]}]
+(defn make-emit-mutation [{:keys [config-opts !state]}]
 
   (fn [[id {:keys [Δ] :as props} :as mutation]]
-    (let [view-index (:view-index @!tooling)
-          app (get @!app view-index)]
+    (let [state @!state
+          index (get-in state [:app-indices :mutate-index])
+          app (get-in state [:app-history index])]
       (log/debug "processing mutation:" id)
-      (swap! !app assoc view-index (Δ app)))))
+      (swap! !state assoc-in [:app-history index] (Δ app)))))
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; db setup
 
 
-(defn make-db [config-opts]
-  (r/atom {:playground {:heart 0
-                        :star 3
-                        :ping 0
-                        :pong 0}
-           :location {:path nil
-                      :handler :unknown
-                      :query nil}
-           :app-status :uninitialised
-           :comms {:chsk-status :initialising
-                   :message {}
-                   :post {}}
-           :auth {}
+(defn make-!state [config-opts]
+  (r/atom {:app-indices {:render-index 0
+                         :mutate-index 0}
+
+           :app-history {0 {:playground {:heart 0
+                                         :star 3
+                                         :ping 0
+                                         :pong 0}
+                            :location {:path nil
+                                       :handler :unknown
+                                       :query nil}
+                            :app-status :uninitialised
+                            :comms {:chsk-status :initialising
+                                    :message {}
+                                    :post {}}
+                            :auth {}}}
+
            :tooling {:tooling-active? true
-                     :unprocessed-mutations '()
-                     :processed-mutations '()
+                     :mutations {}
                      :state-browser-props {:mutated {:paths #{}
                                                      :upstream-paths #{}}
                                            :collapsed #{[:tooling]
@@ -114,35 +118,6 @@
                                                      :upstream-paths #{}}}}}))
 
 
-(defn make-app [config-opts]
-  (r/atom {0 {:playground {:heart 0
-                           :star 3
-                           :ping 0
-                           :pong 0}
-              :location {:path nil
-                         :handler :unknown
-                         :query nil}
-              :app-status :uninitialised
-              :comms {:chsk-status :initialising
-                      :message {}
-                      :post {}}
-              :auth {}}}))
-
-
-(defn make-tooling [config-opts]
-  (r/atom {:track-index 0
-           :view-index 0
-           :tooling-active? true
-           :mutations {}
-           :state-browser-props {:mutated {:paths #{}
-                                           :upstream-paths #{}}
-                                 :collapsed #{[:tooling]
-                                              [:tooling :unprocessed-mutations]
-                                              [:tooling :processed-mutations]}
-                                 :focused {:paths #{}
-                                           :upstream-paths #{}}}}))
-
-
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; component setup
 
 
@@ -150,30 +125,29 @@
   component/Lifecycle
   (start [component]
     (log/info "initialising state")
-    (let [!db (make-db config-opts)
-          !app (make-app config-opts)
-          !tooling (make-tooling config-opts)]
+    (let [!state (make-!state config-opts)]
       (assoc component
-             :!db !db
-             :!rendered-app (r/cursor !app [])
-             :!tooling !tooling
+             :track (fn track
+                      ([v +lens] (track v +lens identity {}))
+                      ([v +lens f] (track v +lens f {}))
+                      ([v +lens f {:keys [tooling?] :or {:tooling? false}}]
+                       (let [state @!state
+                             index (get-in state [:app-indices :render-index])
+                             +root (if tooling?
+                                     (l/in [:tooling])
+                                     (l/in [:app-history index]))]
+                         @(r/track #(f (v state (l/*> +root +lens)))))))
 
-             :track-single (fn track-single
-                             ([+lens]
-                              (track-single +lens identity))
-                             ([+lens f]
-                              @(r/track #(f (l/view-single @!app (l/*> (l/in [(:track-index @!tooling)]) +lens))))))
+             :query (fn query
+                      ([v +lens] (query v +lens {}))
+                      ([v +lens {:keys [tooling?] :or {:tooling? false}}]
+                       (let [state @!state
+                             index (get-in state [:app-indices :mutate-index])
+                             +root (if tooling?
+                                     (l/in [:tooling])
+                                     (l/in [:app-history index]))]
+                         (v state (l/*> +root +lens)))))
 
-             :track (fn [+lens]
-                      @(r/track
-                        (l/view @!app (l/*> (l/in [(:track-index @!tooling)]) +lens))))
-
-             :view-single (fn [+lens]
-                            (l/view-single @!app (l/*> (l/in [(:view-index @!tooling)]) +lens)))
-
-             :view (fn [+lens]
-                     (l/view @!app (l/*> (l/in [(:view-index @!tooling)]) +lens)))
-
-             :emit-mutation! (make-emit-mutation {:config-opts config-opts :!app !app :!tooling !tooling}))))
+             :emit-mutation! (make-emit-mutation {:config-opts config-opts :!state !state}))))
 
   (stop [component] component))

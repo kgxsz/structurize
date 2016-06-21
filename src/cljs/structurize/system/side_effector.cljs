@@ -94,9 +94,9 @@
 
 
 (defmethod process-side-effect :comms/chsk-status-update
-  [{:keys [view-single emit-mutation! send!]} id props]
+  [{:keys [query emit-mutation! send!]} id props]
   (let [{chsk-status :status} props
-        app-uninitialised? (= :uninitialised (view-single (l/in [:app-status])))]
+        app-uninitialised? (= :uninitialised (query l/view-single (l/in [:app-status])))]
 
     (emit-mutation! [:comms/chsk-status-update
                      {:Δ (fn [app] (assoc-in app [:comms :chsk-status] chsk-status))}])
@@ -193,8 +193,8 @@
 
 
 (defmethod process-side-effect :auth/mount-sign-in-with-github-page
-  [{:keys [view-single post! emit-mutation! change-location!]} id props]
-  (let [{:keys [code] attempt-id :state} (view-single (l/in [:location :query]))]
+  [{:keys [query post! emit-mutation! change-location!]} id props]
+  (let [{:keys [code] attempt-id :state} (query l/view-single (l/in [:location :query]))]
     (change-location! {:query {} :replace? true})
     (when (and code attempt-id)
       (post! ["/sign-in/github" {:code code :attempt-id attempt-id}]
@@ -225,8 +225,8 @@
 
 
 (defmethod process-side-effect :playground/ping
-  [{:keys [view-single send! emit-mutation!] :as Φ} id props]
-  (let [ping (view-single (l/in [:playground :ping]))]
+  [{:keys [query send! emit-mutation!] :as Φ} id props]
+  (let [ping (query l/view-single (l/in [:playground :ping]))]
 
     (emit-mutation! [:playground/ping
                      {:Δ (fn [app] (update-in app [:playground :ping] inc))}])
@@ -286,8 +286,7 @@
   (start [component]
     (log/info "initialising side-effector")
     (let [Φ {:config-opts config-opts
-             :view-single (:view-single state)
-             :view (:view state)
+             :query (:query state)
              :emit-mutation! (:emit-mutation! state)
              :send! (:send! comms)
              :post! (:post! comms)

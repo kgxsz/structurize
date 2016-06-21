@@ -5,9 +5,7 @@
 
 (defn reload! []
   (renderer/render-root! {:config-opts (:config-opts system)
-                          :track-single (get-in system [:state :track-single])
                           :track (get-in system [:state :track])
-                          :!db (get-in system [:state :!db])
                           :emit-side-effect! (get-in system [:side-effect-bus :emit-side-effect!])}))
 
 

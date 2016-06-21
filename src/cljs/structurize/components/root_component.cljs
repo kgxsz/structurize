@@ -27,11 +27,11 @@
    [:span.button-text "sign out"]])
 
 
-(defn with-page-load [{:keys [track-single emit-side-effect!] :as φ} page]
-  (let [app-initialised? (track-single (l/in [:app-status])
-                                       (partial = :initialised))
-        chsk-status-initialising? (track-single (l/in [:comms :chsk-status])
-                                                (partial = :initialising))]
+(defn with-page-load [{:keys [track emit-side-effect!] :as φ} page]
+  (let [app-initialised? (track l/view-single (l/in [:app-status])
+                                (partial = :initialised))
+        chsk-status-initialising? (track l/view-single (l/in [:comms :chsk-status])
+                                         (partial = :initialising))]
 
     (log/debug "render with-page-load")
 
@@ -46,13 +46,13 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; top level pages
 
 
-(defn home-page [{:keys [config-opts track-single emit-side-effect!] :as Φ}]
+(defn home-page [{:keys [config-opts track emit-side-effect!] :as Φ}]
   [with-page-load Φ
    (fn []
-     (let [me (track-single (l/in [:auth :me]))
-           star (track-single (l/in [:playground :star]))
-           heart (track-single (l/in [:playground :heart]))
-           pong (track-single (l/in [:playground :pong]))]
+     (let [me (track l/view-single (l/in [:auth :me]))
+           star (track l/view-single (l/in [:playground :star]))
+           heart (track l/view-single (l/in [:playground :heart]))
+           pong (track l/view-single (l/in [:playground :pong]))]
 
        (log/debug "render home-page")
 
@@ -93,17 +93,17 @@
           [:spam.button-text pong]]]]))])
 
 
-(defn sign-in-with-github-page [{:keys [track-single emit-side-effect!] :as Φ}]
+(defn sign-in-with-github-page [{:keys [track emit-side-effect!] :as Φ}]
   [with-page-load Φ
    (fn []
      (log/debug "mount sign-in-with-github-page")
      (emit-side-effect! [:auth/mount-sign-in-with-github-page])
 
      (fn []
-       (let [internal-error (track-single (l/in [:location :query])
-                                          (partial = :error))
-             external-error (track-single (l/in [:auth :sign-in-with-github-status])
-                                          (partial = :failed))]
+       (let [internal-error (track l/view-single (l/in [:location :query])
+                                   (partial = :error))
+             external-error (track l/view-single (l/in [:auth :sign-in-with-github-status])
+                                   (partial = :failed))]
 
          (log/debug "render sign-in-with-github-page")
 
@@ -152,19 +152,18 @@
 
 (defn root
 
-  [{:keys [config-opts track-single emit-side-effect!] :as Φ}]
+  [{:keys [config-opts track emit-side-effect!] :as Φ}]
 
   (let [tooling-enabled? (get-in config-opts [:tooling :enabled?])]
 
     (log/debug "mount root")
 
     (fn []
-      (let [handler (track-single (l/in [:location :handler]))]
+      (let [handler (track l/view-single (l/in [:location :handler]))]
 
         (log/debug "render root")
 
         [:div.viewport
-
          (case handler
            :home [home-page Φ]
            :sign-in-with-github [sign-in-with-github-page Φ]

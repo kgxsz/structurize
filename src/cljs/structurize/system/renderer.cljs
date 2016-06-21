@@ -15,9 +15,7 @@
   (start [component]
     (log/info "initialising renderer")
     (render-root! {:config-opts config-opts
-                   :track-single (:track-single state)
                    :track (:track state)
-                   :!db (:!db state)
                    :emit-side-effect! (:emit-side-effect! side-effect-bus)})
     component)
 
