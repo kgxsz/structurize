@@ -12,26 +12,24 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; components
 
 
-(defn sign-in-with-github [{:keys [emit-side-effect!] :as Φ}]
+(defn sign-in-with-github [{:keys [side-effect!] :as Φ}]
   (log/debug "render sign-in-with-github")
   [:div.button.clickable {:on-click (u/without-propagation
-                                     #(emit-side-effect! [:auth/initialise-sign-in-with-github]))}
+                                     #(side-effect! [:auth/initialise-sign-in-with-github]))}
    [:span.button-icon.icon-github]
    [:span.button-text "sign in with GitHub"]])
 
 
-(defn sign-out [{:keys [emit-side-effect!] :as Φ}]
+(defn sign-out [{:keys [side-effect!] :as Φ}]
   (log/debug "render sign-out")
-  [:div.button.clickable {:on-click (u/without-propagation #(emit-side-effect! [:auth/sign-out]))}
+  [:div.button.clickable {:on-click (u/without-propagation #(side-effect! [:auth/sign-out]))}
    [:span.button-icon.icon-exit]
    [:span.button-text "sign out"]])
 
 
-(defn with-page-load [{:keys [track emit-side-effect!] :as φ} page]
-  (let [app-initialised? (track l/view-single (l/in [:app-status])
-                                (partial = :initialised))
-        chsk-status-initialising? (track l/view-single (l/in [:comms :chsk-status])
-                                         (partial = :initialising))]
+(defn with-page-load [{:keys [track-app side-effect!] :as φ} page]
+  (let [app-initialised? (track-app l/view-single (l/in [:app-status]) (partial = :initialised))
+        chsk-status-initialising? (track-app l/view-single (l/in [:comms :chsk-status]) (partial = :initialising))]
 
     (log/debug "render with-page-load")
 
@@ -46,13 +44,13 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; top level pages
 
 
-(defn home-page [{:keys [config-opts track emit-side-effect!] :as Φ}]
+(defn home-page [{:keys [config-opts track-app side-effect!] :as Φ}]
   [with-page-load Φ
    (fn []
-     (let [me (track l/view-single (l/in [:auth :me]))
-           star (track l/view-single (l/in [:playground :star]))
-           heart (track l/view-single (l/in [:playground :heart]))
-           pong (track l/view-single (l/in [:playground :pong]))]
+     (let [me (track-app l/view-single (l/in [:auth :me]))
+           star (track-app l/view-single (l/in [:playground :star]))
+           heart (track-app l/view-single (l/in [:playground :heart]))
+           pong (track-app l/view-single (l/in [:playground :pong]))]
 
        (log/debug "render home-page")
 
@@ -76,34 +74,32 @@
            [sign-in-with-github Φ])
 
          [:div.button.clickable {:on-click (u/without-propagation
-                                            #(emit-side-effect! [:playground/inc-item {:path [:playground :star]
+                                            #(side-effect! [:playground/inc-item {:path [:playground :star]
                                                                                        :item-name "star"}]))}
           [:span.button-icon.icon-star]
           [:span.button-text star]]
 
          [:div.button.clickable {:on-click (u/without-propagation
-                                            #(emit-side-effect! [:playground/inc-item {:path [:playground :heart]
+                                            #(side-effect! [:playground/inc-item {:path [:playground :heart]
                                                                                        :item-name "heart"}]))}
           [:span.button-icon.icon-heart]
           [:span.button-text heart]]
 
          [:div.button.clickable {:on-click (u/without-propagation
-                                            #(emit-side-effect! [:playground/ping {}]))}
+                                            #(side-effect! [:playground/ping {}]))}
           [:span.button-icon.icon-heart-pulse]
           [:spam.button-text pong]]]]))])
 
 
-(defn sign-in-with-github-page [{:keys [track emit-side-effect!] :as Φ}]
+(defn sign-in-with-github-page [{:keys [track-app side-effect!] :as Φ}]
   [with-page-load Φ
    (fn []
      (log/debug "mount sign-in-with-github-page")
-     (emit-side-effect! [:auth/mount-sign-in-with-github-page])
+     (side-effect! [:auth/mount-sign-in-with-github-page])
 
      (fn []
-       (let [internal-error (track l/view-single (l/in [:location :query])
-                                   (partial = :error))
-             external-error (track l/view-single (l/in [:auth :sign-in-with-github-status])
-                                   (partial = :failed))]
+       (let [internal-error (track-app l/view-single (l/in [:location :query]) (partial = :error))
+             external-error (track-app l/view-single (l/in [:auth :sign-in-with-github-status]) (partial = :failed))]
 
          (log/debug "render sign-in-with-github-page")
 
@@ -119,7 +115,7 @@
 
             [:div.options-section
              [:div.button.clickable {:on-click (u/without-propagation
-                                                #(emit-side-effect! [:general/change-location {:path (b/path-for routes :home)}]))}
+                                                #(side-effect! [:general/change-location {:path (b/path-for routes :home)}]))}
               [:span.button-icon.icon-home]
               [:span.button-text "go home"]]]]
 
@@ -132,7 +128,7 @@
              [:h1.hero-caption "Signing you in with GitHub"]]]))))])
 
 
-(defn unknown-page [{:keys [emit-side-effect!] :as Φ}]
+(defn unknown-page [{:keys [side-effect!] :as Φ}]
   [with-page-load Φ
    (fn []
      (log/debug "render unkown-page")
@@ -145,21 +141,20 @@
 
       [:div.options-section
        [:div.button.clickable {:on-click (u/without-propagation
-                                          #(emit-side-effect! [:general/change-location {:path (b/path-for routes :home)}]))}
+                                          #(side-effect! [:general/change-location {:path (b/path-for routes :home)}]))}
         [:span.button-icon.icon-home]
         [:span.button-text "go home"]]]])])
 
 
 (defn root
-
-  [{:keys [config-opts track emit-side-effect!] :as Φ}]
+  [{:keys [config-opts track-app side-effect!] :as Φ}]
 
   (let [tooling-enabled? (get-in config-opts [:tooling :enabled?])]
 
     (log/debug "mount root")
 
     (fn []
-      (let [handler (track l/view-single (l/in [:location :handler]))]
+      (let [handler (track-app l/view-single (l/in [:location :handler]))]
 
         (log/debug "render root")
 
@@ -169,5 +164,5 @@
            :sign-in-with-github [sign-in-with-github-page Φ]
            :unknown [unknown-page Φ])
 
-         #_(when tooling-enabled?
+         (when tooling-enabled?
            [tooling Φ])]))))

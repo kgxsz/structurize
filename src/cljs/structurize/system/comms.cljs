@@ -13,12 +13,13 @@
 
 
 (defmethod process-received-message :chsk/state
-  [config-opts emit-side-effect! {:keys [event id ?data send-fn] :as event-message}]
-  (emit-side-effect! [:comms/chsk-status-update {:status (if (:open? ?data) :open :closed)}]))
+  [config-opts side-effect! {:keys [event id ?data send-fn] :as event-message}]
+  (side-effect! [:comms/chsk-status-update {:status (if (:open? ?data) :open :closed)}]))
 
 
 (defmethod process-received-message :chsk/handshake
   [])
+
 
 (defmethod process-received-message :default
   [_ _ {:keys [id]}]
@@ -30,11 +31,11 @@
 
 (defn make-receive-message
   "Returns a function that receives a message and processes it appropriately via multimethods"
-  [config-opts emit-side-effect!]
+  [config-opts side-effect!]
 
   (fn [{:keys [event id ?data send-fn] :as event-message}]
     (log/debug "received message from server:" id)
-    (process-received-message config-opts emit-side-effect! event-message)))
+    (process-received-message config-opts side-effect! event-message)))
 
 
 (defn make-send
@@ -47,11 +48,11 @@
    message - the sente message, in the form of a vector, with id
    timeout - in milliseconds"
 
-  [send-fn emit-side-effect!]
+  [send-fn side-effect!]
 
   (fn [[id _ :as message] {:keys [timeout on-success on-failure]}]
     (log/debug "dispatching message to server:" id)
-    (emit-side-effect! [:comms/message-sent {:message-id id}])
+    (side-effect! [:comms/message-sent {:message-id id}])
 
     (send-fn
       message
@@ -60,10 +61,10 @@
         (if (sente/cb-success? reply)
           (let [[id _] reply]
             (log/debug "received a message reply from server:" id)
-            (emit-side-effect! [:comms/message-reply-received {:message-id id :reply reply :on-success on-success}]))
+            (side-effect! [:comms/message-reply-received {:message-id id :reply reply :on-success on-success}]))
           (do
             (log/warn "message failed with:" reply)
-            (emit-side-effect! [:comms/message-failed {:message-id id :reply reply :on-failure on-failure}])))))))
+            (side-effect! [:comms/message-failed {:message-id id :reply reply :on-failure on-failure}])))))))
 
 
 (defn make-post
@@ -79,12 +80,12 @@
    params - map of params to post
    timeout - in milliseconds"
 
-  [chsk chsk-state emit-side-effect!]
+  [chsk chsk-state side-effect!]
 
   (fn [[path params] {:keys [timeout on-success on-failure]}]
     (log/debug "dispatching post to server:" path)
 
-    (emit-side-effect! [:comms/post-sent {:path path}])
+    (side-effect! [:comms/post-sent {:path path}])
 
     (sente/ajax-lite
      path
@@ -95,14 +96,14 @@
        (if (:success? response)
          (do
            (log/debug "received a post response from server:" path)
-           (emit-side-effect! [:comms/post-response-received {:path path :response response :on-success on-success}])
+           (side-effect! [:comms/post-response-received {:path path :response response :on-success on-success}])
 
            ;; we reconnect the websocket connection here to pick up any changes
            ;; in the session that may have come about with the post request
            (sente/chsk-reconnect! chsk))
          (do
            (log/warn "post failed with:" response)
-           (emit-side-effect! [:comms/post-failed {:path path :response response :on-failure on-failure}])))))))
+           (side-effect! [:comms/post-failed {:path path :response response :on-failure on-failure}])))))))
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; component setup
@@ -113,16 +114,16 @@
 
   (start [component]
     (log/info "initialising comms")
-    (let [emit-side-effect! (:emit-side-effect! side-effect-bus)
+    (let [side-effect! (:side-effect! side-effect-bus)
           chsk-opts (get-in config-opts [:comms :chsk-opts])
           {:keys [chsk ch-recv send-fn] chsk-state :state} (sente/make-channel-socket! "/chsk" chsk-opts)]
 
       (log/info "begin listening for messages from server")
-      (sente/start-chsk-router! ch-recv (make-receive-message config-opts emit-side-effect!))
+      (sente/start-chsk-router! ch-recv (make-receive-message config-opts side-effect!))
 
       (assoc component
-             :send! (make-send send-fn emit-side-effect!)
-             :post! (make-post chsk chsk-state emit-side-effect!))))
+             :send! (make-send send-fn side-effect!)
+             :post! (make-post chsk chsk-state side-effect!))))
 
   (stop [component] component))
 

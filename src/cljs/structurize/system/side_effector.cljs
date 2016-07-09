@@ -16,38 +16,39 @@
 
 
 (defmethod process-side-effect :tooling/toggle-tooling-active
-  [{:keys [emit-mutation!]} id props]
+  [{:keys [write-app!]} id props]
 
-  (emit-mutation! [:tooling/toggle-tooling-active
-                   {:Δ (fn [db] (update-in db [:tooling :tooling-active?] not))}]))
+  (write-app! [:tooling/toggle-tooling-active
+                   {:Δ (fn [db] (update-in db [:tooling-active?] not))}]))
 
 
 (defmethod process-side-effect :tooling/toggle-node-collapsed
-  [{:keys [emit-mutation!]} id props]
+  [{:keys [write-app!]} id props]
   (let [{:keys [path]} props]
-    (emit-mutation! [:tooling/toggle-node-collapsed
+    (write-app! [:tooling/toggle-node-collapsed
                      {:Δ (fn [db]
-                           (update-in db [:tooling :state-browser-props :collapsed] #(if (contains? % path)
-                                                                                       (disj % path)
-                                                                                       (conj % path))))}])))
+                           (update-in db [:state-browser-props :collapsed] #(if (contains? % path)
+                                                                              (disj % path)
+                                                                              (conj % path))))}])))
 
 
 (defmethod process-side-effect :tooling/toggle-node-focused
-  [{:keys [emit-mutation!]} id props]
+  [{:keys [write-app!]} id props]
   (let [{:keys [path]} props]
-    (emit-mutation! [:tooling/toggle-node-focused
-                     {:Δ (fn [db]
+    (write-app! [:tooling/toggle-node-focused
+                     {:tooling? true
+                      :Δ (fn [db]
                            (-> db
-                               (update-in [:tooling :state-browser-props :focused :paths] #(if (empty? %) #{path} #{}))
-                               (update-in [:tooling :state-browser-props :focused :upstream-paths] #(if (empty? %) (u/upstream-paths #{path}) #{}))))}])))
+                               (update-in [:state-browser-props :focused :paths] #(if (empty? %) #{path} #{}))
+                               (update-in [:state-browser-props :focused :upstream-paths] #(if (empty? %) (u/upstream-paths #{path}) #{}))))}])))
 
 
-(defmethod process-side-effect :tooling/go-back-in-time
-  [{:keys [emit-mutation!]} id props]
-  (emit-mutation! [:tooling/back-in-time
-                   {:Δ (fn [db]
-                         (let [processed-mutations (get-in db [:tooling :processed-mutations])
-                               latest-processed-mutation (first processed-mutations)
+#_(defmethod process-side-effect :tooling/go-back-in-time
+    [{:keys [write-app!]} id props]
+    (write-app! [:tooling/back-in-time
+                     {:Δ (fn [db]
+                           (let [processed-mutations (get-in db [:tooling :processed-mutations])
+                                 latest-processed-mutation (first processed-mutations)
                                [_ {:keys [pre-Δ-db pre-Δ-mutation-paths pre-Δ-upstream-mutation-paths]}] latest-processed-mutation]
                            (-> pre-Δ-db
                                (assoc :tooling (:tooling db))
@@ -57,9 +58,9 @@
                                (assoc-in [:tooling :state-browser-props :mutated :upstream-paths]  pre-Δ-upstream-mutation-paths))))}]))
 
 
-(defmethod process-side-effect :tooling/go-forward-in-time
-  [{:keys [emit-mutation!]} id props]
-  (emit-mutation! [:tooling/forward-in-time
+#_(defmethod process-side-effect :tooling/go-forward-in-time
+  [{:keys [write-app!]} id props]
+  (write-app! [:tooling/forward-in-time
                    {:Δ (fn [db]
                          (let [next-unprocessed-mutation (first (get-in db [:tooling :unprocessed-mutations]))
                                [_ {:keys [post-Δ-db post-Δ-mutation-paths post-Δ-upstream-mutation-paths]}] next-unprocessed-mutation]
@@ -71,9 +72,9 @@
                                (assoc-in [:tooling :state-browser-props :mutated :upstream-paths] post-Δ-upstream-mutation-paths))))}]))
 
 
-(defmethod process-side-effect :tooling/stop-time-travelling
-  [{:keys [emit-mutation!]} id props]
-  (emit-mutation! [:tooling/real-time
+#_(defmethod process-side-effect :tooling/stop-time-travelling
+  [{:keys [write-app!]} id props]
+  (write-app! [:tooling/real-time
                    {:Δ (fn [db]
                          (let [latest-unprocessed-mutation (last (get-in db [:tooling :unprocessed-mutations]))
                                unprocessed-mutations (get-in db [:tooling :unprocessed-mutations])
@@ -87,45 +88,45 @@
 
 
 (defmethod process-side-effect :browser/change-location
-  [{:keys [emit-mutation!]} id props]
+  [{:keys [write-app!]} id props]
   (let [{:keys [location]} props]
-    (emit-mutation! [:browser/change-location
-                     {:Δ (fn [app] (assoc app :location location))}])))
+    (write-app! [:browser/change-location
+                 {:Δ (fn [app] (assoc app :location location))}])))
 
 
 (defmethod process-side-effect :comms/chsk-status-update
-  [{:keys [query emit-mutation! send!]} id props]
+  [{:keys [read-app write-app! send!]} id props]
   (let [{chsk-status :status} props
-        app-uninitialised? (= :uninitialised (query l/view-single (l/in [:app-status])))]
+        app-uninitialised? (= :uninitialised (read-app l/view-single (l/in [:app-status])))]
 
-    (emit-mutation! [:comms/chsk-status-update
+    (write-app! [:comms/chsk-status-update
                      {:Δ (fn [app] (assoc-in app [:comms :chsk-status] chsk-status))}])
 
     (when (and (= :open chsk-status) app-uninitialised?)
-      (emit-mutation! [:general/app-initialising
+      (write-app! [:general/app-initialising
                        {:Δ (fn [app] (assoc app :app-status :initialising))}])
       (send! [:general/initialise-app]
              {:on-success (fn [[_ {:keys [me]}]]
-                            (emit-mutation! [:general/app-initialised
+                            (write-app! [:general/app-initialised
                                              {:Δ (fn [app] (cond-> app
                                                             me (assoc-in [:auth :me] me)
                                                             true (assoc :app-status :initialised)))}]))
               :on-failure (fn [reply]
-                            (emit-mutation! [:general/app-initialisation-failed
+                            (write-app! [:general/app-initialisation-failed
                                              {:Δ (fn [app] (assoc app :app-status :initialisation-failed))}]))}))))
 
 
 (defmethod process-side-effect :comms/message-sent
-  [{:keys [emit-mutation!]} id props]
+  [{:keys [write-app!]} id props]
   (let [{:keys [message-id]} props]
-    (emit-mutation! [:comms/message-sent
+    (write-app! [:comms/message-sent
                      {:Δ (fn [app] (assoc-in app [:comms :message message-id] {:status :sent}))}])))
 
 
 (defmethod process-side-effect :comms/message-reply-received
-  [{:keys [emit-mutation!]} id props]
+  [{:keys [write-app!]} id props]
   (let [{:keys [message-id reply on-success]} props]
-    (emit-mutation! [:comms/message-reply-received
+    (write-app! [:comms/message-reply-received
                      {:Δ (fn [app] (-> app
                                       (assoc-in [:comms :message message-id :status] :reply-received)
                                       (assoc-in [:comms :message message-id :reply] (second reply))))}])
@@ -133,9 +134,9 @@
 
 
 (defmethod process-side-effect :comms/message-failed
-  [{:keys [emit-mutation!]} id props]
+  [{:keys [write-app!]} id props]
   (let [{:keys [message-id reply on-failure]} props]
-    (emit-mutation! [:comms/message-failed
+    (write-app! [:comms/message-failed
                      {:Δ (fn [app] (-> app
                                      (assoc-in [:comms :message message-id :status] :failed)
                                      (assoc-in [:comms :message message-id :reply] reply)))}])
@@ -143,16 +144,16 @@
 
 
 (defmethod process-side-effect :comms/post-sent
-  [{:keys [emit-mutation!]} id props]
+  [{:keys [write-app!]} id props]
   (let [{:keys [path]} props]
-    (emit-mutation! [:comms/post-sent
+    (write-app! [:comms/post-sent
                      {:Δ (fn [app] (assoc-in app [:comms :post path] {:status :sent}))}])))
 
 
 (defmethod process-side-effect :comms/post-response-received
-  [{:keys [emit-mutation!]} id props]
+  [{:keys [write-app!]} id props]
   (let [{:keys [path response on-success]} props]
-    (emit-mutation! [:comms/post-response-received
+    (write-app! [:comms/post-response-received
                      {:Δ (fn [app] (-> app
                                      (assoc-in [:comms :post path :status] :response-received)
                                      (assoc-in [:comms :post path :response] (:?content response))
@@ -161,9 +162,9 @@
 
 
 (defmethod process-side-effect :comms/post-failed
-  [{:keys [emit-mutation!]} id props]
+  [{:keys [write-app!]} id props]
   (let [{:keys [path response on-failure]} props]
-    (emit-mutation! [:comms/post-failed
+    (write-app! [:comms/post-failed
                      {:Δ (fn [app] (-> app
                                      (assoc-in [:comms :post path :status] :failed)
                                      (assoc-in [:comms :post path :response] response)))}])
@@ -177,7 +178,7 @@
 
 
 (defmethod process-side-effect :auth/initialise-sign-in-with-github
-  [{:keys [send! emit-mutation! change-location!]} id props]
+  [{:keys [send! write-app! change-location!]} id props]
   (send! [:auth/initialise-sign-in-with-github {}]
          {:on-success (fn [[_ {:keys [client-id attempt-id scope redirect-prefix]}]]
                         (let [redirect-uri (str redirect-prefix (b/path-for routes :sign-in-with-github))]
@@ -188,54 +189,54 @@
                                                      :scope scope
                                                      :redirect_uri redirect-uri}})))
           :on-failure (fn [reply]
-                        (emit-mutation! [:auth/sign-in-with-github-failed
+                        (write-app! [:auth/sign-in-with-github-failed
                                          {:Δ (fn [app] (assoc-in app [:auth :sign-in-with-github-failed?] true))}]))}))
 
 
 (defmethod process-side-effect :auth/mount-sign-in-with-github-page
-  [{:keys [query post! emit-mutation! change-location!]} id props]
-  (let [{:keys [code] attempt-id :state} (query l/view-single (l/in [:location :query]))]
+  [{:keys [read-app post! write-app! change-location!]} id props]
+  (let [{:keys [code] attempt-id :state} (read-app l/view-single (l/in [:location :query]))]
     (change-location! {:query {} :replace? true})
     (when (and code attempt-id)
       (post! ["/sign-in/github" {:code code :attempt-id attempt-id}]
              {:on-success (fn [response]
                             (change-location! {:path (b/path-for routes :home)}))
               :on-failure (fn [response]
-                            (emit-mutation! [:auth/sign-in-with-github-failed
+                            (write-app! [:auth/sign-in-with-github-failed
                                              {:Δ (fn [app] (assoc-in app [:auth :sign-in-with-github-failed?] true))}]))}))))
 
 
 (defmethod process-side-effect :auth/sign-out
-  [{:keys [post! emit-mutation!]} id props]
+  [{:keys [post! write-app!]} id props]
   (post! ["/sign-out" {}]
          {:on-success (fn [response]
-                        (emit-mutation! [:auth/sign-out
+                        (write-app! [:auth/sign-out
                                          {:Δ (fn [app] (assoc app :auth {}))}]))
           :on-failure (fn [response]
-                        (emit-mutation! [:auth/sign-out-failed
+                        (write-app! [:auth/sign-out-failed
                                          {:Δ (fn [app] (assoc-in app [:auth :sign-out-status] :failed))}]))}))
 
 
 
 (defmethod process-side-effect :playground/inc-item
-  [{:keys [emit-mutation!]} id props]
+  [{:keys [write-app!]} id props]
   (let [{:keys [path item-name]} props
         mutation-id (keyword (str "playground/inc-" item-name))]
-    (emit-mutation! [mutation-id {:Δ (fn [app] (update-in app path inc))}])))
+    (write-app! [mutation-id {:Δ (fn [app] (update-in app path inc))}])))
 
 
 (defmethod process-side-effect :playground/ping
-  [{:keys [query send! emit-mutation!] :as Φ} id props]
-  (let [ping (query l/view-single (l/in [:playground :ping]))]
+  [{:keys [read-app send! write-app!] :as Φ} id props]
+  (let [ping (read-app l/view-single (l/in [:playground :ping]))]
 
-    (emit-mutation! [:playground/ping
+    (write-app! [:playground/ping
                      {:Δ (fn [app] (update-in app [:playground :ping] inc))}])
 
     (send! [:playground/ping {:ping (inc ping)}]
            {:on-success (fn [[id payload]]
-                          (emit-mutation! [:playground/pong
+                          (write-app! [:playground/pong
                                            {:Δ (fn [app] (assoc-in app [:playground :pong] (:pong payload)))}]))
-            :on-failure (fn [reply] (emit-mutation! [:playground/ping-failed
+            :on-failure (fn [reply] (write-app! [:playground/ping-failed
                                                     {:Δ (fn [app] (assoc-in app [:playground :ping-status] :failed))}]))})))
 
 
@@ -263,11 +264,11 @@
 
         (cond
           tooling? (do
-                     (when log-tooling? (log/debug "emitting side-effect:" id))
+                     (when log-tooling? (log/debug "side-effect:" id))
                      (process-side-effect Φ id props))
 
           real-time? (do
-                       (log/debug "emitting side-effect:" id)
+                       (log/debug "side-effect:" id)
                        (process-side-effect Φ id props))
 
           (or comms? browser?) (log/debug "while time travelling, queueing side-effect:" id)
@@ -286,8 +287,10 @@
   (start [component]
     (log/info "initialising side-effector")
     (let [Φ {:config-opts config-opts
-             :query (:query state)
-             :emit-mutation! (:emit-mutation! state)
+             :read-app (:read-app state)
+             :read-tooling (:read-tooling state)
+             :write-app! (:write-app! state)
+             :write-tooling! (:write-tooling! state)
              :send! (:send! comms)
              :post! (:post! comms)
              :change-location! (:change-location! browser)}]

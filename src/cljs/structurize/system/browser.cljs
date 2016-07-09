@@ -19,7 +19,7 @@
    events and emits the location-change event, which will
    cause an update to the location information in the state."
 
-  [history emit-side-effect!]
+  [history side-effect!]
 
   (fn [g-event]
     (let [token (.getToken history)
@@ -29,7 +29,7 @@
                           (b/match-route routes path))]
       (log/debug "receiving navigation from browser:" token)
       (when-not (.-isNavigation g-event) (js/window.scrollTo 0 0))
-      (emit-side-effect! [:browser/change-location {:location location}]))))
+      (side-effect! [:browser/change-location {:location location}]))))
 
 
 (defn make-transformer
@@ -94,7 +94,7 @@
     (let [history (make-history)]
 
       (log/info "begin listening for navigation from the browser")
-      (listen-for-navigation history (make-navigation-handler history (:emit-side-effect! side-effect-bus)))
+      (listen-for-navigation history (make-navigation-handler history (:side-effect! side-effect-bus)))
 
       (assoc component
              :change-location! (make-change-location history))))

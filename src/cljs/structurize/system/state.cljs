@@ -79,20 +79,49 @@
 
 (defn make-emit-mutation [{:keys [config-opts !state]}]
 
-  (fn [[id {:keys [Δ] :as props} :as mutation]]
+  (fn [[id {:keys [Δ tooling?] :as props} :as mutation]]
     (let [state @!state
           index (get-in state [:app-indices :mutate-index])
           app (get-in state [:app-history index])]
       (log/debug "processing mutation:" id)
+
+      ;; if it's tooling then create the mutation and pass it over to tooling
+      ;; update tooling, that's it
+
       (swap! !state assoc-in [:app-history index] (Δ app)))))
+
+
+(defn make-write-app! [config-opts !state]
+  (fn [[id {:keys [Δ]}]]
+    (let [state @!state
+          index (get-in state [:app-indices :read-write-index])
+          app (get-in state [:app-history index])]
+      (log/debug "write:" id)
+
+      ;; if it's tooling then create the mutation and pass it over to tooling
+      ;; update tooling, that's it
+
+      (swap! !state assoc-in [:app-history index] (Δ app)))))
+
+
+(defn make-write-tooling! [config-opts !state]
+  (fn [[id {:keys [Δ]}]]
+    (let [state @!state
+          tooling (:tooling state)]
+      #_(log/debug "processing mutation:" id)
+
+      ;; if it's tooling then create the mutation and pass it over to tooling
+      ;; update tooling, that's it
+
+      #_(swap! !state assoc-in [:app-history index] (Δ app)))))
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; db setup
 
 
 (defn make-!state [config-opts]
-  (r/atom {:app-indices {:render-index 0
-                         :mutate-index 0}
+  (r/atom {:app-indices {:track-index 0
+                         :read-write-index 0}
 
            :app-history {0 {:playground {:heart 0
                                          :star 3
@@ -127,27 +156,28 @@
     (log/info "initialising state")
     (let [!state (make-!state config-opts)]
       (assoc component
-             :track (fn track
-                      ([v +lens] (track v +lens identity {}))
-                      ([v +lens f] (track v +lens f {}))
-                      ([v +lens f {:keys [tooling?] :or {:tooling? false}}]
-                       (let [state @!state
-                             index (get-in state [:app-indices :render-index])
-                             +root (if tooling?
-                                     (l/in [:tooling])
-                                     (l/in [:app-history index]))]
-                         @(r/track #(f (v state (l/*> +root +lens)))))))
+             :track-app (fn track
+                          ([v +lens] (track v +lens identity))
+                          ([v +lens f]
+                           (let [state @!state
+                                 index (get-in state [:app-indices :track-index])]
+                             @(r/track #(f (v state (l/*> (l/in [:app-history index]) +lens)))))))
 
-             :query (fn query
-                      ([v +lens] (query v +lens {}))
-                      ([v +lens {:keys [tooling?] :or {:tooling? false}}]
-                       (let [state @!state
-                             index (get-in state [:app-indices :mutate-index])
-                             +root (if tooling?
-                                     (l/in [:tooling])
-                                     (l/in [:app-history index]))]
-                         (v state (l/*> +root +lens)))))
+             :track-tooling (fn track
+                              ([v +lens] (track v +lens identity))
+                              ([v +lens f]
+                               @(r/track #(f (v @!state (l/*> (l/in [:tooling]) +lens))))))
 
-             :emit-mutation! (make-emit-mutation {:config-opts config-opts :!state !state}))))
+             :read-app (fn [v +lens]
+                         (let [state @!state
+                               index (get-in state [:app-indices :read-write-index])]
+                           (v state (l/*> (l/in [:app-history index]) +lens))))
+
+             :read-tooling (fn [v +lens]
+                             (v @!state (l/*> (l/in [:tooling]) +lens)))
+
+             :write-app! (make-write-app! config-opts !state)
+
+             :write-tooling! (make-write-tooling! config-opts !state))))
 
   (stop [component] component))

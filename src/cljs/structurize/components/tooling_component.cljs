@@ -1,6 +1,7 @@
 (ns structurize.components.tooling-component
   (:require [structurize.components.component-utils :as u]
             [reagent.core :as r]
+            [traversy.lens :as l]
             [taoensso.timbre :as log]))
 
 (declare node-group)
@@ -8,14 +9,8 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; state-browser components
 
 
-(defn node [{:keys [config-opts !db emit-side-effect!] :as φ} path _]
+(defn node [{:keys [config-opts track-tooling emit-side-effect!] :as φ} path _]
   (let [log? (get-in config-opts [:tooling :log?])
-        !node (r/track #(get-in @!db path))
-        !collapsed? (r/track #(contains? (get-in @!db [:tooling :state-browser-props :collapsed]) path))
-        !mutated? (r/track #(contains? (get-in @!db [:tooling :state-browser-props :mutated :paths]) path))
-        !upstream-mutated? (r/track #(contains? (get-in @!db [:tooling :state-browser-props :mutated :upstream-paths]) path))
-        !focused? (r/track #(contains? (get-in @!db [:tooling :state-browser-props :focused :paths]) path))
-        !upstream-focused? (r/track #(contains? (get-in @!db [:tooling :state-browser-props :focused :upstream-paths]) path))
         toggle-collapsed #(emit-side-effect! [:tooling/toggle-node-collapsed {:path path}])
         toggle-focused #(emit-side-effect! [:tooling/toggle-node-focused {:path path}])]
 
@@ -23,14 +18,14 @@
 
     (fn [_ _ opts]
       (let [{:keys [tail-braces first? last?]} opts
-            node @!node
-            collapsed? @!collapsed?
-            mutated? @!mutated?
-            upstream-mutated? @!upstream-mutated?
-            focused? @!focused?
-            upstream-focused? @!upstream-focused?
+            node (track-tooling l/view-single (l/in path))
+            collapsed? (track-tooling l/view-single (l/in [:state-browser-props :collapsed]) #(contains? % path))
+            mutated? (track-tooling l/view-single (l/in [:state-browser-props :mutated :paths]) #(contains? % path))
+            upstream-mutated? (track-tooling l/view-single (l/in [:state-browser-props :mutated :upstream-paths]) #(contains? % path))
+            focused? (track-tooling l/view-single (l/in [:state-browser-props :focused :paths]) #(contains? % path))
+            upstream-focused? (track-tooling l/view-single (l/in [:state-browser-props :focused :upstream-paths]) #(contains? % path))
             k (last path)
-            v @!node
+            v node
             collapsed-group-node? (and collapsed?
                                        (map? v)
                                        (not (empty? node)))
@@ -97,15 +92,14 @@
           tail-braces]]))))
 
 
-(defn node-group [{:keys [config-opts !db] :as φ} path _ _]
-  (let [log? (get-in config-opts [:tooling :log?])
-        !nodes (r/track #(get-in @!db path))]
+(defn node-group [{:keys [config-opts track-app] :as φ} path _ _]
+  (let [log? (get-in config-opts [:tooling :log?])]
 
     (when log? (log/debug "mount node-group:" path))
 
     (fn [_ _ props opts]
       (let [{:keys [tail-braces]} opts
-            nodes @!nodes
+            nodes (track-app l/view-single (l/in path))
             num-nodes (count nodes)]
 
         (when log? (log/debug "render node-group:" path))
@@ -124,7 +118,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; top-level components
 
 
-(defn mutation-browser [{:keys [config-opts !db emit-side-effect!] :as φ}]
+#_(defn mutation-browser [{:keys [config-opts track emit-side-effect!] :as φ}]
   (let [!processed-mutations (r/track #(get-in @!db [:tooling :processed-mutations]))
         !next-mutation (r/track #(first (get-in @!db [:tooling :unprocessed-mutations])))
         !real-time? (r/track #(empty? (get-in @!db [:tooling :unprocessed-mutations])))
@@ -133,7 +127,7 @@
     (when log? (log/debug "mount mutation-browser"))
 
     (fn []
-      (let [processed-mutations @!processed-mutations
+      (let [processed-mutations (track l/track-single (l/in [:processed-mutations]))
             next-mutation @!next-mutation
             real-time? @!real-time?
             beginning-of-time? (empty? processed-mutations)]
@@ -188,14 +182,13 @@
        [node-group φ [] {} {:tail-braces "}"}]])))
 
 
-(defn tooling [{:keys [config-opts !db emit-side-effect!] :as φ}]
-  (let [log? (get-in config-opts [:tooling :log?])
-        !tooling-active? (r/track #(get-in @!db [:tooling :tooling-active?]))]
+(defn tooling [{:keys [config-opts track-tooling emit-side-effect!] :as φ}]
+  (let [log? (get-in config-opts [:tooling :log?])]
 
     (when log? (log/debug "mount tooling"))
 
     (fn []
-      (let [tooling-active? @!tooling-active?]
+      (let [tooling-active? (track-tooling l/view-single (l/in [:tooling-active?]))]
 
         (when log? (log/debug "render tooling"))
 
@@ -206,5 +199,5 @@
 
          (when tooling-active?
            [:div.browsers
-            [mutation-browser φ]
+            #_[mutation-browser φ]
             [state-browser φ]])]))))
