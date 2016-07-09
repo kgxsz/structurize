@@ -16,29 +16,29 @@
 
 
 (defmethod process-side-effect :tooling/toggle-tooling-active
-  [{:keys [write-app!]} id props]
+  [{:keys [write-tooling!]} id props]
 
-  (write-app! [:tooling/toggle-tooling-active
-                   {:Δ (fn [db] (update-in db [:tooling-active?] not))}]))
+  (write-tooling! [:tooling/toggle-tooling-active
+                   {:Δ (fn [t] (update-in t [:tooling-active?] not))}]))
 
 
 (defmethod process-side-effect :tooling/toggle-node-collapsed
-  [{:keys [write-app!]} id props]
+  [{:keys [write-tooling!]} id props]
   (let [{:keys [path]} props]
-    (write-app! [:tooling/toggle-node-collapsed
-                     {:Δ (fn [db]
-                           (update-in db [:state-browser-props :collapsed] #(if (contains? % path)
-                                                                              (disj % path)
-                                                                              (conj % path))))}])))
+    (write-tooling! [:tooling/toggle-node-collapsed
+                     {:Δ (fn [t]
+                           (update-in t [:state-browser-props :collapsed] #(if (contains? % path)
+                                                                             (disj % path)
+                                                                             (conj % path))))}])))
 
 
 (defmethod process-side-effect :tooling/toggle-node-focused
-  [{:keys [write-app!]} id props]
+  [{:keys [write-tooling!]} id props]
   (let [{:keys [path]} props]
-    (write-app! [:tooling/toggle-node-focused
+    (write-tooling! [:tooling/toggle-node-focused
                      {:tooling? true
-                      :Δ (fn [db]
-                           (-> db
+                      :Δ (fn [t]
+                           (-> t
                                (update-in [:state-browser-props :focused :paths] #(if (empty? %) #{path} #{}))
                                (update-in [:state-browser-props :focused :upstream-paths] #(if (empty? %) (u/upstream-paths #{path}) #{}))))}])))
 

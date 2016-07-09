@@ -9,16 +9,16 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; state-browser components
 
 
-(defn node [{:keys [config-opts track-tooling emit-side-effect!] :as φ} path _]
+(defn node [{:keys [config-opts track-app track-tooling side-effect!] :as φ} path _]
   (let [log? (get-in config-opts [:tooling :log?])
-        toggle-collapsed #(emit-side-effect! [:tooling/toggle-node-collapsed {:path path}])
-        toggle-focused #(emit-side-effect! [:tooling/toggle-node-focused {:path path}])]
+        toggle-collapsed #(side-effect! [:tooling/toggle-node-collapsed {:path path}])
+        toggle-focused #(side-effect! [:tooling/toggle-node-focused {:path path}])]
 
     (when log? (log/debug "mount node:" path))
 
     (fn [_ _ opts]
       (let [{:keys [tail-braces first? last?]} opts
-            node (track-tooling l/view-single (l/in path))
+            node (track-app l/view-single (l/in path))
             collapsed? (track-tooling l/view-single (l/in [:state-browser-props :collapsed]) #(contains? % path))
             mutated? (track-tooling l/view-single (l/in [:state-browser-props :mutated :paths]) #(contains? % path))
             upstream-mutated? (track-tooling l/view-single (l/in [:state-browser-props :mutated :upstream-paths]) #(contains? % path))
@@ -118,7 +118,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; top-level components
 
 
-#_(defn mutation-browser [{:keys [config-opts track emit-side-effect!] :as φ}]
+#_(defn mutation-browser [{:keys [config-opts track side-effect!] :as φ}]
   (let [!processed-mutations (r/track #(get-in @!db [:tooling :processed-mutations]))
         !next-mutation (r/track #(first (get-in @!db [:tooling :unprocessed-mutations])))
         !real-time? (r/track #(empty? (get-in @!db [:tooling :unprocessed-mutations])))
@@ -139,13 +139,13 @@
           [:div.time-control.control-play {:class (if real-time? :active :clickable)
                                            :on-click (when-not real-time?
                                                        (u/without-propagation
-                                                        #(emit-side-effect! [:tooling/stop-time-travelling])))}
+                                                        #(side-effect! [:tooling/stop-time-travelling])))}
            [:span.icon.icon-control-play]]
 
           [:div.time-control.control-next {:class (when-not real-time? (u/->class #{:active :clickable}))
                                            :on-click (when-not real-time?
                                                        (u/without-propagation
-                                                        #(emit-side-effect! [:tooling/go-forward-in-time])))}
+                                                        #(side-effect! [:tooling/go-forward-in-time])))}
            [:span.icon.icon-control-next]]
 
           [:div.time-control.control-previous {:class (u/->class (cond-> #{}
@@ -153,7 +153,7 @@
                                                                    (not beginning-of-time?) (conj :clickable)))
                                                :on-click (when-not beginning-of-time?
                                                            (u/without-propagation
-                                                            #(emit-side-effect! [:tooling/go-back-in-time])))}
+                                                            #(side-effect! [:tooling/go-back-in-time])))}
            [:span.icon.icon-control-prev]]]
 
          [:div.mutation-browser-divider]
@@ -182,7 +182,7 @@
        [node-group φ [] {} {:tail-braces "}"}]])))
 
 
-(defn tooling [{:keys [config-opts track-tooling emit-side-effect!] :as φ}]
+(defn tooling [{:keys [config-opts track-tooling side-effect!] :as φ}]
   (let [log? (get-in config-opts [:tooling :log?])]
 
     (when log? (log/debug "mount tooling"))
@@ -194,7 +194,7 @@
 
         [:div.tooling {:class (when-not tooling-active? :collapsed)}
          [:div.tooling-tab.clickable {:on-click (u/without-propagation
-                                                 #(emit-side-effect! [:tooling/toggle-tooling-active]))}
+                                                 #(side-effect! [:tooling/toggle-tooling-active]))}
           [:span.icon-cog]]
 
          (when tooling-active?

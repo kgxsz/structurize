@@ -106,14 +106,12 @@
 
 (defn make-write-tooling! [config-opts !state]
   (fn [[id {:keys [Δ]}]]
-    (let [state @!state
-          tooling (:tooling state)]
-      #_(log/debug "processing mutation:" id)
+    (log/debug "write:" id)
 
-      ;; if it's tooling then create the mutation and pass it over to tooling
-      ;; update tooling, that's it
+    ;; if it's tooling then create the mutation and pass it over to tooling
+    ;; update tooling, that's it
 
-      #_(swap! !state assoc-in [:app-history index] (Δ app)))))
+    (swap! !state update-in [:tooling] Δ)))
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; db setup
