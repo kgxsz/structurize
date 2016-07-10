@@ -6,7 +6,7 @@
 
 (declare node-group)
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; state-browser components
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; app-browser components
 
 
 (defn node [{:keys [config-opts track-app track-tooling side-effect!] :as φ} path _]
@@ -18,12 +18,23 @@
 
     (fn [_ _ opts]
       (let [{:keys [tail-braces first? last?]} opts
-            node (track-app l/view-single (l/in path))
-            collapsed? (track-tooling l/view-single (l/in [:state-browser-props :collapsed]) #(contains? % path))
-            mutated? (track-tooling l/view-single (l/in [:state-browser-props :mutated :paths]) #(contains? % path))
-            upstream-mutated? (track-tooling l/view-single (l/in [:state-browser-props :mutated :upstream-paths]) #(contains? % path))
-            focused? (track-tooling l/view-single (l/in [:state-browser-props :focused :paths]) #(contains? % path))
-            upstream-focused? (track-tooling l/view-single (l/in [:state-browser-props :focused :upstream-paths]) #(contains? % path))
+            node (track-app l/view-single
+                            (l/in path))
+            collapsed? (track-tooling l/view-single
+                                      (l/in [:app-browser-props :collapsed])
+                                      #(contains? % path))
+            written? (track-tooling l/view-single
+                                    (l/in [:app-browser-props :written :paths])
+                                    #(contains? % path))
+            upstream-written? (track-tooling l/view-single
+                                             (l/in [:app-browser-props :written :upstream-paths])
+                                             #(contains? % path))
+            focused? (track-tooling l/view-single
+                                    (l/in [:app-browser-props :focused :paths])
+                                    #(contains? % path))
+            upstream-focused? (track-tooling l/view-single
+                                             (l/in [:app-browser-props :focused :upstream-paths])
+                                             #(contains? % path))
             k (last path)
             v node
             collapsed-group-node? (and collapsed?
@@ -36,13 +47,13 @@
                             (cond-> #{:clickable}
                               focused? (conj :focused)
                               upstream-focused? (conj :upstream-focused)
-                              mutated? (conj :mutated)
-                              upstream-mutated? (conj :upstream-mutated)
+                              written? (conj :written)
+                              upstream-written? (conj :upstream-written)
                               first? (conj :first)))
             node-value-class (u/->class (cond-> #{}
                                           focused? (conj :focused)
-                                          mutated? (conj :mutated)
-                                          upstream-mutated? (conj :upstream-mutated)))
+                                          written? (conj :written)
+                                          upstream-written? (conj :upstream-written)))
             node-group-class (if focused? :focused)]
 
         (when log? (log/debug "render node:" path))
@@ -118,24 +129,19 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; top-level components
 
 
-#_(defn mutation-browser [{:keys [config-opts track side-effect!] :as φ}]
-  (let [!processed-mutations (r/track #(get-in @!db [:tooling :processed-mutations]))
-        !next-mutation (r/track #(first (get-in @!db [:tooling :unprocessed-mutations])))
-        !real-time? (r/track #(empty? (get-in @!db [:tooling :unprocessed-mutations])))
-        log? (get-in config-opts [:tooling :log?])]
+(defn writes-browser [{:keys [config-opts track-tooling side-effect!] :as φ}]
+  (let [log? (get-in config-opts [:tooling :log?])]
 
-    (when log? (log/debug "mount mutation-browser"))
+    (when log? (log/debug "mount writes-browser"))
 
     (fn []
-      (let [processed-mutations (track l/track-single (l/in [:processed-mutations]))
-            next-mutation @!next-mutation
-            real-time? @!real-time?
-            beginning-of-time? (empty? processed-mutations)]
+      (let [writes (track-tooling l/view
+                                  (l/*> (l/in [:writes]) l/all-values))]
 
-        (when log? (log/debug "render mutation-browser"))
+        (when log? (log/debug "render writes-browser"))
 
         [:div.browser.mutation-browser
-         [:div.time-controls
+         #_[:div.time-controls
           [:div.time-control.control-play {:class (if real-time? :active :clickable)
                                            :on-click (when-not real-time?
                                                        (u/without-propagation
@@ -156,29 +162,29 @@
                                                             #(side-effect! [:tooling/go-back-in-time])))}
            [:span.icon.icon-control-prev]]]
 
-         [:div.mutation-browser-divider]
+         #_[:div.mutation-browser-divider]
 
-         [:div.processed-mutations
+         [:div.writes
           (doall
-           (for [[id {:keys [n] :as props}] processed-mutations]
-             [:div.mutation-container {:key n}
-              [:div.mutation-caption
-               [:span.mutation-caption-symbol "Δ"]
-               [:span.mutation-caption-subscript n]]
-              [:div.mutation-shell {:key n}
-               [:div.mutation.processed-mutation
+           (for [{:keys [id n]} (sort-by :n > writes)]
+             [:div.write-container {:key n}
+              [:div.write-caption
+               [:span.write-caption-symbol "Δ"]
+               [:span.write-caption-subscript n]]
+              [:div.write-shell {:key n}
+               [:div.write.writes
                 (pr-str id)]]]))]]))))
 
 
 
-(defn state-browser [{:keys [config-opts] :as φ}]
+(defn app-browser [{:keys [config-opts] :as φ}]
   (let [log? (get-in config-opts [:tooling :log?])]
 
-    (when log? (log/debug "mount state-browser"))
+    (when log? (log/debug "mount app-browser"))
 
     (fn []
-      (when log? (log/debug "render state-browser"))
-      [:div.browser.state-browser
+      (when log? (log/debug "render app-browser"))
+      [:div.browser.app-browser
        [node-group φ [] {} {:tail-braces "}"}]])))
 
 
@@ -199,5 +205,5 @@
 
          (when tooling-active?
            [:div.browsers
-            #_[mutation-browser φ]
-            [state-browser φ]])]))))
+            [writes-browser φ]
+            [app-browser φ]])]))))

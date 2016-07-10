@@ -22,13 +22,13 @@
       (cons k subkey))))
 
 
-(defn make-mutation-paths
+(defn make-paths
 
-  "This function finds the path to every mutation in the db."
+  "This function finds the path to every changed node between the two maps."
 
-  [post-Δ-db pre-Δ-db]
+  [post pre]
 
-  (let [[added removed _] (data/diff post-Δ-db pre-Δ-db)
+  (let [[added removed _] (data/diff post pre)
         removed-paths (if removed (map->paths removed) [])
         added-paths (if added (map->paths added) [])]
      (into #{} (concat removed-paths added-paths))))
@@ -77,41 +77,39 @@
                                    (assoc-in [:tooling :state-browser-props :mutated :upstream-paths] upstream-mutation-paths))))))))))
 
 
-(defn make-emit-mutation [{:keys [config-opts !state]}]
-
-  (fn [[id {:keys [Δ tooling?] :as props} :as mutation]]
-    (let [state @!state
-          index (get-in state [:app-indices :mutate-index])
-          app (get-in state [:app-history index])]
-      (log/debug "processing mutation:" id)
-
-      ;; if it's tooling then create the mutation and pass it over to tooling
-      ;; update tooling, that's it
-
-      (swap! !state assoc-in [:app-history index] (Δ app)))))
-
 
 (defn make-write-app! [config-opts !state]
-  (fn [[id {:keys [Δ]}]]
+  (fn [[id f]]
     (let [state @!state
           index (get-in state [:app-indices :read-write-index])
-          app (get-in state [:app-history index])]
+          pre-app (get-in state [:app-history index])
+          post-app (f pre-app)
+          paths (make-paths post-app pre-app)
+          upstream-paths (u/make-upstream-paths paths)]
       (log/debug "write:" id)
 
-      ;; if it's tooling then create the mutation and pass it over to tooling
-      ;; update tooling, that's it
+      ;; TODO - When not live, act a little differently
+      ;; when not live, don't incrememnt the track index
+      ;; when not live, don't update the written props
 
-      (swap! !state assoc-in [:app-history index] (Δ app)))))
+      (swap! !state #(-> %
+                         (update-in [:app-indices :read-write-index] inc)
+                         (update-in [:app-indices :track-index] inc)
+                         (assoc-in [:tooling :writes (inc index)] {:id id
+                                                                   :n (inc index)
+                                                                   :paths paths
+                                                                   :upstream-paths upstream-paths
+                                                                   :t (t/now)})
+                         (assoc-in [:tooling :app-browser-props :written] {:paths paths
+                                                                           :upstream-paths upstream-paths})
+                         (assoc-in [:app-history (inc index)] post-app))))))
 
 
 (defn make-write-tooling! [config-opts !state]
-  (fn [[id {:keys [Δ]}]]
-    (log/debug "write:" id)
-
-    ;; if it's tooling then create the mutation and pass it over to tooling
-    ;; update tooling, that's it
-
-    (swap! !state update-in [:tooling] Δ)))
+  (let [log? (get-in config-opts [:tooling :log?])]
+    (fn [[id f]]
+      (when log? (log/debug "write:" id))
+      (swap! !state update-in [:tooling] f))))
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; db setup
@@ -135,14 +133,12 @@
                             :auth {}}}
 
            :tooling {:tooling-active? true
-                     :mutations {}
-                     :state-browser-props {:mutated {:paths #{}
-                                                     :upstream-paths #{}}
-                                           :collapsed #{[:tooling]
-                                                        [:tooling :unprocessed-mutations]
-                                                        [:tooling :processed-mutations]}
-                                           :focused {:paths #{}
-                                                     :upstream-paths #{}}}}}))
+                     :writes {}
+                     :app-browser-props {:written {:paths #{}
+                                                   :upstream-paths #{}}
+                                         :collapsed #{}
+                                         :focused {:paths #{}
+                                                   :upstream-paths #{}}}}}))
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; component setup
@@ -157,9 +153,9 @@
              :track-app (fn track
                           ([v +lens] (track v +lens identity))
                           ([v +lens f]
-                           (let [state @!state
-                                 index (get-in state [:app-indices :track-index])]
-                             @(r/track #(f (v state (l/*> (l/in [:app-history index]) +lens)))))))
+                           @(r/track #(let [state @!state
+                                            index (get-in state [:app-indices :track-index])]
+                                        (f (v state (l/*> (l/in [:app-history index]) +lens)))))))
 
              :track-tooling (fn track
                               ([v +lens] (track v +lens identity))

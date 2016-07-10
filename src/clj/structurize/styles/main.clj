@@ -178,7 +178,7 @@
 
       [:&:last-child {:margin-bottom "15px"}]]
 
-     [:.state-browser {:flex-grow 1
+     [:.app-browser {:flex-grow 1
                        :height 0}
 
       [:.node {:display :flex}
@@ -197,17 +197,17 @@
                     :margin-right "2px"}
         [:span {:pointer-events :none}]
         [:&.first {:margin-left 0}]
-        [:&.mutated :&.upstream-mutated {:color (:light-green colours)}]
+        [:&.written :&.upstream-written {:color (:light-green colours)}]
         [:&.focused :&.upstream-focused {:background-color (:dark-blue colours)
                                          :color (:light-blue colours)}]]
 
        [:.node-value
-        [:&.mutated :&.upstream-mutated {:color (:light-green colours)}]
+        [:&.written :&.upstream-written {:color (:light-green colours)}]
         [:&.focused {:background-color (:light-blue colours)
                      :color (:dark-blue colours)}]]
 
        [:.node-group
-        [:&.mutated
+        [:&.written
          [:.node-key :.node-value {:color (:light-green colours)}]]
         [:&.focused
          [:.node-key :.node-value {:background-color (:light-blue colours)
@@ -242,27 +242,27 @@
        [:&.control-next :&.control-previous {:background-color (:light-yellow colours)
                                              :color (:dark-yellow  colours)}]]]
 
-     [:.mutation-container {:margin-top "5px"}]
+     [:.write-container {:margin-top "5px"}]
 
-     [:.mutation-caption {:margin-left "18px"}
-      [:.mutation-caption-symbol {:font-size "1.6rem"
+     [:.write-caption {:margin-left "18px"}
+      [:.write-caption-symbol {:font-size "1.6rem"
                                   :margin-right "2px"}]
-      [:.mutation-caption-subscript {:font-size "1.1rem"}]]
+      [:.write-caption-subscript {:font-size "1.1rem"}]]
 
-     [:.mutation-shell {:padding "6px"
+     [:.write-shell {:padding "6px"
                         :margin-left "12px"
                         :border "dotted 2px"
                         :border-radius "4px"}]
 
-     [:.mutation {:padding "3px 5px"
+     [:.write {:padding "3px 5px"
                   :border-radius "3px"
                   :height "100%"}
 
-      [:&.processed-mutation {:background-color (:light-green colours)
-                              :color (:dark-green colours)}]]
+      [:&.writes {:background-color (:light-green colours)
+                  :color (:dark-green colours)}]]
 
-     [:.processed-mutations {:display :flex
-                             :padding-right "15px"}]]]])
+     [:.writes {:display :flex
+                :padding-right "15px"}]]]])
 
 
 (def main

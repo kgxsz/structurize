@@ -74,14 +74,16 @@
            [sign-in-with-github Φ])
 
          [:div.button.clickable {:on-click (u/without-propagation
-                                            #(side-effect! [:playground/inc-item {:path [:playground :star]
-                                                                                       :item-name "star"}]))}
+                                            #(side-effect! [:playground/inc-item
+                                                            {:path [:playground :star]
+                                                             :item-name "star"}]))}
           [:span.button-icon.icon-star]
           [:span.button-text star]]
 
          [:div.button.clickable {:on-click (u/without-propagation
-                                            #(side-effect! [:playground/inc-item {:path [:playground :heart]
-                                                                                       :item-name "heart"}]))}
+                                            #(side-effect! [:playground/inc-item
+                                                            {:path [:playground :heart]
+                                                             :item-name "heart"}]))}
           [:span.button-icon.icon-heart]
           [:span.button-text heart]]
 
@@ -115,7 +117,8 @@
 
             [:div.options-section
              [:div.button.clickable {:on-click (u/without-propagation
-                                                #(side-effect! [:general/change-location {:path (b/path-for routes :home)}]))}
+                                                #(side-effect! [:general/change-location
+                                                                {:path (b/path-for routes :home)}]))}
               [:span.button-icon.icon-home]
               [:span.button-text "go home"]]]]
 
@@ -141,7 +144,8 @@
 
       [:div.options-section
        [:div.button.clickable {:on-click (u/without-propagation
-                                          #(side-effect! [:general/change-location {:path (b/path-for routes :home)}]))}
+                                          #(side-effect! [:general/change-location
+                                                          {:path (b/path-for routes :home)}]))}
         [:span.button-icon.icon-home]
         [:span.button-text "go home"]]]])])
 
