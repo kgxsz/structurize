@@ -130,6 +130,7 @@
 
     (fn []
       (let [writes (track-tooling l/view (l/*> (l/in [:writes]) l/all-values))
+            track-index (track-tooling l/view-single (l/in [:track-index]))
             time-travel-status (track-tooling l/view-single (l/in [:time-travel-status]))]
 
         (when log? (log/debug "render writes-browser"))
@@ -160,7 +161,7 @@
 
          [:div.writes
           (doall
-           (for [{:keys [id n]} (sort-by :n > writes)]
+           (for [{:keys [id n]} (take-last track-index (sort-by :n > writes))]
              [:div.write-container {:key n}
               [:div.write-caption
                [:span.write-caption-symbol "Δ"]
