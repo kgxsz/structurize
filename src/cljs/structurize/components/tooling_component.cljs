@@ -18,22 +18,16 @@
 
     (fn [_ _ opts]
       (let [{:keys [tail-braces first? last?]} opts
-            node (track-app l/view-single
-                            (l/in path))
-            collapsed? (track-tooling l/view-single
-                                      (l/in [:app-browser-props :collapsed])
+            node (track-app l/view-single (l/in path))
+            collapsed? (track-tooling l/view-single (l/in [:app-browser-props :collapsed])
                                       #(contains? % path))
-            written? (track-tooling l/view-single
-                                    (l/in [:app-browser-props :written :paths])
+            written? (track-tooling l/view-single (l/in [:app-browser-props :written :paths])
                                     #(contains? % path))
-            upstream-written? (track-tooling l/view-single
-                                             (l/in [:app-browser-props :written :upstream-paths])
+            upstream-written? (track-tooling l/view-single (l/in [:app-browser-props :written :upstream-paths])
                                              #(contains? % path))
-            focused? (track-tooling l/view-single
-                                    (l/in [:app-browser-props :focused :paths])
+            focused? (track-tooling l/view-single (l/in [:app-browser-props :focused :paths])
                                     #(contains? % path))
-            upstream-focused? (track-tooling l/view-single
-                                             (l/in [:app-browser-props :focused :upstream-paths])
+            upstream-focused? (track-tooling l/view-single (l/in [:app-browser-props :focused :upstream-paths])
                                              #(contains? % path))
             k (last path)
             v node
@@ -135,34 +129,34 @@
     (when log? (log/debug "mount writes-browser"))
 
     (fn []
-      (let [writes (track-tooling l/view
-                                  (l/*> (l/in [:writes]) l/all-values))]
+      (let [writes (track-tooling l/view (l/*> (l/in [:writes]) l/all-values))
+            time-travel-status (track-tooling l/view-single (l/in [:time-travel-status]))]
 
         (when log? (log/debug "render writes-browser"))
 
-        [:div.browser.mutation-browser
-         #_[:div.time-controls
-          [:div.time-control.control-play {:class (if real-time? :active :clickable)
-                                           :on-click (when-not real-time?
+        [:div.browser.writes-browser
+         [:div.time-controls
+          [:div.time-control.control-play {:class (if (= time-travel-status :passive) :active :clickable)
+                                           :on-click (when (not= time-travel-status :passive)
                                                        (u/without-propagation
                                                         #(side-effect! [:tooling/stop-time-travelling])))}
            [:span.icon.icon-control-play]]
 
-          [:div.time-control.control-next {:class (when-not real-time? (u/->class #{:active :clickable}))
-                                           :on-click (when-not real-time?
+          [:div.time-control.control-next {:class (when (not= time-travel-status :passive) (u/->class #{:active :clickable}))
+                                           :on-click (when (not= time-travel-status :passive)
                                                        (u/without-propagation
                                                         #(side-effect! [:tooling/go-forward-in-time])))}
            [:span.icon.icon-control-next]]
 
           [:div.time-control.control-previous {:class (u/->class (cond-> #{}
-                                                                   (not real-time?) (conj :active)
-                                                                   (not beginning-of-time?) (conj :clickable)))
-                                               :on-click (when-not beginning-of-time?
+                                                                   (not= time-travel-status :passive) (conj :active)
+                                                                   (not= time-travel-status :exhausted) (conj :clickable)))
+                                               :on-click (when (not= time-travel-status :exhausted)
                                                            (u/without-propagation
                                                             #(side-effect! [:tooling/go-back-in-time])))}
            [:span.icon.icon-control-prev]]]
 
-         #_[:div.mutation-browser-divider]
+         [:div.writes-browser-divider]
 
          [:div.writes
           (doall

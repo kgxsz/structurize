@@ -37,11 +37,12 @@
 (defn make-write-app! [config-opts !state]
   (fn [[id f]]
     (let [state @!state
-          index (get-in state [:app-indices :read-write-index])
+          index (get-in state [:tooling :read-write-index])
           pre-app (get-in state [:app-history index])
           post-app (f pre-app)
           paths (make-paths post-app pre-app)
           upstream-paths (u/make-upstream-paths paths)]
+
       (log/debug "write:" id)
 
       ;; TODO - When not live, act a little differently
@@ -49,8 +50,8 @@
       ;; when not live, don't update the written props
 
       (swap! !state #(-> %
-                         (update-in [:app-indices :read-write-index] inc)
-                         (update-in [:app-indices :track-index] inc)
+                         (update-in [:tooling :read-write-index] inc)
+                         (update-in [:tooling :track-index] inc)
                          (assoc-in [:tooling :writes (inc index)] {:id id
                                                                    :n (inc index)
                                                                    :paths paths
@@ -65,17 +66,14 @@
   (let [log? (get-in config-opts [:tooling :log?])]
     (fn [[id f]]
       (when log? (log/debug "write:" id))
-      (swap! !state update-in [:tooling] f))))
+      (swap! !state update :tooling f))))
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; db setup
 
 
 (defn make-!state [config-opts]
-  (r/atom {:app-indices {:track-index 0
-                         :read-write-index 0}
-
-           :app-history {0 {:playground {:heart 0
+  (r/atom {:app-history {0 {:playground {:heart 0
                                          :star 3
                                          :ping 0
                                          :pong 0}
@@ -88,7 +86,10 @@
                                     :post {}}
                             :auth {}}}
 
-           :tooling {:tooling-active? true
+           :tooling {:track-index 0
+                     :read-write-index 0
+                     :tooling-active? true
+                     :time-travel-status :passive
                      :writes {}
                      :app-browser-props {:written {:paths #{}
                                                    :upstream-paths #{}}
@@ -110,7 +111,7 @@
                           ([v +lens] (track v +lens identity))
                           ([v +lens f]
                            @(r/track #(let [state @!state
-                                            index (get-in state [:app-indices :track-index])]
+                                            index (get-in state [:tooling :track-index])]
                                         (f (v state (l/*> (l/in [:app-history index]) +lens)))))))
 
              :track-tooling (fn track
@@ -120,7 +121,7 @@
 
              :read-app (fn [v +lens]
                          (let [state @!state
-                               index (get-in state [:app-indices :read-write-index])]
+                               index (get-in state [:tooling :read-write-index])]
                            (v state (l/*> (l/in [:app-history index]) +lens))))
 
              :read-tooling (fn [v +lens]

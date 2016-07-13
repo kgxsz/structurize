@@ -45,24 +45,23 @@
                                       #(if (empty? %) (u/make-upstream-paths #{path}) #{}))))])))
 
 
-#_(defmethod process-side-effect :tooling/go-back-in-time
-    [{:keys [write-app!]} id props]
-    (write-app! [:tooling/back-in-time
-                     {:Δ (fn [db]
-                           (let [processed-mutations (get-in db [:tooling :processed-mutations])
-                                 latest-processed-mutation (first processed-mutations)
-                               [_ {:keys [pre-Δ-db pre-Δ-mutation-paths pre-Δ-upstream-mutation-paths]}] latest-processed-mutation]
-                           (-> pre-Δ-db
-                               (assoc :tooling (:tooling db))
-                               (update-in [:tooling :unprocessed-mutations] conj latest-processed-mutation)
-                               (update-in [:tooling :processed-mutations] rest)
-                               (assoc-in [:tooling :app-browser-props :mutated :paths] pre-Δ-mutation-paths)
-                               (assoc-in [:tooling :app-browser-props :mutated :upstream-paths]  pre-Δ-upstream-mutation-paths))))}]))
+(defmethod process-side-effect :tooling/go-back-in-time
+  [{:keys [read-tooling write-tooling!]} id props]
+  (let [track-index (max 0 (dec (read-tooling l/view-single (l/in [:track-index]))))
+        {:keys [paths upstream-paths]} (read-tooling l/view-single (l/in [:writes track-index]))]
+    (write-tooling! [:tooling/back-in-time
+                     (fn [t]
+                       (-> t
+                           (assoc :track-index track-index)
+                           (assoc-in [:app-browser-props :written] {:paths (or paths #{})
+                                                                    :upstream-paths (or upstream-paths #{})})
+                           (assoc :time-travel-status (if (zero? track-index) :exhausted :active))))])))
 
 
-#_(defmethod process-side-effect :tooling/go-forward-in-time
+
+(defmethod process-side-effect :tooling/go-forward-in-time
   [{:keys [write-app!]} id props]
-  (write-app! [:tooling/forward-in-time
+  #_(write-app! [:tooling/forward-in-time
                    {:Δ (fn [db]
                          (let [next-unprocessed-mutation (first (get-in db [:tooling :unprocessed-mutations]))
                                [_ {:keys [post-Δ-db post-Δ-mutation-paths post-Δ-upstream-mutation-paths]}] next-unprocessed-mutation]
@@ -74,9 +73,9 @@
                                (assoc-in [:tooling :app-browser-props :mutated :upstream-paths] post-Δ-upstream-mutation-paths))))}]))
 
 
-#_(defmethod process-side-effect :tooling/stop-time-travelling
+(defmethod process-side-effect :tooling/stop-time-travelling
   [{:keys [write-app!]} id props]
-  (write-app! [:tooling/real-time
+  #_(write-app! [:tooling/real-time
                    {:Δ (fn [db]
                          (let [latest-unprocessed-mutation (last (get-in db [:tooling :unprocessed-mutations]))
                                unprocessed-mutations (get-in db [:tooling :unprocessed-mutations])
@@ -280,6 +279,11 @@
     (go-loop []
       (let [[id props :as side-effect] (a/<! <side-effects)
             tooling? (= (namespace id) "tooling")]
+
+        ;; TODO - still need to figure out how to prevent actions when time travelling!
+        ;; but still allow tooling related stuff, perhaps use priveledged side effects
+        ;; or base it on the namespace, special namespaces like tooling, browser, comms
+        ;; get to go through no matter what, but all else get dropped.
 
         (when (or log? (not tooling?))
           (log/debug "side-effect:" id))

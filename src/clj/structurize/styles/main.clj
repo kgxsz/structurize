@@ -213,17 +213,17 @@
          [:.node-key :.node-value {:background-color (:light-blue colours)
                                    :color (:dark-blue colours)}]]]]]]
 
-    [:.mutation-browser {:display :flex
+    [:.writes-browser {:display :flex
                          :height "90px"}
 
-     [:.mutation-browser-divider {:align-self :center
-                                  :margin-left "12px"
-                                  :border "solid 1px"
-                                  :border-radius "4px"
-                                  :border-color (:grey-a colours)
-                                  :align-items :center
-                                  :width "0px"
-                                  :height "82px"}]
+     [:.writes-browser-divider {:align-self :center
+                                :margin-left "7px"
+                                :border "solid 1px"
+                                :border-radius "4px"
+                                :border-color (:grey-a colours)
+                                :align-items :center
+                                :width "0px"
+                                :height "82px"}]
 
      [:.time-controls {:align-self :center}
       [:.time-control {:display :flex
