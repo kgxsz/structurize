@@ -268,24 +268,31 @@
 
 
 (defn listen-for-side-effects
-
-  [{:keys [config-opts !db] :as Φ} <side-effects]
+  [{:keys [config-opts read-tooling] :as Φ} <side-effects]
 
   (let [log? (get-in config-opts [:tooling :log?])]
 
     (go-loop []
       (let [[id props :as side-effect] (a/<! <side-effects)
-            tooling? (= (namespace id) "tooling")]
+            real-time? (apply = (read-tooling l/view (l/+> (l/in [:read-write-index]) (l/in [:track-index]))))
+            tooling? (= (namespace id) "tooling")
+            browser? (= (namespace id) "browser")
+            comms? (= (namespace id) "comms")]
 
-        ;; TODO - still need to figure out how to prevent actions when time travelling!
-        ;; but still allow tooling related stuff, perhaps use priveledged side effects
-        ;; or base it on the namespace, special namespaces like tooling, browser, comms
-        ;; get to go through no matter what, but all else get dropped.
+        (cond
+          (or browser? comms?) (do
+                                 (log/debug "side-effect:" id)
+                                 (process-side-effect Φ id props))
 
-        (when (or log? (not tooling?))
-          (log/debug "side-effect:" id))
+          tooling? (do
+                     (when log? (log/debug "side-effect:" id))
+                     (process-side-effect Φ id props))
 
-        (process-side-effect Φ id props))
+          real-time? (do
+                       (log/debug "side-effect:" id)
+                       (process-side-effect Φ id props))
+
+         :else (log/debug "during time travel, ignoring side-effect:" id)))
 
       (recur))))
 
