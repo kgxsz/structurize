@@ -34,7 +34,8 @@
   (fn [[id f]]
     (let [state @!state
           index (get-in state [:tooling :read-write-index])
-          passive? (= :passive (get-in state [:tooling :time-travel-status]))
+          real-time? (= (get-in state [:tooling :read-write-index])
+                        (get-in state [:tooling :track-index]))
           pre-app (get-in state [:app-history index])
           post-app (f pre-app)
           paths (make-paths post-app pre-app)
@@ -44,13 +45,13 @@
 
       (swap! !state #(cond-> %
                        true (update-in [:tooling :read-write-index] inc)
-                       passive? (update-in [:tooling :track-index] inc)
+                       real-time? (update-in [:tooling :track-index] inc)
                        true (assoc-in [:tooling :writes (inc index)] {:id id
                                                                    :n (inc index)
                                                                    :paths paths
                                                                    :upstream-paths upstream-paths
                                                                    :t (t/now)})
-                       passive? (assoc-in [:tooling :app-browser-props :written] {:paths paths
+                       real-time? (assoc-in [:tooling :app-browser-props :written] {:paths paths
                                                                            :upstream-paths upstream-paths})
                        true (assoc-in [:app-history (inc index)] post-app))))))
 
@@ -82,7 +83,6 @@
            :tooling {:track-index 0
                      :read-write-index 0
                      :tooling-active? true
-                     :time-travel-status :passive
                      :writes {}
                      :app-browser-props {:written {:paths #{}
                                                    :upstream-paths #{}}

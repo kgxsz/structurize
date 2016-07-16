@@ -130,29 +130,31 @@
 
     (fn []
       (let [writes (track-tooling l/view (l/*> (l/in [:writes]) l/all-values))
+            read-write-index (track-tooling l/view-single (l/in [:read-write-index]))
             track-index (track-tooling l/view-single (l/in [:track-index]))
-            time-travel-status (track-tooling l/view-single (l/in [:time-travel-status]))]
+            real-time? (= track-index read-write-index)
+            beginning-of-time? (zero? track-index)]
 
         (when log? (log/debug "render writes-browser"))
 
         [:div.browser.writes-browser
          [:div.time-controls
-          [:div.time-control.control-play {:class (if (= time-travel-status :passive) :active :clickable)
-                                           :on-click (when (not= time-travel-status :passive)
+          [:div.time-control.control-play {:class (if real-time? :active :clickable)
+                                           :on-click (when-not real-time?
                                                        (u/without-propagation
                                                         #(side-effect! [:tooling/stop-time-travelling])))}
            [:span.icon.icon-control-play]]
 
-          [:div.time-control.control-next {:class (when (not= time-travel-status :passive) (u/->class #{:active :clickable}))
-                                           :on-click (when (not= time-travel-status :passive)
+          [:div.time-control.control-next {:class (when-not real-time? (u/->class #{:active :clickable}))
+                                           :on-click (when-not real-time?
                                                        (u/without-propagation
                                                         #(side-effect! [:tooling/go-forward-in-time])))}
            [:span.icon.icon-control-next]]
 
           [:div.time-control.control-previous {:class (u/->class (cond-> #{}
-                                                                   (not= time-travel-status :passive) (conj :active)
-                                                                   (not= time-travel-status :exhausted) (conj :clickable)))
-                                               :on-click (when (not= time-travel-status :exhausted)
+                                                                   (not real-time?) (conj :active)
+                                                                   (not beginning-of-time?) (conj :clickable)))
+                                               :on-click (when (not beginning-of-time?)
                                                            (u/without-propagation
                                                             #(side-effect! [:tooling/go-back-in-time])))}
            [:span.icon.icon-control-prev]]]

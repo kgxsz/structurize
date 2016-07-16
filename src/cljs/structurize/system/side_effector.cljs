@@ -54,8 +54,7 @@
                        (-> t
                            (assoc :track-index track-index)
                            (assoc-in [:app-browser-props :written] {:paths (or paths #{})
-                                                                    :upstream-paths (or upstream-paths #{})})
-                           (assoc :time-travel-status (if (zero? track-index) :exhausted :active))))])))
+                                                                    :upstream-paths (or upstream-paths #{})})))])))
 
 
 (defmethod process-side-effect :tooling/go-forward-in-time
@@ -68,8 +67,7 @@
                        (-> t
                            (assoc :track-index track-index)
                            (assoc-in [:app-browser-props :written] {:paths (or paths #{})
-                                                                    :upstream-paths (or upstream-paths #{})})
-                           (assoc :time-travel-status (if (= read-write-index track-index) :passive :active))))])))
+                                                                    :upstream-paths (or upstream-paths #{})})))])))
 
 
 (defmethod process-side-effect :tooling/stop-time-travelling
@@ -81,8 +79,7 @@
                        (-> t
                            (assoc :track-index read-write-index)
                            (assoc-in [:app-browser-props :written] {:paths (or paths #{})
-                                                                    :upstream-paths (or upstream-paths #{})})
-                           (assoc :time-travel-status :passive)))])))
+                                                                    :upstream-paths (or upstream-paths #{})})))])))
 
 
 (defmethod process-side-effect :browser/change-location
