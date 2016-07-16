@@ -14,7 +14,10 @@
                      :log? false
                      :max-processed-mutations 50}
            :comms {:chsk-opts {:type :auto
-                               :packer :edn}}))
+                               :packer :edn}}
+           :routes ["/" [["" :home]
+                         ["sign-in/github" :sign-in-with-github]
+                         [true :unknown]]]))
 
   (stop [component] component))
 

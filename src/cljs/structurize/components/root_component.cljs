@@ -1,6 +1,5 @@
 (ns structurize.components.root-component
-  (:require [structurize.routes :refer [routes]]
-            [structurize.components.component-utils :as u]
+  (:require [structurize.components.component-utils :as u]
             [structurize.components.tooling-component :refer [tooling]]
             [traversy.lens :as l]
             [bidi.bidi :as b]
@@ -93,7 +92,7 @@
           [:spam.button-text pong]]]]))])
 
 
-(defn sign-in-with-github-page [{:keys [track-app side-effect!] :as Φ}]
+(defn sign-in-with-github-page [{:keys [config-opts track-app side-effect!] :as Φ}]
   [with-page-load Φ
    (fn []
      (log/debug "mount sign-in-with-github-page")
@@ -118,7 +117,7 @@
             [:div.options-section
              [:div.button.clickable {:on-click (u/without-propagation
                                                 #(side-effect! [:general/change-location
-                                                                {:path (b/path-for routes :home)}]))}
+                                                                {:path (b/path-for (:routes config-opts) :home)}]))}
               [:span.button-icon.icon-home]
               [:span.button-text "go home"]]]]
 
@@ -131,7 +130,7 @@
              [:h1.hero-caption "Signing you in with GitHub"]]]))))])
 
 
-(defn unknown-page [{:keys [side-effect!] :as Φ}]
+(defn unknown-page [{:keys [config-opts side-effect!] :as Φ}]
   [with-page-load Φ
    (fn []
      (log/debug "render unkown-page")
@@ -145,7 +144,7 @@
       [:div.options-section
        [:div.button.clickable {:on-click (u/without-propagation
                                           #(side-effect! [:general/change-location
-                                                          {:path (b/path-for routes :home)}]))}
+                                                          {:path (b/path-for (:routes config-opts) :home)}]))}
         [:span.button-icon.icon-home]
         [:span.button-text "go home"]]]])])
 

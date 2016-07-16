@@ -1,6 +1,5 @@
 (ns structurize.system.side-effector
-  (:require [structurize.routes :refer [routes]]
-            [structurize.system.system-utils :as u]
+  (:require [structurize.system.system-utils :as u]
             [bidi.bidi :as b]
             [traversy.lens :as l]
             [com.stuartsierra.component :as component]
@@ -185,10 +184,10 @@
 
 
 (defmethod process-side-effect :auth/initialise-sign-in-with-github
-  [{:keys [send! write-app! change-location!]} id props]
+  [{:keys [config-opts send! write-app! change-location!]} id props]
   (send! [:auth/initialise-sign-in-with-github {}]
          {:on-success (fn [[_ {:keys [client-id attempt-id scope redirect-prefix]}]]
-                        (let [redirect-uri (str redirect-prefix (b/path-for routes :sign-in-with-github))]
+                        (let [redirect-uri (str redirect-prefix (b/path-for (:routes config-opts) :sign-in-with-github))]
                           (change-location! {:prefix "https://github.com"
                                              :path "/login/oauth/authorize"
                                              :query {:client_id client-id
@@ -202,13 +201,13 @@
 
 
 (defmethod process-side-effect :auth/mount-sign-in-with-github-page
-  [{:keys [read-app post! write-app! change-location!]} id props]
+  [{:keys [config-opts read-app post! write-app! change-location!]} id props]
   (let [{:keys [code] attempt-id :state} (read-app l/view-single (l/in [:location :query]))]
     (change-location! {:query {} :replace? true})
     (when (and code attempt-id)
       (post! ["/sign-in/github" {:code code :attempt-id attempt-id}]
              {:on-success (fn [response]
-                            (change-location! {:path (b/path-for routes :home)}))
+                            (change-location! {:path (b/path-for (:routes config-opts) :home)}))
               :on-failure (fn [response]
                             (write-app! [:auth/sign-in-with-github-failed
                                          (fn [app]

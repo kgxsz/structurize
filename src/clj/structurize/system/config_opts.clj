@@ -6,10 +6,8 @@
 
 
 (defn load-config
-
   "Loads pubic and private config from hardocded locations, then merges them.
    If no private file is present, will simply give an empty map in its place."
-
   []
 
   (let [home (System/getProperty "user.home")
@@ -21,10 +19,8 @@
 
 
 (defn make-config
-
   "Returns a function that takes a kw and first checks if an env var exists,
    before going to the config map to get a value."
-
   []
 
   (let [config (load-config)]

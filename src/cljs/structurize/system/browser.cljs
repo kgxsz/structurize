@@ -1,6 +1,5 @@
 (ns structurize.system.browser
-  (:require [structurize.routes :refer [routes]]
-            [bidi.bidi :as b]
+  (:require [bidi.bidi :as b]
             [cemerick.url :refer [map->query query->map]]
             [clojure.string :as str]
             [com.stuartsierra.component :as component]
@@ -14,15 +13,14 @@
 
 
 (defn make-navigation-handler
-
   "Returns a function that handles browser navigation
    events and emits the location-change event, which will
    cause an update to the location information in the state."
-
-  [history side-effect!]
+  [config-opts history side-effect!]
 
   (fn [g-event]
-    (let [token (.getToken history)
+    (let [routes (:routes config-opts)
+          token (.getToken history)
           [path query] (str/split token "?")
           location (merge {:path path
                            :query (->> query query->map (m/map-keys keyword))}
@@ -58,18 +56,15 @@
 
 
 (defn make-change-location
-
   "Returns a function that takes a map of options and updates the
    browser's location accordingly. The browser will fire a navigation
    event if the location changes, which will be dealt with by a listener.
 
    The returned function expects:
-
    prefix - the part before the path, set it if you want to navigate to a different site
    path - the path you wish to navigate to
    query - map of query params
    replace? - ensures that the browser replaces the current location in history"
-
   [history]
 
   (fn [{:keys [prefix path query replace?]}]
@@ -94,7 +89,7 @@
     (let [history (make-history)]
 
       (log/info "begin listening for navigation from the browser")
-      (listen-for-navigation history (make-navigation-handler history (:side-effect! side-effect-bus)))
+      (listen-for-navigation history (make-navigation-handler config-opts history (:side-effect! side-effect-bus)))
 
       (assoc component
              :change-location! (make-change-location history))))
