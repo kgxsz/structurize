@@ -9,10 +9,8 @@
 
 
 (defn map->paths
-
   "This function takes a map and returns a list of every possible path in the map.
    For example {:a 1 :b {:c 2 :d 3}} would give ((:a) (:b :c) (:b :d))."
-
   [m]
 
   (if (or (not (map? m)) (empty? m))
@@ -23,9 +21,7 @@
 
 
 (defn make-paths
-
   "This function finds the path to every changed node between the two maps."
-
   [post pre]
 
   (let [[added removed _] (data/diff post pre)
