@@ -73,18 +73,16 @@
 
 
 (defmethod process-side-effect :tooling/stop-time-travelling
-  [{:keys [write-app!]} id props]
-  #_(write-app! [:tooling/real-time
-                   {:Δ (fn [db]
-                         (let [latest-unprocessed-mutation (last (get-in db [:tooling :unprocessed-mutations]))
-                               unprocessed-mutations (get-in db [:tooling :unprocessed-mutations])
-                               [_ {:keys [post-Δ-db post-Δ-mutation-paths post-Δ-upstream-mutation-paths]}] latest-unprocessed-mutation]
-                           (-> post-Δ-db
-                               (assoc :tooling (:tooling db))
-                               (update-in [:tooling :processed-mutations] (partial concat (reverse unprocessed-mutations)))
-                               (assoc-in [:tooling :unprocessed-mutations] '())
-                               (assoc-in [:tooling :app-browser-props :mutated :paths] post-Δ-mutation-paths)
-                               (assoc-in [:tooling :app-browser-props :mutated :upstream-paths] post-Δ-upstream-mutation-paths))))}]))
+  [{:keys [read-tooling write-tooling!]} id props]
+  (let [read-write-index (read-tooling l/view-single (l/in [:read-write-index]))
+        {:keys [paths upstream-paths]} (read-tooling l/view-single (l/in [:writes read-write-index]))]
+    (write-tooling! [:tooling/stop-time-travellin
+                     (fn [t]
+                       (-> t
+                           (assoc :track-index read-write-index)
+                           (assoc-in [:app-browser-props :written] {:paths (or paths #{})
+                                                                    :upstream-paths (or upstream-paths #{})})
+                           (assoc :time-travel-status :passive)))])))
 
 
 (defmethod process-side-effect :browser/change-location
