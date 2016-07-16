@@ -34,6 +34,7 @@
   (fn [[id f]]
     (let [state @!state
           index (get-in state [:tooling :read-write-index])
+          passive? (= :passive (get-in state [:tooling :time-travel-status]))
           pre-app (get-in state [:app-history index])
           post-app (f pre-app)
           paths (make-paths post-app pre-app)
@@ -41,21 +42,17 @@
 
       (log/debug "write:" id)
 
-      ;; TODO - When not live, act a little differently
-      ;; when not live, don't incrememnt the track index
-      ;; when not live, don't update the written props
-
-      (swap! !state #(-> %
-                         (update-in [:tooling :read-write-index] inc)
-                         (update-in [:tooling :track-index] inc)
-                         (assoc-in [:tooling :writes (inc index)] {:id id
+      (swap! !state #(cond-> %
+                       true (update-in [:tooling :read-write-index] inc)
+                       passive? (update-in [:tooling :track-index] inc)
+                       true (assoc-in [:tooling :writes (inc index)] {:id id
                                                                    :n (inc index)
                                                                    :paths paths
                                                                    :upstream-paths upstream-paths
                                                                    :t (t/now)})
-                         (assoc-in [:tooling :app-browser-props :written] {:paths paths
+                       passive? (assoc-in [:tooling :app-browser-props :written] {:paths paths
                                                                            :upstream-paths upstream-paths})
-                         (assoc-in [:app-history (inc index)] post-app))))))
+                       true (assoc-in [:app-history (inc index)] post-app))))))
 
 
 (defn make-write-tooling! [config-opts !state]
