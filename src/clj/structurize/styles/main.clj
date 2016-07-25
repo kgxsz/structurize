@@ -50,6 +50,74 @@
    [:table {:border-collapse :collapse :border-spacing 0}]])
 
 
+(def v
+  {:spacing 10})
+
+
+(def objects
+  [:#root
+
+   [:.o-underlay {:position :relative
+                  :overflow :hidden}]
+
+   [:.o-overlay {:width "100%"
+                 :height "100%"
+                 :pointer-events :none
+                 :position :absolute
+                 :background-color (c/rgba [0 0 0 0])
+                 :top 0
+                 :left 0}
+    [:&--fixed {:width "100vw"
+                :height "100vh"
+                :position :fixed}]
+    [:&__content {:pointer-events :auto}]]
+
+   [:.o-slider {:width "40%"
+                :height "100%"
+                :background-color (c/rgba [0 10 20 0.7])
+                :position :relative
+                :top 0
+                :left "100%"
+                :transition "left 0.2s"}
+    [:&--active {:left "60%"}]]
+
+   ]
+  )
+
+
+(def components
+  [:#root
+
+   [:.c-tooling {:width "40vw"
+                 :height "100%"
+                 :padding (-> v :spacing u/px)
+                 :background-color (c/rgba [0 10 20 0.7])
+                 :position :fixed
+                 :top 0
+                 :left "100vw"}
+
+    [:&--active {:left :auto
+                 :right 0}]
+
+    [:&__handle {:display :flex
+                 :justify-content :center
+                 :align-items :center
+                 :cursor :pointer
+                 :background-color (c/rgba [0 10 20 0.7])
+                 :width "25px"
+                 :height "30px"
+                 :border-top-left-radius "5px"
+                 :border-bottom-left-radius "5px"
+                 :position :absolute
+                 :top (-> v :spacing u/px)
+                 :left "-25px"}]]]
+
+  )
+
+
+(def utilities)
+
+
 (def general
   [:html {:font-size (u/px 10)}
 
@@ -80,7 +148,7 @@
             :height (u/vh 100)}]])
 
 
-(def components
+(def components*
   [:#root
    [:.loading {:display :flex
                :flex-direction :column
@@ -132,14 +200,7 @@
     [:.button-icon {:font-size "2.2rem"
                     :margin-right "7px"}]]
 
-   [:.tooling {:width "40vw"
-               :height "100%"
-               :min-width "320px"
-               :min-height "320px"
-               :background-color (c/rgba [0 10 20 0.7])
-               :position :fixed
-               :top 0
-               :right 0}
+   [:.tooling
 
     [".browser::-webkit-scrollbar" {:display :none}]
 
@@ -179,7 +240,7 @@
       [:&:last-child {:margin-bottom "15px"}]]
 
      [:.app-browser {:flex-grow 1
-                       :height 0}
+                     :height 0}
 
       [:.node {:display :flex}
 
@@ -268,5 +329,8 @@
 (def main
   [meyer-reset
    general
+   objects
+   components
+
    pages
-   components])
+   components*])
