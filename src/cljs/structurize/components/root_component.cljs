@@ -56,40 +56,40 @@
        [:div.page
 
         (if me
-          [:div.hero
-           [:div.hero-visual
-            [:img.large-avatar {:src (:avatar-url me)}]]
-           [:h1.hero-caption "Hello @" (:login me)]]
+            [:div.hero
+             [:div.hero-visual
+              [:img.large-avatar {:src (:avatar-url me)}]]
+             [:h1.hero-caption "Hello @" (:login me)]]
 
-          [:div.hero
-           [:div.hero-visual
-            [:span.icon.icon-mustache]]
-           [:h1.hero-caption "Hello there"]])
+            [:div.hero
+             [:div.hero-visual
+              [:span.icon.icon-mustache]]
+             [:h1.hero-caption "Hello there"]])
 
         [:div.options-section
 
-         (if me
-           [sign-out Φ]
-           [sign-in-with-github Φ])
+           (if me
+             [sign-out Φ]
+             [sign-in-with-github Φ])
 
-         [:div.button.clickable {:on-click (u/without-propagation
-                                            #(side-effect! [:playground/inc-item
-                                                            {:path [:playground :star]
-                                                             :item-name "star"}]))}
-          [:span.button-icon.icon-star]
-          [:span.button-text star]]
+           [:div.button.clickable {:on-click (u/without-propagation
+                                              #(side-effect! [:playground/inc-item
+                                                              {:path [:playground :star]
+                                                               :item-name "star"}]))}
+            [:span.button-icon.icon-star]
+            [:span.button-text star]]
 
-         [:div.button.clickable {:on-click (u/without-propagation
-                                            #(side-effect! [:playground/inc-item
-                                                            {:path [:playground :heart]
-                                                             :item-name "heart"}]))}
-          [:span.button-icon.icon-heart]
-          [:span.button-text heart]]
+           [:div.button.clickable {:on-click (u/without-propagation
+                                              #(side-effect! [:playground/inc-item
+                                                              {:path [:playground :heart]
+                                                               :item-name "heart"}]))}
+            [:span.button-icon.icon-heart]
+            [:span.button-text heart]]
 
-         [:div.button.clickable {:on-click (u/without-propagation
-                                            #(side-effect! [:playground/ping {}]))}
-          [:span.button-icon.icon-heart-pulse]
-          [:spam.button-text pong]]]]))])
+           [:div.button.clickable {:on-click (u/without-propagation
+                                              #(side-effect! [:playground/ping {}]))}
+            [:span.button-icon.icon-heart-pulse]
+            [:spam.button-text pong]]]]))])
 
 
 (defn sign-in-with-github-page [{:keys [config-opts track-app side-effect!] :as Φ}]
@@ -161,7 +161,7 @@
 
         (log/debug "render root")
 
-        [:div.viewport
+        [:div
          (case handler
            :home [home-page Φ]
            :sign-in-with-github [sign-in-with-github-page Φ]

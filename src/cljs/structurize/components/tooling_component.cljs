@@ -137,7 +137,7 @@
 
         (when log? (log/debug "render writes-browser"))
 
-        [:div.browser.writes-browser
+        [:div.writes-browser
          [:div.time-controls
           [:div.time-control.control-play {:class (if real-time? :active :clickable)
                                            :on-click (when-not real-time?
@@ -184,6 +184,12 @@
       [:div.browser.app-browser
        [node-group φ [] {} {:tail-braces "}"}]])))
 
+(defn slide-over [φ {:keys [open? absolute-width direction]} content]
+  ;; TODO - flesh this guy out to every option needed to be a useful component
+  (log/debug "render slide-over")
+  [:div.l-slide-over {:style {:width (str absolute-width "px")
+                              direction (if open? 0 (str (- absolute-width) "px"))}}
+   content])
 
 (defn tooling [{:keys [config-opts track-tooling side-effect!] :as φ}]
   (let [log? (get-in config-opts [:tooling :log?])]
@@ -195,12 +201,17 @@
 
         (when log? (log/debug "render tooling"))
 
-        [:div.tooling {:class (when-not tooling-active? :collapsed)}
-         [:div.tooling-tab.clickable {:on-click (u/without-propagation
-                                                 #(side-effect! [:tooling/toggle-tooling-active]))}
-          [:span.icon-cog]]
-
-         (when tooling-active?
-           [:div.browsers
-            [writes-browser φ]
-            [app-browser φ]])]))))
+        [:div.l-overlay.l-overlay--viewport-fixed
+         [slide-over φ {:open? tooling-active?
+                        :absolute-width 800
+                        :direction :right}
+          [:div.l-overlay__content.c-tooling
+           [:div.c-tooling__handle
+            {:on-click (u/without-propagation
+                        #(side-effect! [:tooling/toggle-tooling-active]))}
+            [:div.icon-cog]]
+           [:div.l-col
+            [:div.l-col__item.c-tooling__item
+             [writes-browser φ]]
+            [:div.l-col__item.l-col__item--grow.c-tooling__item
+             [app-browser φ]]]]]]))))

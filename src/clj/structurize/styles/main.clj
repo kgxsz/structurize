@@ -51,72 +51,77 @@
 
 
 (def v
-  {:spacing 10})
+  {:spacing 10
+   :filling 30})
 
-
-(def objects
+(def layouts
   [:#root
 
-   [:.o-underlay {:position :relative
-                  :overflow :hidden}]
+   [:.l-underlay {:position :relative}]
 
-   [:.o-overlay {:width "100%"
+   [:.l-overlay {:width "100%"
                  :height "100%"
                  :pointer-events :none
                  :position :absolute
                  :background-color (c/rgba [0 0 0 0])
                  :top 0
                  :left 0}
-    [:&--fixed {:width "100vw"
-                :height "100vh"
-                :position :fixed}]
+
+    [:&--viewport-fixed {:width "100vw"
+                         :height "100vh"
+                         :position :fixed}]
+
     [:&__content {:pointer-events :auto}]]
 
-   [:.o-slider {:width "40%"
-                :height "100%"
-                :background-color (c/rgba [0 10 20 0.7])
-                :position :relative
-                :top 0
-                :left "100%"
-                :transition "left 0.2s"}
-    [:&--active {:left "60%"}]]
+   [:.l-col {:display :flex
+             :flex-direction :column
+             :height (u/percent 100)}
+    [:&__item
+     [:&--grow {:flex-grow 1}]]]
 
-   ]
-  )
+   [:.l-slide-over {:height "100%"
+                    :background-color (c/rgba [0 0 0 0])
+                    :position :absolute
+                    :top 0
+                    :transition "right 0.2s"}]])
 
 
 (def components
   [:#root
 
-   [:.c-tooling {:width "40vw"
-                 :height "100%"
+   [:.c-tooling {:box-sizing :border-box
+                 :width (u/percent 100)
+                 :height (u/percent 100)
                  :padding (-> v :spacing u/px)
-                 :background-color (c/rgba [0 10 20 0.7])
-                 :position :fixed
-                 :top 0
-                 :left "100vw"}
-
-    [:&--active {:left :auto
-                 :right 0}]
+                 :background-color (c/rgba [0 10 20 0.7])}
 
     [:&__handle {:display :flex
                  :justify-content :center
                  :align-items :center
                  :cursor :pointer
                  :background-color (c/rgba [0 10 20 0.7])
-                 :width "25px"
+                 :width "30px"
                  :height "30px"
                  :border-top-left-radius "5px"
                  :border-bottom-left-radius "5px"
                  :position :absolute
                  :top (-> v :spacing u/px)
-                 :left "-25px"}]]]
+                 :left "-30px"}]
+
+
+    [:&__item {:box-sizing :border-box
+               :width (u/percent 100)
+               :padding (-> v :spacing u/px)
+               :background-color (c/rgba [80 90 100 0.3])
+               :border-radius "5px"
+               :margin-bottom (-> v :spacing u/px)
+               :overflow :auto}
+
+     ["&::-webkit-scrollbar" {:display :none}]
+
+     [:&:last-child {:margin-bottom 0}]]]]
 
   )
-
-
-(def utilities)
-
 
 (def general
   [:html {:font-size (u/px 10)}
@@ -143,9 +148,7 @@
   [:#root
    [:.page {:display :flex
             :flex-direction :column
-            :align-items :center
-            :width (u/vw 100)
-            :height (u/vh 100)}]])
+            :align-items :center}]])
 
 
 (def components*
@@ -200,136 +203,108 @@
     [:.button-icon {:font-size "2.2rem"
                     :margin-right "7px"}]]
 
-   [:.tooling
 
-    [".browser::-webkit-scrollbar" {:display :none}]
+   [:.app-browser {:flex-grow 1
+                   :height 0
+                   :font-family "'Fira Mono', monospace"
+                   :font-size "1.2rem"
+                   :color (:white-b colours)
+                   :white-space :nowrap
+                   :line-height "1.7rem"}
 
-    [:&.collapsed {:left "100vw"}]
+    [:.node {:display :flex}
 
-    [:.tooling-tab {:display :flex
-                    :justify-content :center
-                    :align-items :center
-                    :background-color (c/rgba [0 10 20 0.7])
-                    :width "25px"
-                    :height "33px"
-                    :border-top-left-radius "5px"
-                    :border-bottom-left-radius "5px"
-                    :position :absolute
-                    :top "15px"
-                    :left "-25px"}
-     [:.icon-cog {:color (:white-a colours)
-                  :font-size "1.5rem"
-                  :margin "0 0 1px 2px"}]]
+     [:.node-brace {:padding-top "2px"}]
 
-    [:.browsers {:display :flex
-                 :flex-direction :column
-                 :width "100%"
-                 :height "100%"
-                 :font-family "'Fira Mono', monospace"
-                 :font-size "1.2rem"
-                 :color (:white-b colours)
-                 :line-height "1.7rem"
-                 :white-space :nowrap}
+     [:.node-value :.node-key {:height "100%"
+                               :margin-bottom "2px"
+                               :padding "2px 3px 1px 3px"
+                               :border-radius "4px"
+                               :background-color (:grey-c colours)}]
 
-     [:.browser {:background-color (c/rgba [80 90 100 0.3])
-                 :margin "15px 15px 0 15px"
-                 :padding "10px"
-                 :border-radius "5px"
-                 :overflow :auto}
+     [:.node-key {:display :flex
+                  :align-items :center
+                  :margin-left "7px"
+                  :margin-right "2px"}
+      [:span {:pointer-events :none}]
+      [:&.first {:margin-left 0}]
+      [:&.written :&.upstream-written {:color (:light-green colours)}]
+      [:&.focused :&.upstream-focused {:background-color (:dark-blue colours)
+                                       :color (:light-blue colours)}]]
 
-      [:&:last-child {:margin-bottom "15px"}]]
+     [:.node-value
+      [:&.written :&.upstream-written {:color (:light-green colours)}]
+      [:&.focused {:background-color (:light-blue colours)
+                   :color (:dark-blue colours)}]]
 
-     [:.app-browser {:flex-grow 1
-                     :height 0}
+     [:.node-group
+      [:&.written
+       [:.node-key :.node-value {:color (:light-green colours)}]]
+      [:&.focused
+       [:.node-key :.node-value {:background-color (:light-blue colours)
+                                 :color (:dark-blue colours)}]]]]]
 
-      [:.node {:display :flex}
+   [:.writes-browser {:display :flex
+                      :height "90px"
+                      :font-family "'Fira Mono', monospace"
+                      :font-size "1.2rem"
+                      :color (:white-b colours)
+                      :white-space :nowrap
+                      :line-height "1.7rem"}
 
-       [:.node-brace {:padding-top "2px"}]
+    [:.writes-browser-divider {:align-self :center
+                               :margin-left "7px"
+                               :border "solid 1px"
+                               :border-radius "4px"
+                               :border-color (:grey-a colours)
+                               :align-items :center
+                               :width "0px"
+                               :height "82px"}]
 
-       [:.node-value :.node-key {:height "100%"
-                                 :margin-bottom "2px"
-                                 :padding "2px 3px 1px 3px"
-                                 :border-radius "4px"
-                                 :background-color (:grey-c colours)}]
+    [:.time-controls {:align-self :center}
+     [:.time-control {:display :flex
+                      :align-items :center
+                      :justify-content :center
+                      :height "24px"
+                      :width "24px"
+                      :margin "4px"
+                      :border-radius "12px"
+                      :opacity 0.3}
 
-       [:.node-key {:display :flex
-                    :align-items :center
-                    :margin-left "7px"
-                    :margin-right "2px"}
-        [:span {:pointer-events :none}]
-        [:&.first {:margin-left 0}]
-        [:&.written :&.upstream-written {:color (:light-green colours)}]
-        [:&.focused :&.upstream-focused {:background-color (:dark-blue colours)
-                                         :color (:light-blue colours)}]]
+      [:&.active {:opacity 1}]
 
-       [:.node-value
-        [:&.written :&.upstream-written {:color (:light-green colours)}]
-        [:&.focused {:background-color (:light-blue colours)
-                     :color (:dark-blue colours)}]]
+      [:&.control-play {:background-color (:light-green colours)
+                        :color (:dark-green colours)}]
+      [:&.control-next :&.control-previous {:background-color (:light-yellow colours)
+                                            :color (:dark-yellow  colours)}]]]
 
-       [:.node-group
-        [:&.written
-         [:.node-key :.node-value {:color (:light-green colours)}]]
-        [:&.focused
-         [:.node-key :.node-value {:background-color (:light-blue colours)
-                                   :color (:dark-blue colours)}]]]]]]
+    [:.write-container {:margin-top "5px"}]
 
-    [:.writes-browser {:display :flex
-                         :height "90px"}
+    [:.write-caption {:margin-left "18px"}
+     [:.write-caption-symbol {:font-size "1.6rem"
+                              :margin-right "2px"}]
+     [:.write-caption-subscript {:font-size "1.1rem"}]]
 
-     [:.writes-browser-divider {:align-self :center
-                                :margin-left "7px"
-                                :border "solid 1px"
-                                :border-radius "4px"
-                                :border-color (:grey-a colours)
-                                :align-items :center
-                                :width "0px"
-                                :height "82px"}]
+    [:.write-shell {:padding "6px"
+                    :margin-left "12px"
+                    :border "dotted 2px"
+                    :border-radius "4px"}]
 
-     [:.time-controls {:align-self :center}
-      [:.time-control {:display :flex
-                           :align-items :center
-                           :justify-content :center
-                           :height "24px"
-                           :width "24px"
-                           :margin "4px"
-                           :border-radius "12px"
-                           :opacity 0.3}
+    [:.write {:padding "3px 5px"
+              :border-radius "3px"
+              :height "100%"}
 
-       [:&.active {:opacity 1}]
+     [:&.writes {:background-color (:light-green colours)
+                 :color (:dark-green colours)}]]
 
-       [:&.control-play {:background-color (:light-green colours)
-                         :color (:dark-green colours)}]
-       [:&.control-next :&.control-previous {:background-color (:light-yellow colours)
-                                             :color (:dark-yellow  colours)}]]]
-
-     [:.write-container {:margin-top "5px"}]
-
-     [:.write-caption {:margin-left "18px"}
-      [:.write-caption-symbol {:font-size "1.6rem"
-                                  :margin-right "2px"}]
-      [:.write-caption-subscript {:font-size "1.1rem"}]]
-
-     [:.write-shell {:padding "6px"
-                        :margin-left "12px"
-                        :border "dotted 2px"
-                        :border-radius "4px"}]
-
-     [:.write {:padding "3px 5px"
-                  :border-radius "3px"
-                  :height "100%"}
-
-      [:&.writes {:background-color (:light-green colours)
-                  :color (:dark-green colours)}]]
-
-     [:.writes {:display :flex
-                :padding-right "15px"}]]]])
+    [:.writes {:display :flex
+               :padding-right "15px"}]]])
 
 
 (def main
   [meyer-reset
    general
-   objects
+   layouts
    components
 
    pages
