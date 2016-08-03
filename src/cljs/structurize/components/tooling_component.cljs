@@ -210,7 +210,7 @@
             {:on-click (u/without-propagation
                         #(side-effect! [:tooling/toggle-tooling-active]))}
             [:div.icon-cog]]
-           [:div.l-col
+           [:div.l-col.l-height--full
             [:div.l-col__item.c-tooling__item
              [writes-browser φ]]
             [:div.l-col__item.l-col__item--grow.c-tooling__item

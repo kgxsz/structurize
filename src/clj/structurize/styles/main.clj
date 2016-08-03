@@ -57,6 +57,9 @@
 (def layouts
   [:#root
 
+   [:.l-height
+    [:&--full {:height (u/percent 100)}]]
+
    [:.l-underlay {:position :relative}]
 
    [:.l-overlay {:width "100%"
@@ -74,8 +77,7 @@
     [:&__content {:pointer-events :auto}]]
 
    [:.l-col {:display :flex
-             :flex-direction :column
-             :height (u/percent 100)}
+             :flex-direction :column}
     [:&__item
      [:&--grow {:flex-grow 1}]]]
 
