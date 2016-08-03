@@ -137,45 +137,46 @@
 
         (when log? (log/debug "render writes-browser"))
 
-        [:div.l-row.c-writes #_.writes-browser
+        [:div.l-row.c-writes-browser
 
-         [:div.l-col.c-writes__control #_.time-controls
+         [:div.l-col.c-writes-browser__controls
 
-          [:div.l-center.c-writes__control__item.c-writes__control__item--green
+          [:div.l-cell.l-cell--center.c-writes-browser__controls__item.c-writes-browser__controls__item--green
            {:class (if real-time?
-                     :c-writes__control__item--opaque
-                     :c-writes__control__item--clickable)
+                     :c-writes-browser__controls__item--opaque
+                     :c-writes-browser__controls__item--clickable)
             :on-click (when-not real-time?
                         (u/without-propagation
                          #(side-effect! [:tooling/stop-time-travelling])))}
            [:div.c-icon.c-icon--control-play]]
 
-          [:div.l-center.c-writes__control__item.c-writes__control__item--yellow
-           {:class (when-not real-time? (u/->class #{:c-writes__control__item--opaque
-                                                     :c-writes__control__item--clickable}))
+          [:div.l-cell.l-cell--center.c-writes-browser__controls__item.c-writes-browser__controls__item--yellow
+           {:class (when-not real-time? (u/->class #{:c-writes-browser__controls__item--opaque
+                                                     :c-writes-browser__controls__item--clickable}))
             :on-click (when-not real-time?
                         (u/without-propagation
                          #(side-effect! [:tooling/go-forward-in-time])))}
            [:div.c-icon.c-icon--control-next]]
 
-          [:div.l-center.c-writes__control__item.c-writes__control__item--yellow
+          [:div.l-cell.l-cell--center.c-writes-browser__controls__item.c-writes-browser__controls__item--yellow
            {:class (u/->class (cond-> #{}
-                                (not real-time?) (conj :c-writes__control__item--opaque)
-                                (not beginning-of-time?) (conj :c-writes__control__item--clickable)))
+                                (not real-time?) (conj :c-writes-browser__controls__item--opaque)
+                                (not beginning-of-time?) (conj :c-writes-browser__controls__item--clickable)))
             :on-click (when (not beginning-of-time?)
                         (u/without-propagation
                          #(side-effect! [:tooling/go-back-in-time])))}
-           [:div.c-icon.c-icon--control-prev]]]
+           [:div.c-icon.c-icon--control-prev]]]{}
 
-         [:div.writes
+         [:div.l-row
           (doall
            (for [{:keys [id n]} (take-last track-index (sort-by :n > writes))]
-             [:div.write-container {:key n}
-              [:div.write-caption
-               [:span.write-caption-symbol "Δ"]
-               [:span.write-caption-subscript n]]
-              [:div.write-shell {:key n}
-               [:div.write.writes
+             [:div.l-col.c-writes-browser__item {:key n}
+              [:div.l-cell.l-cell--bottom-left.c-writes-browser__pill-superscript
+               [:span.c-writes-browser__pill-superscript__symbol "Δ"]
+               [:span n]]
+
+              [:div.c-writes-browser__pill-container
+               [:div.l-cell.l-cell--center.c-writes-browser__pill
                 (pr-str id)]]]))]]))))
 
 
@@ -207,7 +208,7 @@
                         :absolute-width 800
                         :direction :right}
           [:div.l-overlay__content.c-tooling
-           [:div.l-center.c-tooling__handle
+           [:div.l-cell.l-cell--center.c-tooling__handle
             {:on-click (u/without-propagation
                         #(side-effect! [:tooling/toggle-tooling-active]))}
             [:div.c-icon.c-icon--cog]]
