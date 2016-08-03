@@ -10,8 +10,6 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; app-browser components
 
 
-;; 1) when hovering over a greened area, how to get the colour to default back
-
 (defn node [{:keys [config-opts track-app track-tooling side-effect!] :as φ} path _]
   (let [log? (get-in config-opts [:tooling :log?])
         toggle-collapsed #(side-effect! [:tooling/toggle-node-collapsed {:path path}])
@@ -20,7 +18,7 @@
     (when log? (log/debug "mount node:" path))
 
     (fn [_ _ opts]
-      (let [{:keys [tail-braces first? last?]} opts
+      (let [{:keys [tail-braces first? last? downstream-focused?]} opts
             node (track-app l/view-single (l/in path))
             collapsed? (track-tooling l/view-single (l/in [:app-browser-props :collapsed])
                                       #(contains? % path))
@@ -32,6 +30,8 @@
                                     #(contains? % path))
             upstream-focused? (track-tooling l/view-single (l/in [:app-browser-props :focused :upstream-paths])
                                              #(contains? % path))
+            downstream-focused? (or downstream-focused? focused?)
+
             k (last path)
             v node
             collapsed-group-node? (and collapsed?
@@ -41,17 +41,15 @@
             node-value? (not (map? v))
             show-tail-braces? (and last? (or collapsed? empty-group-node? node-value?))
             node-key-class (u/->class
-                            (cond-> #{:clickable}
-                              focused? (conj :c-app-browser__node__key--focused)
-                              upstream-focused? (conj :c-app-browser__node__key--upstream-focused)
-                              written? (conj :c-app-browser__node__key--written)
-                              upstream-written? (conj :c-app-browser__node__key--upstream-written)
-                              first? (conj :c-app-browser__node__key--first)))
+                            (cond-> #{}
+                              downstream-focused? (conj :c-app-browser__node__key--downstream-focused)
+                              first? (conj :c-app-browser__node__key--first)
+                              (or focused? upstream-focused?) (conj :c-app-browser__node__key--focused)
+                              (or written? upstream-written?) (conj :c-app-browser__node__key--written)))
             node-value-class (u/->class (cond-> #{}
-                                          focused? (conj :c-app-browser__node__value--focused)
-                                          written? (conj :c-app-browser__node__value--written)
-                                          upstream-written? (conj :c-app-browser__node__value--upstream-written)))
-            node-group-class (if focused? :c-app-browser__node-group--focused)]
+                                          (or focused? downstream-focused?) (conj :c-app-browser__node__value--focused)
+                                          (or collapsed-group-node? collapsed?) (conj :c-app-browser__node__value--clickable)
+                                          (or written? upstream-written?) (conj :c-app-browser__node__value--written)))]
 
         (when log? (log/debug "render node:" path))
 
@@ -61,29 +59,29 @@
 
 
          [:div.c-app-browser__node__key {:class node-key-class
-                                        :on-mouse-over (u/without-propagation toggle-focused)
-                                        :on-mouse-out (u/without-propagation toggle-focused)
-                                        :on-click (u/without-propagation toggle-collapsed)}
+                                         :on-mouse-over (u/without-propagation toggle-focused)
+                                         :on-mouse-out (u/without-propagation toggle-focused)
+                                         :on-click (u/without-propagation toggle-collapsed)}
 
           (pr-str k)]
 
          (cond
            collapsed-group-node? (list [:div.c-app-browser__brace {:key :opening} "{"]
-                                       [:div.c-app-browser__node__value.clickable {:key k
-                                                                                   :class node-value-class
-                                                                                   :on-mouse-over (u/without-propagation toggle-focused)
-                                                                                   :on-mouse-out (u/without-propagation toggle-focused)
-                                                                                   :on-click (u/without-propagation toggle-focused toggle-collapsed)}
+                                       [:div.c-app-browser__node__value {:key k
+                                                                         :class node-value-class
+                                                                         :on-mouse-over (u/without-propagation toggle-focused)
+                                                                         :on-mouse-out (u/without-propagation toggle-focused)
+                                                                         :on-click (u/without-propagation toggle-focused toggle-collapsed)}
                                         "~"]
                                        [:div.c-app-browser__brace {:key :closing} "}"])
 
            empty-group-node? (list [:div.c-app-browser__brace {:key :opening} "{"]
                                    [:div.c-app-browser__brace {:key :closing} "}"])
 
-           collapsed? [:div.c-app-browser__node__value.clickable {:class node-value-class
-                                                                  :on-mouse-over (u/without-propagation toggle-focused)
-                                                                  :on-mouse-out (u/without-propagation toggle-focused)
-                                                                  :on-click (u/without-propagation toggle-collapsed)}
+           collapsed? [:div.c-app-browser__node__value {:class node-value-class
+                                                        :on-mouse-over (u/without-propagation toggle-focused)
+                                                        :on-mouse-out (u/without-propagation toggle-focused)
+                                                        :on-click (u/without-propagation toggle-collapsed)}
                        "~"]
 
            node-value? [:div.c-app-browser__node__value {:class node-value-class
@@ -91,34 +89,34 @@
                                                          :on-mouse-out (u/without-propagation toggle-focused)}
                         (pr-str v)]
 
-           last? [node-group φ path {:class node-group-class} {:tail-braces (str tail-braces "}")}]
+           last? [node-group φ path {:tail-braces (str tail-braces "}") :downstream-focused? downstream-focused?}]
 
-           :else [node-group φ path {:class node-group-class} {:tail-braces "}"}])
+           :else [node-group φ path {:tail-braces "}" :downstream-focused? downstream-focused?}])
 
-         [:div.c-tree__brace {:class (when-not show-tail-braces? :hidden)}
+         [:div.c-app-browser__brace {:class (when-not show-tail-braces? :hidden)}
           tail-braces]]))))
 
 
-(defn node-group [{:keys [config-opts track-app] :as φ} path _ _]
+(defn node-group [{:keys [config-opts track-app] :as φ} path _]
   (let [log? (get-in config-opts [:tooling :log?])]
 
     (when log? (log/debug "mount node-group:" path))
 
-    (fn [_ _ props opts]
-      (let [{:keys [tail-braces]} opts
+    (fn [_ _ opts]
+      (let [{:keys [tail-braces downstream-focused?]} opts
             nodes (track-app l/view-single (l/in path))
             num-nodes (count nodes)]
 
         (when log? (log/debug "render node-group:" path))
 
-        [:div.c-app-browser__node-group props
+        [:div
          (doall
           (for [[i [k _]] (map-indexed vector nodes)
                 :let [first? (zero? i)
                       last? (= num-nodes (inc i))
                       path (conj path k)]]
             [:div {:key (pr-str k)}
-             [node φ path {:tail-braces tail-braces :first? first? :last? last?}]]))]))))
+             [node φ path {:tail-braces tail-braces :first? first? :last? last? :downstream-focused? downstream-focused?}]]))]))))
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; top-level components
@@ -190,7 +188,7 @@
     (fn []
       (when log? (log/debug "render app-browser"))
       [:div.c-app-browser
-       [node-group φ [] {} {:tail-braces "}"}]])))
+       [node-group φ [] {:tail-braces "}"}]])))
 
 
 

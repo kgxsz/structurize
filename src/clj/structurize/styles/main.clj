@@ -190,7 +190,6 @@
 
    [:.c-app-browser {:font-family "'Fira Mono', monospace"
                      :font-size "1.2rem"
-                     :white-space :nowrap
                      :line-height "1.7rem"}
 
     [:&__brace {:padding-top "2px"}]
@@ -200,32 +199,27 @@
      [:&__value :&__key {:height "100%"
                          :margin-bottom "2px"
                          :padding "2px 3px 1px 3px"
-                         :border-radius "4px"
-                         :background-color (:grey-c colours)}]
+                         :border-radius "3px"
+                         :background-color (:grey-c colours)
+                         :white-space :nowrap}]
 
      [:&__key {:display :flex
                :align-items :center
                :margin-left "7px"
-               :margin-right "2px"}
-      [:span {:pointer-events :none}]
+               :margin-right "2px"
+               :cursor :pointer}
       [:&--first {:margin-left 0}]
-      [:&--written :&--upstream-written {:color (:light-green colours)}]
-      [:&--focused :&--upstream-focused {:background-color (:dark-blue colours)
-                                         :color (:light-blue colours)}]]
+      [:&--written {:color (:light-green colours)}]
+      [:&--downstream-focused {:background-color (:light-blue colours)
+                               :color (:dark-blue colours)}]
+      [:&--focused {:background-color (:dark-blue colours)
+                    :color (:light-blue colours)}]]
 
      [:&__value
-      [:&--written :&--upstream-written {:color (:light-green colours)}]
+      [:&--clickable {:cursor :pointer}]
+      [:&--written {:color (:light-green colours)}]
       [:&--focused {:background-color (:light-blue colours)
-                   :color (:dark-blue colours)}]]]
-
-    [:&__node-group
-     ;; TODO this is a bit of a violation of BEM concerns
-     [:&--focused
-      [:c-app-browser__node__key :c-app-browser__node__value {:background-color (:light-blue colours)
-                                                              :color (:dark-blue colours)}]]]
-
-    ]
-   ])
+                   :color (:dark-blue colours)}]]]]])
 
 (def general
   [:html {:font-size (u/px 10)}
