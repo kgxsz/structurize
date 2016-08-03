@@ -137,29 +137,35 @@
 
         (when log? (log/debug "render writes-browser"))
 
-        [:div.writes-browser
-         [:div.time-controls
-          [:div.time-control.control-play {:class (if real-time? :active :clickable)
-                                           :on-click (when-not real-time?
-                                                       (u/without-propagation
-                                                        #(side-effect! [:tooling/stop-time-travelling])))}
-           [:span.icon.icon-control-play]]
+        [:div.l-row.c-writes #_.writes-browser
 
-          [:div.time-control.control-next {:class (when-not real-time? (u/->class #{:active :clickable}))
-                                           :on-click (when-not real-time?
-                                                       (u/without-propagation
-                                                        #(side-effect! [:tooling/go-forward-in-time])))}
-           [:span.icon.icon-control-next]]
+         [:div.l-col.c-writes__control #_.time-controls
 
-          [:div.time-control.control-previous {:class (u/->class (cond-> #{}
-                                                                   (not real-time?) (conj :active)
-                                                                   (not beginning-of-time?) (conj :clickable)))
-                                               :on-click (when (not beginning-of-time?)
-                                                           (u/without-propagation
-                                                            #(side-effect! [:tooling/go-back-in-time])))}
-           [:span.icon.icon-control-prev]]]
+          [:div.c-writes__control__item.c-writes__control__item--green
+           {:class (if real-time?
+                     :c-writes__control__item--opaque
+                     :c-writes__control__item--clickable)
+            :on-click (when-not real-time?
+                        (u/without-propagation
+                         #(side-effect! [:tooling/stop-time-travelling])))}
+           [:span.c-icon.c-icon--control-play]]
 
-         [:div.writes-browser-divider]
+          [:div.c-writes__control__item.c-writes__control__item--yellow
+           {:class (when-not real-time? (u/->class #{:c-writes__control__item--opaque
+                                                     :c-writes__control__item--clickable}))
+            :on-click (when-not real-time?
+                        (u/without-propagation
+                         #(side-effect! [:tooling/go-forward-in-time])))}
+           [:span.c-icon.c-icon--control-next]]
+
+          [:div.c-writes__control__item.c-writes__control__item--yellow
+           {:class (u/->class (cond-> #{}
+                                (not real-time?) (conj :c-writes__control__item--opaque)
+                                (not beginning-of-time?) (conj :c-writes__control__item--clickable)))
+            :on-click (when (not beginning-of-time?)
+                        (u/without-propagation
+                         #(side-effect! [:tooling/go-back-in-time])))}
+           [:span.c-icon.c-icon--control-prev]]]
 
          [:div.writes
           (doall
@@ -204,7 +210,7 @@
            [:div.c-tooling__handle
             {:on-click (u/without-propagation
                         #(side-effect! [:tooling/toggle-tooling-active]))}
-            [:div.icon-cog]]
+            [:div.c-icon.c-icon--cog]]
            [:div.l-col.l-height.l-height--full
             [:div.l-col__item.c-tooling__item
              [writes-browser φ]]

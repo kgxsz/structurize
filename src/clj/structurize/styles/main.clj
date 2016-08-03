@@ -81,6 +81,11 @@
     [:&__item
      [:&--grow {:flex-grow 1}]]]
 
+   [:.l-row {:display :flex
+             :flex-direction :row}
+    [:&__item
+     [:&--grow {:flex-grow 1}]]]
+
    [:.l-slide-over {:height "100%"
                     :background-color (c/rgba [0 0 0 0])
                     :position :absolute
@@ -90,6 +95,8 @@
 
 (def components
   [:#root
+
+   [:.c-icon]
 
    [:.c-tooling {:box-sizing :border-box
                  :width (u/percent 100)
@@ -102,13 +109,13 @@
                  :align-items :center
                  :cursor :pointer
                  :background-color (c/rgba [0 10 20 0.7])
-                 :width "30px"
-                 :height "30px"
+                 :width "26px"
+                 :height "26px"
                  :border-top-left-radius "5px"
                  :border-bottom-left-radius "5px"
                  :position :absolute
                  :top (-> v :spacing u/px)
-                 :left "-30px"}]
+                 :left "-26px"}]
 
 
     [:&__item {:box-sizing :border-box
@@ -121,7 +128,48 @@
 
      ["&::-webkit-scrollbar" {:display :none}]
 
-     [:&:last-child {:margin-bottom 0}]]]]
+     [:&:last-child {:margin-bottom 0}]]]
+
+   [:.c-writes {:font-family "'Fira Mono', monospace"
+                :line-height "1.7rem"
+                :font-size "1.2rem"
+                :color (:white-b colours)
+                :white-space :nowrap}
+
+    [:&__control {:background-color (c/rgba [80 90 100 0.3])
+                  :border-radius "5px"
+                  :padding (-> v :spacing u/px)}
+
+     [:&__item {:display :flex
+                :justify-content :center
+                :align-items :center
+                :width (u/px 26)
+                :height (u/px 26)
+                :margin-bottom (u/px 5)
+                :background-color "pink"
+                :border-radius "13px"
+                :opacity 0.3}
+
+      [:&:last-child {:margin-bottom 0}]
+
+      [:&--green {:background-color (:light-green colours)
+                  :color (:dark-green colours)}]
+
+      [:&--yellow {:background-color (:light-yellow colours)
+                   :color (:dark-yellow colours)}]
+
+      [:&--opaque {:opacity 1}]
+
+      [:&--clickable {:cursor :pointer}]
+
+      ]
+     
+     ]
+
+    ]
+
+   ]
+
 
   )
 
@@ -246,61 +294,36 @@
        [:.node-key :.node-value {:background-color (:light-blue colours)
                                  :color (:dark-blue colours)}]]]]]
 
-   [:.writes-browser {:display :flex
-                      :height "90px"
-                      :font-family "'Fira Mono', monospace"
-                      :font-size "1.2rem"
-                      :color (:white-b colours)
-                      :white-space :nowrap
-                      :line-height "1.7rem"}
+   [:.writes-browser-divider {:align-self :center
+                              :margin-left "7px"
+                              :border "solid 1px"
+                              :border-radius "4px"
+                              :border-color (:grey-a colours)
+                              :align-items :center
+                              :width "0px"
+                              :height "82px"}]
 
-    [:.writes-browser-divider {:align-self :center
-                               :margin-left "7px"
-                               :border "solid 1px"
-                               :border-radius "4px"
-                               :border-color (:grey-a colours)
-                               :align-items :center
-                               :width "0px"
-                               :height "82px"}]
+   [:.write-container {:margin-top "5px"}]
 
-    [:.time-controls {:align-self :center}
-     [:.time-control {:display :flex
-                      :align-items :center
-                      :justify-content :center
-                      :height "24px"
-                      :width "24px"
-                      :margin "4px"
-                      :border-radius "12px"
-                      :opacity 0.3}
+   [:.write-caption {:margin-left "18px"}
+    [:.write-caption-symbol {:font-size "1.6rem"
+                             :margin-right "2px"}]
+    [:.write-caption-subscript {:font-size "1.1rem"}]]
 
-      [:&.active {:opacity 1}]
+   [:.write-shell {:padding "6px"
+                   :margin-left "12px"
+                   :border "dotted 2px"
+                   :border-radius "4px"}]
 
-      [:&.control-play {:background-color (:light-green colours)
-                        :color (:dark-green colours)}]
-      [:&.control-next :&.control-previous {:background-color (:light-yellow colours)
-                                            :color (:dark-yellow  colours)}]]]
+   [:.write {:padding "3px 5px"
+             :border-radius "3px"
+             :height "100%"}
 
-    [:.write-container {:margin-top "5px"}]
+    [:&.writes {:background-color (:light-green colours)
+                :color (:dark-green colours)}]]
 
-    [:.write-caption {:margin-left "18px"}
-     [:.write-caption-symbol {:font-size "1.6rem"
-                              :margin-right "2px"}]
-     [:.write-caption-subscript {:font-size "1.1rem"}]]
-
-    [:.write-shell {:padding "6px"
-                    :margin-left "12px"
-                    :border "dotted 2px"
-                    :border-radius "4px"}]
-
-    [:.write {:padding "3px 5px"
-              :border-radius "3px"
-              :height "100%"}
-
-     [:&.writes {:background-color (:light-green colours)
-                 :color (:dark-green colours)}]]
-
-    [:.writes {:display :flex
-               :padding-right "15px"}]]])
+   [:.writes {:display :flex
+              :padding-right "15px"}]])
 
 
 (def main
