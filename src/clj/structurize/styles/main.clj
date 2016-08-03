@@ -57,8 +57,8 @@
 (def layouts
   [:#root
 
-   [:.l-height
-    [:&--full {:height (u/percent 100)}]]
+   [:.l-box
+    [:&--height-100 {:height (u/percent 100)}]]
 
    [:.l-underlay {:position :relative}]
 
@@ -136,9 +136,7 @@
 
    [:.c-writes-browser {:font-family "'Fira Mono', monospace"
                         :line-height "1.7rem"
-                        :font-size "1.2rem"
-                        :color (:white-b colours)
-                        :white-space :nowrap}
+                        :font-size "1.2rem"}
 
     [:&__controls {:background-color (c/rgba [80 90 100 0.3])
                    :border-radius "5px"
@@ -150,14 +148,18 @@
                 :margin-bottom (u/px 5)
                 :border-radius "13px"
                 :opacity 0.3}
+
       [:&:last-child {:margin-bottom 0}]
+
       [:&--green {:background-color (:light-green colours)
                   :color (:dark-green colours)}]
+
       [:&--yellow {:background-color (:light-yellow colours)
                    :color (:dark-yellow colours)}]
-      [:&--opaque {:opacity 1}]
-      [:&--clickable {:cursor :pointer}]]]
 
+      [:&--opaque {:opacity 1}]
+
+      [:&--clickable {:cursor :pointer}]]]
 
     [:&__item {:padding (-> v :spacing u/px)
                :padding-right 0}
@@ -182,7 +184,48 @@
                :padding-right (u/px 5)
                :border-radius "3px"
                :background-color (:light-green colours)
-               :color (:dark-green colours)}]]])
+               :white-space :nowrap
+               :color (:dark-green colours)}]]
+
+
+   [:.c-app-browser {:font-family "'Fira Mono', monospace"
+                     :font-size "1.2rem"
+                     :white-space :nowrap
+                     :line-height "1.7rem"}
+
+    [:&__brace {:padding-top "2px"}]
+
+    [:&__node {:display :flex}
+
+     [:&__value :&__key {:height "100%"
+                         :margin-bottom "2px"
+                         :padding "2px 3px 1px 3px"
+                         :border-radius "4px"
+                         :background-color (:grey-c colours)}]
+
+     [:&__key {:display :flex
+               :align-items :center
+               :margin-left "7px"
+               :margin-right "2px"}
+      [:span {:pointer-events :none}]
+      [:&--first {:margin-left 0}]
+      [:&--written :&--upstream-written {:color (:light-green colours)}]
+      [:&--focused :&--upstream-focused {:background-color (:dark-blue colours)
+                                         :color (:light-blue colours)}]]
+
+     [:&__value
+      [:&--written :&--upstream-written {:color (:light-green colours)}]
+      [:&--focused {:background-color (:light-blue colours)
+                   :color (:dark-blue colours)}]]]
+
+    [:&__node-group
+     ;; TODO this is a bit of a violation of BEM concerns
+     [:&--focused
+      [:c-app-browser__node__key :c-app-browser__node__value {:background-color (:light-blue colours)
+                                                              :color (:dark-blue colours)}]]]
+
+    ]
+   ])
 
 (def general
   [:html {:font-size (u/px 10)}
@@ -265,70 +308,39 @@
                     :margin-right "7px"}]]
 
 
-   [:.app-browser {:flex-grow 1
-                   :height 0
-                   :font-family "'Fira Mono', monospace"
-                   :font-size "1.2rem"
-                   :color (:white-b colours)
-                   :white-space :nowrap
-                   :line-height "1.7rem"}
+   [:.node {:display :flex}
 
-    [:.node {:display :flex}
+    [:.node-brace {:padding-top "2px"}]
 
-     [:.node-brace {:padding-top "2px"}]
+    [:.node-value :.node-key {:height "100%"
+                              :margin-bottom "2px"
+                              :padding "2px 3px 1px 3px"
+                              :border-radius "4px"
+                              :background-color (:grey-c colours)}]
 
-     [:.node-value :.node-key {:height "100%"
-                               :margin-bottom "2px"
-                               :padding "2px 3px 1px 3px"
-                               :border-radius "4px"
-                               :background-color (:grey-c colours)}]
+    [:.node-key {:display :flex
+                 :align-items :center
+                 :margin-left "7px"
+                 :margin-right "2px"}
+     [:span {:pointer-events :none}]
+     [:&.first {:margin-left 0}]
+     [:&.written :&.upstream-written {:color (:light-green colours)}]
+     [:&.focused :&.upstream-focused {:background-color (:dark-blue colours)
+                                      :color (:light-blue colours)}]]
 
-     [:.node-key {:display :flex
-                  :align-items :center
-                  :margin-left "7px"
-                  :margin-right "2px"}
-      [:span {:pointer-events :none}]
-      [:&.first {:margin-left 0}]
-      [:&.written :&.upstream-written {:color (:light-green colours)}]
-      [:&.focused :&.upstream-focused {:background-color (:dark-blue colours)
-                                       :color (:light-blue colours)}]]
+    [:.node-value
+     [:&.written :&.upstream-written {:color (:light-green colours)}]
+     [:&.focused {:background-color (:light-blue colours)
+                  :color (:dark-blue colours)}]]
 
-     [:.node-value
-      [:&.written :&.upstream-written {:color (:light-green colours)}]
-      [:&.focused {:background-color (:light-blue colours)
-                   :color (:dark-blue colours)}]]
+    [:.node-group
+     [:&.written
+      [:.node-key :.node-value {:color (:light-green colours)}]]
+     [:&.focused
+      [:.node-key :.node-value {:background-color (:light-blue colours)
+                                :color (:dark-blue colours)}]]]]
 
-     [:.node-group
-      [:&.written
-       [:.node-key :.node-value {:color (:light-green colours)}]]
-      [:&.focused
-       [:.node-key :.node-value {:background-color (:light-blue colours)
-                                 :color (:dark-blue colours)}]]]]]
-
-
-
-
-   [:.write-container {:margin-top "5px"}]
-
-   [:.write-caption {:margin-left "18px"}
-    [:.write-caption-symbol {:font-size "1.6rem"
-                             :margin-right "2px"}]
-    [:.write-caption-subscript {:font-size "1.1rem"}]]
-
-   [:.write-shell {:padding "6px"
-                   :margin-left "12px"
-                   :border "dotted 2px"
-                   :border-radius "4px"}]
-
-   [:.write {:padding "3px 5px"
-             :border-radius "3px"
-             :height "100%"}
-
-    [:&.writes {:background-color (:light-green colours)
-                :color (:dark-green colours)}]]
-
-   [:.writes {:display :flex
-              :padding-right "15px"}]])
+   ])
 
 
 (def main

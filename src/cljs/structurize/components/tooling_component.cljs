@@ -10,6 +10,8 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; app-browser components
 
 
+;; 1) when hovering over a greened area, how to get the colour to default back
+
 (defn node [{:keys [config-opts track-app track-tooling side-effect!] :as φ} path _]
   (let [log? (get-in config-opts [:tooling :log?])
         toggle-collapsed #(side-effect! [:tooling/toggle-node-collapsed {:path path}])
@@ -40,61 +42,60 @@
             show-tail-braces? (and last? (or collapsed? empty-group-node? node-value?))
             node-key-class (u/->class
                             (cond-> #{:clickable}
-                              focused? (conj :focused)
-                              upstream-focused? (conj :upstream-focused)
-                              written? (conj :written)
-                              upstream-written? (conj :upstream-written)
-                              first? (conj :first)))
+                              focused? (conj :c-app-browser__node__key--focused)
+                              upstream-focused? (conj :c-app-browser__node__key--upstream-focused)
+                              written? (conj :c-app-browser__node__key--written)
+                              upstream-written? (conj :c-app-browser__node__key--upstream-written)
+                              first? (conj :c-app-browser__node__key--first)))
             node-value-class (u/->class (cond-> #{}
-                                          focused? (conj :focused)
-                                          written? (conj :written)
-                                          upstream-written? (conj :upstream-written)))
-            node-group-class (if focused? :focused)]
+                                          focused? (conj :c-app-browser__node__value--focused)
+                                          written? (conj :c-app-browser__node__value--written)
+                                          upstream-written? (conj :c-app-browser__node__value--upstream-written)))
+            node-group-class (if focused? :c-app-browser__node-group--focused)]
 
         (when log? (log/debug "render node:" path))
 
-        [:div.node
-         [:div.node-brace {:class (when-not first? :hidden)}
+        [:div.c-app-browser__node
+         [:div.c-app-browser__brace {:class (when-not first? :hidden)}
           "{"]
 
 
-         [:div.node-key {:class node-key-class
-                         :on-mouse-over (u/without-propagation toggle-focused)
-                         :on-mouse-out (u/without-propagation toggle-focused)
-                         :on-click (u/without-propagation toggle-collapsed)}
+         [:div.c-app-browser__node__key {:class node-key-class
+                                        :on-mouse-over (u/without-propagation toggle-focused)
+                                        :on-mouse-out (u/without-propagation toggle-focused)
+                                        :on-click (u/without-propagation toggle-collapsed)}
 
           (pr-str k)]
 
          (cond
-
-           collapsed-group-node? (list [:div.node-brace {:key :opening} "{"]
-                                       [:div.node-value.clickable {:key k
-                                                                   :class node-value-class
-                                                                   :on-mouse-over (u/without-propagation toggle-focused)
-                                                                   :on-mouse-out (u/without-propagation toggle-focused)
-                                                                   :on-click (u/without-propagation toggle-focused toggle-collapsed)}
+           collapsed-group-node? (list [:div.c-app-browser__brace {:key :opening} "{"]
+                                       [:div.c-app-browser__node__value.clickable {:key k
+                                                                                   :class node-value-class
+                                                                                   :on-mouse-over (u/without-propagation toggle-focused)
+                                                                                   :on-mouse-out (u/without-propagation toggle-focused)
+                                                                                   :on-click (u/without-propagation toggle-focused toggle-collapsed)}
                                         "~"]
-                                       [:div.node-brace {:key :closing} "}"])
+                                       [:div.c-app-browser__brace {:key :closing} "}"])
 
-           empty-group-node? (list [:div.node-brace {:key :opening} "{"]
-                                   [:div.node-brace {:key :closing} "}"])
+           empty-group-node? (list [:div.c-app-browser__brace {:key :opening} "{"]
+                                   [:div.c-app-browser__brace {:key :closing} "}"])
 
-           collapsed? [:div.node-value.clickable {:class node-value-class
-                                                  :on-mouse-over (u/without-propagation toggle-focused)
-                                                  :on-mouse-out (u/without-propagation toggle-focused)
-                                                  :on-click (u/without-propagation toggle-collapsed)}
+           collapsed? [:div.c-app-browser__node__value.clickable {:class node-value-class
+                                                                  :on-mouse-over (u/without-propagation toggle-focused)
+                                                                  :on-mouse-out (u/without-propagation toggle-focused)
+                                                                  :on-click (u/without-propagation toggle-collapsed)}
                        "~"]
 
-           node-value? [:div.node-value {:class node-value-class
-                                         :on-mouse-over (u/without-propagation toggle-focused)
-                                         :on-mouse-out (u/without-propagation toggle-focused)}
+           node-value? [:div.c-app-browser__node__value {:class node-value-class
+                                                         :on-mouse-over (u/without-propagation toggle-focused)
+                                                         :on-mouse-out (u/without-propagation toggle-focused)}
                         (pr-str v)]
 
            last? [node-group φ path {:class node-group-class} {:tail-braces (str tail-braces "}")}]
 
            :else [node-group φ path {:class node-group-class} {:tail-braces "}"}])
 
-         [:div.node-brace {:class (when-not show-tail-braces? :hidden)}
+         [:div.c-tree__brace {:class (when-not show-tail-braces? :hidden)}
           tail-braces]]))))
 
 
@@ -110,7 +111,7 @@
 
         (when log? (log/debug "render node-group:" path))
 
-        [:div.node-group props
+        [:div.c-app-browser__node-group props
          (doall
           (for [[i [k _]] (map-indexed vector nodes)
                 :let [first? (zero? i)
@@ -188,7 +189,7 @@
 
     (fn []
       (when log? (log/debug "render app-browser"))
-      [:div.browser.app-browser
+      [:div.c-app-browser
        [node-group φ [] {} {:tail-braces "}"}]])))
 
 
@@ -212,7 +213,7 @@
             {:on-click (u/without-propagation
                         #(side-effect! [:tooling/toggle-tooling-active]))}
             [:div.c-icon.c-icon--cog]]
-           [:div.l-col.l-height.l-height--full
+           [:div.l-col.l-box.l-box--height-100
             [:div.l-col__item.c-tooling__item
              [writes-browser φ]]
             [:div.l-col__item.l-col__item--grow.c-tooling__item
