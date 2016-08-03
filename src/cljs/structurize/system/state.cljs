@@ -8,6 +8,9 @@
             [taoensso.timbre :as log]))
 
 
+;; helpers ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+
 (defn map->paths
   "This function takes a map and returns a list of every possible path in the map.
    For example {:a 1 :b {:c 2 :d 3}} would give ((:a) (:b :c) (:b :d))."
@@ -63,9 +66,6 @@
       (swap! !state update :tooling f))))
 
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; db setup
-
-
 (defn make-!state [config-opts]
   (r/atom {:app-history {0 {:playground {:heart 0
                                          :star 3
@@ -91,7 +91,7 @@
                                                    :upstream-paths #{}}}}}))
 
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; component setup
+;; component setup ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 
 (defrecord State [config-opts]
