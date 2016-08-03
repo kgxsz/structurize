@@ -86,6 +86,10 @@
     [:&__item
      [:&--grow {:flex-grow 1}]]]
 
+   [:.l-center {:display :flex
+                :justify-content :center
+                :align-items :center}]
+
    [:.l-slide-over {:height "100%"
                     :background-color (c/rgba [0 0 0 0])
                     :position :absolute
@@ -104,10 +108,7 @@
                  :padding (-> v :spacing u/px)
                  :background-color (c/rgba [0 10 20 0.7])}
 
-    [:&__handle {:display :flex
-                 :justify-content :center
-                 :align-items :center
-                 :cursor :pointer
+    [:&__handle {:cursor :pointer
                  :background-color (c/rgba [0 10 20 0.7])
                  :width "26px"
                  :height "26px"
@@ -140,10 +141,7 @@
                   :border-radius "5px"
                   :padding (-> v :spacing u/px)}
 
-     [:&__item {:display :flex
-                :justify-content :center
-                :align-items :center
-                :width (u/px 26)
+     [:&__item {:width (u/px 26)
                 :height (u/px 26)
                 :margin-bottom (u/px 5)
                 :background-color "pink"

@@ -141,31 +141,31 @@
 
          [:div.l-col.c-writes__control #_.time-controls
 
-          [:div.c-writes__control__item.c-writes__control__item--green
+          [:div.l-center.c-writes__control__item.c-writes__control__item--green
            {:class (if real-time?
                      :c-writes__control__item--opaque
                      :c-writes__control__item--clickable)
             :on-click (when-not real-time?
                         (u/without-propagation
                          #(side-effect! [:tooling/stop-time-travelling])))}
-           [:span.c-icon.c-icon--control-play]]
+           [:div.c-icon.c-icon--control-play]]
 
-          [:div.c-writes__control__item.c-writes__control__item--yellow
+          [:div.l-center.c-writes__control__item.c-writes__control__item--yellow
            {:class (when-not real-time? (u/->class #{:c-writes__control__item--opaque
                                                      :c-writes__control__item--clickable}))
             :on-click (when-not real-time?
                         (u/without-propagation
                          #(side-effect! [:tooling/go-forward-in-time])))}
-           [:span.c-icon.c-icon--control-next]]
+           [:div.c-icon.c-icon--control-next]]
 
-          [:div.c-writes__control__item.c-writes__control__item--yellow
+          [:div.l-center.c-writes__control__item.c-writes__control__item--yellow
            {:class (u/->class (cond-> #{}
                                 (not real-time?) (conj :c-writes__control__item--opaque)
                                 (not beginning-of-time?) (conj :c-writes__control__item--clickable)))
             :on-click (when (not beginning-of-time?)
                         (u/without-propagation
                          #(side-effect! [:tooling/go-back-in-time])))}
-           [:span.c-icon.c-icon--control-prev]]]
+           [:div.c-icon.c-icon--control-prev]]]
 
          [:div.writes
           (doall
@@ -207,7 +207,7 @@
                         :absolute-width 800
                         :direction :right}
           [:div.l-overlay__content.c-tooling
-           [:div.c-tooling__handle
+           [:div.l-center.c-tooling__handle
             {:on-click (u/without-propagation
                         #(side-effect! [:tooling/toggle-tooling-active]))}
             [:div.c-icon.c-icon--cog]]
