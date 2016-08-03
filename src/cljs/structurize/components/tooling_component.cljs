@@ -1,5 +1,6 @@
 (ns structurize.components.tooling-component
   (:require [structurize.components.component-utils :as u]
+            [structurize.components.general :as g]
             [reagent.core :as r]
             [traversy.lens :as l]
             [taoensso.timbre :as log]))
@@ -184,12 +185,7 @@
       [:div.browser.app-browser
        [node-group φ [] {} {:tail-braces "}"}]])))
 
-(defn slide-over [φ {:keys [open? absolute-width direction]} content]
-  ;; TODO - flesh this guy out to every option needed to be a useful component
-  (log/debug "render slide-over")
-  [:div.l-slide-over {:style {:width (str absolute-width "px")
-                              direction (if open? 0 (str (- absolute-width) "px"))}}
-   content])
+
 
 (defn tooling [{:keys [config-opts track-tooling side-effect!] :as φ}]
   (let [log? (get-in config-opts [:tooling :log?])]
@@ -202,7 +198,7 @@
         (when log? (log/debug "render tooling"))
 
         [:div.l-overlay.l-overlay--viewport-fixed
-         [slide-over φ {:open? tooling-active?
+         [g/slide-over φ {:open? tooling-active?
                         :absolute-width 800
                         :direction :right}
           [:div.l-overlay__content.c-tooling
@@ -210,7 +206,7 @@
             {:on-click (u/without-propagation
                         #(side-effect! [:tooling/toggle-tooling-active]))}
             [:div.icon-cog]]
-           [:div.l-col.l-height--full
+           [:div.l-col.l-height.l-height--full
             [:div.l-col__item.c-tooling__item
              [writes-browser φ]]
             [:div.l-col__item.l-col__item--grow.c-tooling__item
