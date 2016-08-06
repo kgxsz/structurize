@@ -54,7 +54,8 @@
 
 (def v
   {:spacing 10
-   :filling 30})
+   :filling 30
+   :transition-duration 200})
 
 
 (def layouts
@@ -69,8 +70,8 @@
                  :background-color (:tranparent colours)
                  :top 0
                  :left 0}
-    [:&--viewport-fixed {:width "100vw"
-                         :height "100vh"
+    [:&--viewport-fixed {:width (u/vw 100)
+                         :height (u/vh 100)
                          :position :fixed}]
     [:&__content {:pointer-events :auto}]]
 
@@ -96,10 +97,11 @@
      [:&-end {:align-items :flex-end}]]]
 
    [:.l-slide-over {:height (u/percent 100)
-                    :background-color (c/rgba [0 0 0 0])
+                    :background-color (:transparent colours)
                     :position :absolute
                     :top 0
-                    :transition "right 0.2s"}]])
+                    :transition-property :right
+                    :transition-duration (-> v :transition-duration u/ms)}]])
 
 
 (def components
