@@ -3,14 +3,18 @@
             [garden.units :as u]))
 
 
+(defn alpha [hex alpha]
+  (assoc (c/hex->rgb hex) :alpha alpha))
+
+
 (def colours
   {:tranparent (c/rgba [0 0 0 0])
-   :tinted-black-a "#000204"
-   :tinted-black-b "#101214"
+   :black-a "#000000"
+   :black-b "#000A14"
    :white-a "#FFFFFF"
    :white-b "#F6F9FC"
    :white-c "#DDDDDD"
-   :grey-a "#272B30"
+   :grey-a "#505A64"
    :grey-b "#343337"
    :grey-c "#474C51"
    :light-green "#D3EDA3"
@@ -33,6 +37,46 @@
    :dark-blue "#5992AA"})
 
 
+(def v
+  {:font-size-xx-small 8
+   :font-size-x-small 10
+   :font-size-small 12
+   :font-size-medium 14
+   :font-size-large 16
+   :font-size-x-large 18
+   :font-size-xx-large 20
+
+   :spacing-xx-small 3
+   :spacing-x-small 5
+   :spacing-small 7
+   :spacing-medium 10
+   :spacing-large 15
+   :spacing-x-large 20
+
+   :nudge-small 1
+   :nudge-medium 2
+   :nudge-large 3
+
+   :filling-small 22
+   :filling-medium 26
+   :filling-large 32
+
+   :border-width-small 1
+   :border-width-medium 2
+   :border-width-large 3
+
+   :border-radius-x-small 2
+   :border-radius-small 3
+   :border-radius-medium 4
+   :border-radius-large 5
+   :border-radius-x-large 6
+
+   :transition-duration 200
+   :alpha-low 0.3
+   :alpha-medium 0.5
+   :alpha-high 0.7})
+
+
 (def meyer-reset
   [[:html :body :div :span :applet :object :iframe :h1 :h2 :h3 :h4 :h5 :h6 :p
     :blockquote :pre :a :abbr :acronym :address :big :cite :code :del :dfn :em
@@ -52,15 +96,8 @@
    [:table {:border-collapse :collapse :border-spacing 0}]])
 
 
-(def v
-  {:spacing 10
-   :filling 30
-   :transition-duration 200})
-
-
 (def layouts
   [:#root
-
    [:.l-underlay {:position :relative}]
 
    [:.l-overlay {:width (u/percent 100)
@@ -103,34 +140,33 @@
                     :transition-property :right
                     :transition-duration (-> v :transition-duration u/ms)}]])
 
-
 (def components
   [:#root
 
    [:.c-tooling {:width (u/percent 100)
                  :height (u/percent 100)
-                 :padding (-> v :spacing u/px)
-                 :background-color (c/rgba [0 10 20 0.7])}
+                 :padding (-> v :spacing-medium u/px)
+                 :background-color (alpha (:black-b colours) (:alpha-high v))}
 
     [:&__handle {:display :flex
                  :justify-content :center
                  :align-items :center
                  :cursor :pointer
-                 :background-color (c/rgba [0 10 20 0.7])
-                 :width "26px"
-                 :height "26px"
-                 :border-top-left-radius "5px"
-                 :border-bottom-left-radius "5px"
+                 :background-color (alpha (:black-b colours) (:alpha-high v))
+                 :width (-> v :filling-medium u/px)
+                 :height (-> v :filling-medium u/px)
+                 :border-top-left-radius (-> v :border-radius-medium u/px)
+                 :border-bottom-left-radius (-> v :border-radius-medium u/px)
                  :position :absolute
-                 :top (-> v :spacing u/px)
-                 :left "-26px"}]
+                 :top (-> v :spacing-medium u/px)
+                 :left (-> v :filling-medium - u/px)}]
 
 
     [:&__item {:width (u/percent 100)
-               :padding (-> v :spacing u/px)
-               :background-color (c/rgba [80 90 100 0.3])
-               :border-radius "5px"
-               :margin-bottom (-> v :spacing u/px)
+               :padding (-> v :spacing-medium u/px)
+               :background-color (alpha (:grey-a colours) (:alpha-low v))
+               :border-radius (-> v :border-radius-medium u/px)
+               :margin-bottom (-> v :spacing-medium u/px)
                :overflow :auto}
 
      ["&::-webkit-scrollbar" {:display :none}]
@@ -138,22 +174,21 @@
      [:&:last-child {:margin-bottom 0}]]]
 
 
-   [:.c-writes-browser {}
+   [:.c-writes-browser {:font-family "'Fira Mono', monospace"}
 
-    [:&__controls {:background-color (c/rgba [80 90 100 0.3])
-                   :border-radius "5px"
-                   :padding (-> v :spacing u/px)}
-
+    [:&__controls {:background-color (alpha (:grey-a colours) (:alpha-low v))
+                   :border-radius (-> v :border-radius-medium u/px)
+                   :padding (-> v :spacing-medium u/px)}
 
      [:&__item {:display :flex
                 :justify-content :center
                 :align-items :center
-                :width (u/px 26)
-                :height (u/px 26)
-                :margin-bottom (u/px 5)
-                :border-radius "13px"
-                :font-size "1.2rem"
-                :opacity 0.3}
+                :width (-> v :filling-medium u/px)
+                :height (-> v :filling-medium u/px)
+                :margin-bottom (-> v :spacing-x-small u/px)
+                :border-radius (-> v :filling-medium (/ 2) u/px)
+                :font-size (-> v :font-size-small u/px)
+                :opacity (:alpha-low v)}
 
       [:&:last-child {:margin-bottom 0}]
 
@@ -167,33 +202,32 @@
 
       [:&--clickable {:cursor :pointer}]]]
 
-    [:&__item {:padding (-> v :spacing u/px)
+    [:&__item {:padding (-> v :spacing-medium u/px)
                :padding-right 0}
 
-     [:&:last-child {:margin-right "20px"}]]
+     [:&:last-child {:margin-right (-> v :spacing-x-large u/px)}]]
 
     [:&__pill-superscript {:display :flex
                            :align-items :flex-end
-                           :height (u/px 26)
-                           :padding-left (u/px (+ 5 2))
-                           :font-family "'Fira Mono', monospace"
-                           :font-size "1.3rem"}
-     [:&__symbol {:margin-right "2px"}]]
+                           :height (-> v :filling-medium u/px)
+                           :padding-left (-> v :spacing-small u/px)
+                           :padding-bottom (-> v :spacing-xx-small u/px)
+                           :font-size (-> v :font-size-small u/px)}
+     [:&__symbol {:margin-right (-> v :spacing-xx-small u/px)}]]
 
-    [:&__pill {:padding (u/px 5)
+    [:&__pill {:padding (-> v :spacing-x-small u/px)
                :border-style :dotted
-               :border-width (u/px 2)
-               :border-radius "5px"}
+               :border-width (-> v :border-width-medium u/px)
+               :border-radius (-> v :border-radius-large u/px)}
 
      [:&__content {:display :flex
                    :align-items :center
-                   :height (u/px 22)
-                   :padding-left (u/px 5)
-                   :padding-right (u/px 5)
-                   :border-radius "3px"
+                   :height (-> v :filling-small u/px)
+                   :padding-left (-> v :spacing-x-small u/px)
+                   :padding-right (-> v :spacing-x-small u/px)
+                   :border-radius (-> v :border-radius-small u/px)
                    :background-color (:light-green colours)
-                   :font-family "'Fira Mono', monospace"
-                   :font-size "1.1rem"
+                   :font-size (-> v :font-size-x-small u/px)
                    :white-space :nowrap
                    :color (:dark-green colours)}]]]
 
@@ -242,9 +276,8 @@
 
    [:body {:font-family "sans-serif"
            :font-size "1.4rem"
-           :line-height 1.5
-           :color (:white-b colours)
-           :background-color (:white-b colours)
+           :color (:white-a colours)
+           :background-color (:white-a colours)
            :background-image "url(\"/images/blurred-background.jpg\")"
            :background-repeat :no-repeat
            :background-position [:center :center]
@@ -304,7 +337,7 @@
               :min-width "50px"
               :height "45px"
               :padding "0 30px"
-              :color (:white-b colours)
+              :color (:white-a colours)
               :border "3px solid"
               :border-radius "7px"
               :font-family "sans-serif"
