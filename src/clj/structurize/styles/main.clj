@@ -46,9 +46,9 @@
    :font-size-x-large 18
    :font-size-xx-large 20
 
-   :spacing-xx-small 3
+   :spacing-xx-small 2
    :spacing-x-small 5
-   :spacing-small 7
+   :spacing-small 8
    :spacing-medium 10
    :spacing-large 15
    :spacing-x-large 20
@@ -56,6 +56,8 @@
    :nudge-small 1
    :nudge-medium 2
    :nudge-large 3
+   :nudge-x-large 4
+   :nudge-xx-large 6
 
    :filling-small 22
    :filling-medium 26
@@ -233,24 +235,25 @@
 
 
    [:.c-app-browser {:font-family "'Fira Mono', monospace"
-                     :font-size "1.2rem"
-                     :line-height "1.7rem"}
+                     :font-size (-> v :font-size-small u/px)}
 
-    [:&__brace {:padding-top "2px"}]
+    [:&__brace {:padding-top (-> v :nudge-xx-large u/px)}]
 
     [:&__node {:display :flex}
 
-     [:&__value :&__key {:height "100%"
-                         :margin-bottom "2px"
-                         :padding "2px 3px 1px 3px"
-                         :border-radius "3px"
+     [:&__value :&__key {:height (-> v :filling-small u/px)
+                         :font-size (-> v :font-size-x-small u/px)
+                         :padding-left (-> v :spacing-x-small u/px)
+                         :padding-right (-> v :spacing-x-small u/px)
+                         :border-radius (-> v :border-radius-small u/px)
+                         :margin-bottom (-> v :spacing-xx-small u/px)
                          :background-color (:grey-c colours)
                          :white-space :nowrap}]
 
      [:&__key {:display :flex
                :align-items :center
-               :margin-left "7px"
-               :margin-right "2px"
+               :margin-left (-> v :spacing-small u/px)
+               :margin-right (-> v :spacing-xx-small u/px)
                :cursor :pointer}
       [:&--first {:margin-left 0}]
       [:&--written {:color (:light-green colours)}]
@@ -259,7 +262,8 @@
       [:&--focused {:background-color (:dark-blue colours)
                     :color (:light-blue colours)}]]
 
-     [:&__value
+     [:&__value {:display :flex
+                :align-items :center}
       [:&--clickable {:cursor :pointer}]
       [:&--written {:color (:light-green colours)}]
       [:&--focused {:background-color (:light-blue colours)
