@@ -4,7 +4,8 @@
 
 
 (def colours
-  {:tinted-black-a "#000204"
+  {:tranparent (c/rgba [0 0 0 0])
+   :tinted-black-a "#000204"
    :tinted-black-b "#101214"
    :white-a "#FFFFFF"
    :white-b "#F6F9FC"
@@ -41,6 +42,7 @@
     :embed :figure :figcaption :footer :header :hgroup :menu :nav :output :ruby
     :section :summary :time :mark :audio :video
     {:margin 0 :padding 0 :border 0 :font-size (u/percent 100) :font :inherit :vertical-align :baseline}]
+   [:* {:box-sizing :border-box}]
    [:article :aside :details :figcaption :figure :footer :header :hgroup :menu :nav :section
     {:display :block}]
    [:body {:line-height 1}]
@@ -54,45 +56,46 @@
   {:spacing 10
    :filling 30})
 
+
 (def layouts
   [:#root
 
-   [:.l-box
-    [:&--height-100 {:height (u/percent 100)}]]
-
    [:.l-underlay {:position :relative}]
 
-   [:.l-overlay {:width "100%"
-                 :height "100%"
+   [:.l-overlay {:width (u/percent 100)
+                 :height (u/percent 100)
                  :pointer-events :none
                  :position :absolute
-                 :background-color (c/rgba [0 0 0 0])
+                 :background-color (:tranparent colours)
                  :top 0
                  :left 0}
-
     [:&--viewport-fixed {:width "100vw"
                          :height "100vh"
                          :position :fixed}]
-
     [:&__content {:pointer-events :auto}]]
 
    [:.l-row {:display :flex
              :flex-direction :row}
+    [:&--height-100 {:height (u/percent 100)}]
     [:&__item
      [:&--grow {:flex-grow 1}]]]
 
    [:.l-col {:display :flex
              :flex-direction :column}
+    [:&--fill-height {:height (u/percent 100)}]
     [:&__item
      [:&--grow {:flex-grow 1}]]]
 
    [:.l-cell {:display :flex}
-    [:&--center {:justify-content :center
-                 :align-items :center}]
-    [:&--left {:align-items :center}]
-    [:&--bottom-left {:align-items :flex-end}]]
+    [:&--fill {:width (u/percent 100)
+               :height (u/percent 100)}]
+    [:&--justify
+     [:&-center {:justify-content :center}]]
+    [:&--align
+     [:&-center {:align-items :center}]
+     [:&-end {:align-items :flex-end}]]]
 
-   [:.l-slide-over {:height "100%"
+   [:.l-slide-over {:height (u/percent 100)
                     :background-color (c/rgba [0 0 0 0])
                     :position :absolute
                     :top 0
@@ -102,15 +105,15 @@
 (def components
   [:#root
 
-   [:.c-icon]
-
-   [:.c-tooling {:box-sizing :border-box
-                 :width (u/percent 100)
+   [:.c-tooling {:width (u/percent 100)
                  :height (u/percent 100)
                  :padding (-> v :spacing u/px)
                  :background-color (c/rgba [0 10 20 0.7])}
 
-    [:&__handle {:cursor :pointer
+    [:&__handle {:display :flex
+                 :justify-content :center
+                 :align-items :center
+                 :cursor :pointer
                  :background-color (c/rgba [0 10 20 0.7])
                  :width "26px"
                  :height "26px"
@@ -121,8 +124,7 @@
                  :left "-26px"}]
 
 
-    [:&__item {:box-sizing :border-box
-               :width (u/percent 100)
+    [:&__item {:width (u/percent 100)
                :padding (-> v :spacing u/px)
                :background-color (c/rgba [80 90 100 0.3])
                :border-radius "5px"
@@ -134,19 +136,21 @@
      [:&:last-child {:margin-bottom 0}]]]
 
 
-   [:.c-writes-browser {:font-family "'Fira Mono', monospace"
-                        :line-height "1.7rem"
-                        :font-size "1.2rem"}
+   [:.c-writes-browser {}
 
     [:&__controls {:background-color (c/rgba [80 90 100 0.3])
                    :border-radius "5px"
                    :padding (-> v :spacing u/px)}
 
 
-     [:&__item {:width (u/px 26)
+     [:&__item {:display :flex
+                :justify-content :center
+                :align-items :center
+                :width (u/px 26)
                 :height (u/px 26)
                 :margin-bottom (u/px 5)
                 :border-radius "13px"
+                :font-size "1.2rem"
                 :opacity 0.3}
 
       [:&:last-child {:margin-bottom 0}]
@@ -166,26 +170,30 @@
 
      [:&:last-child {:margin-right "20px"}]]
 
-    [:&__pill-superscript {:box-sizing :border-box
+    [:&__pill-superscript {:display :flex
+                           :align-items :flex-end
                            :height (u/px 26)
-                           :padding-bottom "5px"
-                           :padding-left (u/px (+ 5 2))}
-     [:&__symbol {:font-size "1.6rem"
-                  :margin-right "2px"}]]
+                           :padding-left (u/px (+ 5 2))
+                           :font-family "'Fira Mono', monospace"
+                           :font-size "1.3rem"}
+     [:&__symbol {:margin-right "2px"}]]
 
-    [:&__pill-container {:box-sizing :border-box
-                         :height (u/px (+ 26 10))
-                         :padding (u/px 5)
-                         :border "dotted 2px"
-                         :border-radius "5px"}]
+    [:&__pill {:padding (u/px 5)
+               :border-style :dotted
+               :border-width (u/px 2)
+               :border-radius "5px"}
 
-    [:&__pill {:height "100%"
-               :padding-left (u/px 5)
-               :padding-right (u/px 5)
-               :border-radius "3px"
-               :background-color (:light-green colours)
-               :white-space :nowrap
-               :color (:dark-green colours)}]]
+     [:&__content {:display :flex
+                   :align-items :center
+                   :height (u/px 22)
+                   :padding-left (u/px 5)
+                   :padding-right (u/px 5)
+                   :border-radius "3px"
+                   :background-color (:light-green colours)
+                   :font-family "'Fira Mono', monospace"
+                   :font-size "1.1rem"
+                   :white-space :nowrap
+                   :color (:dark-green colours)}]]]
 
 
    [:.c-app-browser {:font-family "'Fira Mono', monospace"
@@ -220,6 +228,12 @@
       [:&--written {:color (:light-green colours)}]
       [:&--focused {:background-color (:light-blue colours)
                    :color (:dark-blue colours)}]]]]])
+
+
+
+
+
+
 
 (def general
   [:html {:font-size (u/px 10)}
@@ -299,42 +313,7 @@
     [:&:hover {:background-color (c/rgba [0 10 20 0.4])}]
 
     [:.button-icon {:font-size "2.2rem"
-                    :margin-right "7px"}]]
-
-
-   [:.node {:display :flex}
-
-    [:.node-brace {:padding-top "2px"}]
-
-    [:.node-value :.node-key {:height "100%"
-                              :margin-bottom "2px"
-                              :padding "2px 3px 1px 3px"
-                              :border-radius "4px"
-                              :background-color (:grey-c colours)}]
-
-    [:.node-key {:display :flex
-                 :align-items :center
-                 :margin-left "7px"
-                 :margin-right "2px"}
-     [:span {:pointer-events :none}]
-     [:&.first {:margin-left 0}]
-     [:&.written :&.upstream-written {:color (:light-green colours)}]
-     [:&.focused :&.upstream-focused {:background-color (:dark-blue colours)
-                                      :color (:light-blue colours)}]]
-
-    [:.node-value
-     [:&.written :&.upstream-written {:color (:light-green colours)}]
-     [:&.focused {:background-color (:light-blue colours)
-                  :color (:dark-blue colours)}]]
-
-    [:.node-group
-     [:&.written
-      [:.node-key :.node-value {:color (:light-green colours)}]]
-     [:&.focused
-      [:.node-key :.node-value {:background-color (:light-blue colours)
-                                :color (:dark-blue colours)}]]]]
-
-   ])
+                    :margin-right "7px"}]]])
 
 
 (def main

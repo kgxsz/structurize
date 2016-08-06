@@ -139,8 +139,7 @@
         [:div.l-row.c-writes-browser
 
          [:div.l-col.c-writes-browser__controls
-
-          [:div.l-cell.l-cell--center.c-writes-browser__controls__item.c-writes-browser__controls__item--green
+          [:div.c-writes-browser__controls__item.c-writes-browser__controls__item--green
            {:class (if real-time?
                      :c-writes-browser__controls__item--opaque
                      :c-writes-browser__controls__item--clickable)
@@ -149,7 +148,7 @@
                          #(side-effect! [:tooling/stop-time-travelling])))}
            [:div.c-icon.c-icon--control-play]]
 
-          [:div.l-cell.l-cell--center.c-writes-browser__controls__item.c-writes-browser__controls__item--yellow
+          [:div.c-writes-browser__controls__item.c-writes-browser__controls__item--yellow
            {:class (when-not real-time? (u/->class #{:c-writes-browser__controls__item--opaque
                                                      :c-writes-browser__controls__item--clickable}))
             :on-click (when-not real-time?
@@ -157,25 +156,25 @@
                          #(side-effect! [:tooling/go-forward-in-time])))}
            [:div.c-icon.c-icon--control-next]]
 
-          [:div.l-cell.l-cell--center.c-writes-browser__controls__item.c-writes-browser__controls__item--yellow
+          [:div.c-writes-browser__controls__item.c-writes-browser__controls__item--yellow
            {:class (u/->class (cond-> #{}
                                 (not real-time?) (conj :c-writes-browser__controls__item--opaque)
                                 (not beginning-of-time?) (conj :c-writes-browser__controls__item--clickable)))
             :on-click (when (not beginning-of-time?)
                         (u/without-propagation
                          #(side-effect! [:tooling/go-back-in-time])))}
-           [:div.c-icon.c-icon--control-prev]]]{}
+           [:div.c-icon.c-icon--control-prev]]]
 
          [:div.l-row
           (doall
            (for [{:keys [id n]} (take-last track-index (sort-by :n > writes))]
              [:div.l-col.c-writes-browser__item {:key n}
-              [:div.l-cell.l-cell--bottom-left.c-writes-browser__pill-superscript
+              [:div.c-writes-browser__pill-superscript
                [:span.c-writes-browser__pill-superscript__symbol "Δ"]
                [:span n]]
 
-              [:div.c-writes-browser__pill-container
-               [:div.l-cell.l-cell--center.c-writes-browser__pill
+              [:div.c-writes-browser__pill
+               [:div.c-writes-browser__pill__content
                 (pr-str id)]]]))]]))))
 
 
@@ -204,14 +203,14 @@
 
         [:div.l-overlay.l-overlay--viewport-fixed
          [g/slide-over φ {:open? tooling-active?
-                        :absolute-width 800
-                        :direction :right}
+                          :absolute-width 800
+                          :direction :right}
           [:div.l-overlay__content.c-tooling
-           [:div.l-cell.l-cell--center.c-tooling__handle
+           [:div.c-tooling__handle
             {:on-click (u/without-propagation
                         #(side-effect! [:tooling/toggle-tooling-active]))}
             [:div.c-icon.c-icon--cog]]
-           [:div.l-col.l-box.l-box--height-100
+           [:div.l-col.l-col--fill-height
             [:div.l-col__item.c-tooling__item
              [writes-browser φ]]
             [:div.l-col__item.l-col__item--grow.c-tooling__item
