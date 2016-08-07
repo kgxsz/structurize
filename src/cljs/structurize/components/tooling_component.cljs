@@ -54,7 +54,7 @@
         (when log? (log/debug "render node:" path))
 
         [:div.c-app-browser__node
-         [:div.c-app-browser__brace {:class (when-not first? :hidden)}
+         [:div.c-app-browser__brace {:class (when-not first? :is-hidden)}
           "{"]
 
 
@@ -93,7 +93,7 @@
 
            :else [node-group φ path {:tail-braces "}" :downstream-focused? downstream-focused?}])
 
-         [:div.c-app-browser__brace {:class (when-not show-tail-braces? :hidden)}
+         [:div.c-app-browser__brace {:class (when-not show-tail-braces? :is-hidden)}
           tail-braces]]))))
 
 

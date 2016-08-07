@@ -38,13 +38,13 @@
 
 
 (def v
-  {:font-size-xx-small 8
-   :font-size-x-small 10
-   :font-size-small 12
-   :font-size-medium 14
-   :font-size-large 16
-   :font-size-x-large 18
-   :font-size-xx-large 20
+  {:p-size-xx-small 8
+   :p-size-x-small 10
+   :p-size-small 12
+   :p-size-medium 14
+   :p-size-large 16
+   :p-size-x-large 18
+   :p-size-xx-large 20
 
    :spacing-xx-small 2
    :spacing-x-small 5
@@ -74,6 +74,7 @@
    :border-radius-x-large 6
 
    :transition-duration 200
+
    :alpha-low 0.3
    :alpha-medium 0.5
    :alpha-high 0.7})
@@ -98,8 +99,13 @@
    [:table {:border-collapse :collapse :border-spacing 0}]])
 
 
+(def states
+  [:html
+   [:.is-hidden {:display :none}]])
+
+
 (def layouts
-  [:#root
+  [:html
    [:.l-underlay {:position :relative}]
 
    [:.l-overlay {:width (u/percent 100)
@@ -189,7 +195,7 @@
                 :height (-> v :filling-medium u/px)
                 :margin-bottom (-> v :spacing-x-small u/px)
                 :border-radius (-> v :filling-medium (/ 2) u/px)
-                :font-size (-> v :font-size-small u/px)
+                :font-size (-> v :p-size-small u/px)
                 :opacity (:alpha-low v)}
 
       [:&:last-child {:margin-bottom 0}]
@@ -214,7 +220,7 @@
                            :height (-> v :filling-medium u/px)
                            :padding-left (-> v :spacing-small u/px)
                            :padding-bottom (-> v :spacing-xx-small u/px)
-                           :font-size (-> v :font-size-small u/px)}
+                           :font-size (-> v :p-size-small u/px)}
      [:&__symbol {:margin-right (-> v :spacing-xx-small u/px)}]]
 
     [:&__pill {:padding (-> v :spacing-x-small u/px)
@@ -229,20 +235,20 @@
                    :padding-right (-> v :spacing-x-small u/px)
                    :border-radius (-> v :border-radius-small u/px)
                    :background-color (:light-green colours)
-                   :font-size (-> v :font-size-x-small u/px)
+                   :font-size (-> v :p-size-x-small u/px)
                    :white-space :nowrap
                    :color (:dark-green colours)}]]]
 
 
    [:.c-app-browser {:font-family "'Fira Mono', monospace"
-                     :font-size (-> v :font-size-small u/px)}
+                     :font-size (-> v :p-size-small u/px)}
 
     [:&__brace {:padding-top (-> v :nudge-xx-large u/px)}]
 
     [:&__node {:display :flex}
 
      [:&__value :&__key {:height (-> v :filling-small u/px)
-                         :font-size (-> v :font-size-x-small u/px)
+                         :font-size (-> v :p-size-x-small u/px)
                          :padding-left (-> v :spacing-x-small u/px)
                          :padding-right (-> v :spacing-x-small u/px)
                          :border-radius (-> v :border-radius-small u/px)
@@ -291,8 +297,7 @@
    [:h1 {:font-size "3rem"}]
    [:h5 {:font-size "1.6rem"}]
 
-   [:.clickable:hover {:cursor :pointer}]
-   [:.hidden {:display :none}]])
+   ])
 
 
 (def pages
@@ -358,6 +363,7 @@
 (def main
   [meyer-reset
    general
+   states
    layouts
    components
 
