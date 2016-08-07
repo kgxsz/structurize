@@ -127,7 +127,10 @@
            :background-repeat :no-repeat
            :background-position [:center :center]
            :background-attachements :fixed
-           :background-size :cover}]])
+           :background-size :cover}]
+
+   [:#js-root {:width (u/vw 100)
+               :height (u/vh 100)}]])
 
 
 (def states
@@ -203,7 +206,8 @@
   [:html
 
    [:.c-icon
-    [:&--hero {:font-size (-> v :h-size-x-large u/px)}]]
+    [:&--h-size-xx-large {:font-size (-> v :h-size-xx-large u/px)}]
+    [:&--h-size-large {:font-size (-> v :h-size-large u/px)}]]
 
    [:.c-button {:width (-> v :button-width-medium u/px)
                 :height (-> v :button-height-medium u/px)
@@ -350,7 +354,7 @@
               :margin-bottom (-> v :spacing-xx-large u/px)
               :text-align :center}
     [:&__caption {:font-family "'Raleway', Arial"
-                  :font-size (-> v :h-size-xx-small u/px)
+                  :font-size (-> v :h-size-x-small u/px)
                   :margin-top (-> v :spacing-large u/px)}]]])
 
 

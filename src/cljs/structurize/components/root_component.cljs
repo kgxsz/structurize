@@ -13,17 +13,19 @@
 
 (defn sign-in-with-github [{:keys [side-effect!] :as Φ}]
   (log/debug "render sign-in-with-github")
-  [:div.button.clickable {:on-click (u/without-propagation
-                                     #(side-effect! [:auth/initialise-sign-in-with-github]))}
-   [:span.button-icon.icon-github]
-   [:span.button-text "sign in with GitHub"]])
+  [:button.c-button {:on-click (u/without-propagation
+                                #(side-effect! [:auth/initialise-sign-in-with-github]))}
+   [:div.l-row.l-row--justify-center
+    [:div.l-spacing.l-spacing--margin-right-small.c-icon.c-icon--github]
+    "sign in with GitHub"]])
 
 
 (defn sign-out [{:keys [side-effect!] :as Φ}]
   (log/debug "render sign-out")
-  [:div.button.clickable {:on-click (u/without-propagation #(side-effect! [:auth/sign-out]))}
-   [:span.button-icon.icon-exit]
-   [:span.button-text "sign out"]])
+  [:button.c-button {:on-click (u/without-propagation #(side-effect! [:auth/sign-out]))}
+   [:div.l-row.l-row--justify-center
+    [:div.l-spacing.l-spacing--margin-right-small.c-icon.c-icon--exit]
+    "sign out"]])
 
 
 (defn with-page-load [{:keys [track-app side-effect!] :as φ} page]
@@ -35,10 +37,10 @@
     (if (or (not app-initialised?)
             chsk-status-initialising?)
       [:div.c-page
-         [:div.l-col.l-col--justify-center
-          [:div.c-hero
-           [:div.c-icon.c-icon--coffee-cup.c-icon--hero]
-           [:div.c-hero__caption "Loading"]]]]
+       [:div.l-col.l-col--justify-center
+        [:div.c-hero
+         [:div.c-icon.c-icon--coffee-cup.c-icon--h-size-large]
+         [:div.c-hero__caption "loading"]]]]
       [page])))
 
 
@@ -55,43 +57,40 @@
 
        (log/debug "render home-page")
 
-       [:div.page
+       [:div.c-page
+        [:div.l-col.l-col--justify-center
+         (if me
+           [:div.c-hero
+            [:img.large-avatar {:src (:avatar-url me)}]
+            [:div.c-hero__caption "Hello @" (:login me)]]
 
-        (if me
-            [:div.hero
-             [:div.hero-visual
-              [:img.large-avatar {:src (:avatar-url me)}]]
-             [:h1.hero-caption "Hello @" (:login me)]]
+           [:div.c-hero
+            [:div.c-icon.c-icon--mustache.c-icon--h-size-xx-large]
+            [:div.c-hero__caption "Hello there"]])
 
-            [:div.hero
-             [:div.hero-visual
-              [:span.icon.icon-mustache]]
-             [:h1.hero-caption "Hello there"]])
+         [:div.l-col.l-col--align-center
+          (if me
+            [sign-out Φ]
+            [sign-in-with-github Φ])]
 
-        [:div.options-section
+         #_[:div.button.clickable {:on-click (u/without-propagation
+                                            #(side-effect! [:playground/inc-item
+                                                            {:path [:playground :star]
+                                                             :item-name "star"}]))}
+          [:span.button-icon.icon-star]
+          [:span.button-text star]]
 
-           (if me
-             [sign-out Φ]
-             [sign-in-with-github Φ])
+         #_[:div.button.clickable {:on-click (u/without-propagation
+                                            #(side-effect! [:playground/inc-item
+                                                            {:path [:playground :heart]
+                                                             :item-name "heart"}]))}
+          [:span.button-icon.icon-heart]
+          [:span.button-text heart]]
 
-           [:div.button.clickable {:on-click (u/without-propagation
-                                              #(side-effect! [:playground/inc-item
-                                                              {:path [:playground :star]
-                                                               :item-name "star"}]))}
-            [:span.button-icon.icon-star]
-            [:span.button-text star]]
-
-           [:div.button.clickable {:on-click (u/without-propagation
-                                              #(side-effect! [:playground/inc-item
-                                                              {:path [:playground :heart]
-                                                               :item-name "heart"}]))}
-            [:span.button-icon.icon-heart]
-            [:span.button-text heart]]
-
-           [:div.button.clickable {:on-click (u/without-propagation
-                                              #(side-effect! [:playground/ping {}]))}
-            [:span.button-icon.icon-heart-pulse]
-            [:spam.button-text pong]]]]))])
+         #_[:div.button.clickable {:on-click (u/without-propagation
+                                            #(side-effect! [:playground/ping {}]))}
+          [:span.button-icon.icon-heart-pulse]
+          [:spam.button-text pong]]]]))])
 
 
 (defn sign-in-with-github-page [{:keys [config-opts track-app side-effect!] :as Φ}]
@@ -140,7 +139,7 @@
      [:div.c-page
       [:div.l-col.l-col--justify-center
        [:div.c-hero
-        [:div.c-icon.c-icon--poop.c-icon--hero]
+        [:div.c-icon.c-icon--poop.c-icon--h-size-xx-large]
         [:div.c-hero__caption "Looks like you're lost!"]]
 
        [:div.l-col.l-col--align-center
