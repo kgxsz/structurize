@@ -87,8 +87,13 @@
 
    :button-height-medium 50
 
+   :avatar-width-medium 100
+
+   :avatar-height-medium 100
+
    :transition-duration 200
 
+   :proportion-x-small 25
    :proportion-small 30
    :proportion-medium 50
    :proportion-large 70
@@ -186,7 +191,8 @@
    [:.l-spacing
     [:&--margin
      [:&-top
-      [:&-small {:margin-top (-> v :spacing-small u/px)}]]
+      [:&-small {:margin-top (-> v :spacing-small u/px)}]
+      [:&-medium {:margin-top (-> v :spacing-medium u/px)}]]
      [:&-right
       [:&-small {:margin-right (-> v :spacing-small u/px)}]]
      [:&-bottom
@@ -218,6 +224,7 @@
                 :border-color (:white-a colours)
                 :padding 0
                 :border-radius (-> v :border-radius-xx-large u/px)
+                :outline :none
                 :cursor :pointer
                 :font-family "sans-serif"
                 :font-size (-> v :p-size-large u/px)}
@@ -350,56 +357,22 @@
    [:.c-page {:overflow :auto
               :min-height (u/vh 100)}]
 
-   [:.c-hero {:margin-top (-> v :proportion-small u/vh)
+   [:.c-hero {:margin-top (-> v :proportion-x-small u/vh)
               :margin-bottom (-> v :spacing-xx-large u/px)
               :text-align :center}
     [:&__caption {:font-family "'Raleway', Arial"
                   :font-size (-> v :h-size-x-small u/px)
-                  :margin-top (-> v :spacing-large u/px)}]]])
-
-
-
-
-(def components*
-  [:#js-root
-   [:.loading {:display :flex
-               :flex-direction :column
-               :justify-content :center
-               :align-items :center
-               :width (u/vw 100)
-               :height (u/vh 100)}
-    [:.icon-coffee-cup {:height "60px"
-                        :font-size "6rem"}]
-    [:.loading-caption {:margin-top "10px"}]]
-
-
-   [:.options-section {:margin-top "30px"}
-    [:.button {:margin-bottom "10px"}]]
-
-   [:.large-avatar {:width "100px"
-                    :height "100px"
-                    :background-color (c/rgba [0 10 20 0.2])
-                    :border "3px solid"
-                    :border-radius "100px"}]
-
-   [:.button {:display :flex
-              :justify-content :center
-              :align-items :center
-              :min-width "50px"
-              :height "45px"
-              :padding "0 30px"
-              :color (:white-a colours)
-              :border "3px solid"
-              :border-radius "7px"
-              :font-family "sans-serif"
-              :font-size "1.5rem"
-              :background-color (c/rgba [0 10 20 0.2])
-              :line-height "1.7rem"}
-
-    [:&:hover {:background-color (c/rgba [0 10 20 0.4])}]
-
-    [:.button-icon {:font-size "2.2rem"
-                    :margin-right "7px"}]]])
+                  :margin-top (-> v :spacing-x-large u/px)}]
+    [:&__avatar {:width (-> v :avatar-width-medium u/px)
+                 :height (-> v :avatar-height-medium u/px)
+                 :background-color (alpha (:black-b colours) (:alpha-low v))
+                 :border-style :solid
+                 :border-width (-> v :border-width-large u/px)
+                 :border-radius (-> v :avatar-height-medium u/px)}]
+    [:&__inter-icon {:font-size (-> v :h-size-large u/px)
+                     :margin-top (-> v :spacing-large u/px)
+                     :margin-left (-> v :spacing-x-large u/px)
+                     :margin-right (-> v :spacing-x-large u/px)}]]])
 
 
 (def main
@@ -407,5 +380,4 @@
    general
    states
    layouts
-   components
-   components*])
+   components])
