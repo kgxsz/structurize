@@ -31,7 +31,7 @@
                     (include-css "/css/icomoon.css")
                     (include-css "/css/structurize.css")]
                    [:body
-                    [:div#root
+                    [:div#js-root
                      [:div.loading
                       coffee-cup-svg
                       [:h5.loading-caption "loading"]]]

@@ -6,7 +6,7 @@
 
 
 (defn render-root! [Φ]
-  (r/render [root Φ] (js/document.getElementById "root")))
+  (r/render [root Φ] (js/document.getElementById "js-root")))
 
 
 (defrecord Renderer [config-opts state side-effect-bus]

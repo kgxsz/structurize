@@ -135,18 +135,19 @@
    (fn []
      (log/debug "render unkown-page")
 
-     [:div.page
-      [:div.hero
-       [:div.hero-visual
-        [:span.icon.icon-poop]]
-       [:h1.hero-caption "Looks like you're lost"]]
+     [:div.c-page
+      [:div.l-col.l-col--fill-parent.l-col--justify-center
+       [:div.c-hero
+        [:div.c-icon.c-icon--poop.c-icon--hero]
+        [:div.c-hero__caption "Looks like you're lost!"]]
 
-      [:div.options-section
-       [:div.button.clickable {:on-click (u/without-propagation
-                                          #(side-effect! [:general/change-location
-                                                          {:path (b/path-for (:routes config-opts) :home)}]))}
-        [:span.button-icon.icon-home]
-        [:span.button-text "go home"]]]])])
+       [:div.l-col.l-col--align-center
+        [:button.c-button {:on-click (u/without-propagation
+                                      #(side-effect! [:general/change-location
+                                                      {:path (b/path-for (:routes config-opts) :home)}]))}
+         [:div.l-row.l-row--justify-center
+          [:div.l-spacing.l-spacing--margin-right-small.c-icon.c-icon--home]
+          "go home"]]]]])])
 
 
 (defn root

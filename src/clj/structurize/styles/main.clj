@@ -46,12 +46,21 @@
    :p-size-x-large 18
    :p-size-xx-large 20
 
+   :h-size-xx-small 25
+   :h-size-x-small 30
+   :h-size-small 35
+   :h-size-medium 40
+   :h-size-large 60
+   :h-size-x-large 80
+   :h-size-xx-large 100
+
    :spacing-xx-small 2
    :spacing-x-small 5
    :spacing-small 8
    :spacing-medium 10
    :spacing-large 15
    :spacing-x-large 20
+   :spacing-xx-large 30
 
    :nudge-small 1
    :nudge-medium 2
@@ -72,8 +81,17 @@
    :border-radius-medium 4
    :border-radius-large 5
    :border-radius-x-large 6
+   :border-radius-xx-large 7
+
+   :button-width-medium 220
+
+   :button-height-medium 50
 
    :transition-duration 200
+
+   :proportion-small 30
+   :proportion-medium 50
+   :proportion-large 70
 
    :alpha-low 0.3
    :alpha-medium 0.5
@@ -97,6 +115,19 @@
    [:blockquote :q {:quotes :none}
     [:&:before :&:after {:content :none}]]
    [:table {:border-collapse :collapse :border-spacing 0}]])
+
+
+(def general
+  [:html
+   [:body {:font-family "sans-serif"
+           :font-size (-> v :p-size-medium u/px)
+           :color (:white-a colours)
+           :background-color (:white-a colours)
+           :background-image "url(\"/images/blurred-background.jpg\")"
+           :background-repeat :no-repeat
+           :background-position [:center :center]
+           :background-attachements :fixed
+           :background-size :cover}]])
 
 
 (def states
@@ -123,6 +154,8 @@
    [:.l-row {:display :flex
              :flex-direction :row}
     [:&--height-100 {:height (u/percent 100)}]
+    [:&--justify
+     [:&-center {:justify-content :center}]]
     [:&__item
      [:&--grow {:flex-grow 1}]]]
 
@@ -130,17 +163,33 @@
              :flex-direction :column}
     [:&--fill-parent {:width (u/percent 100)
                       :height (u/percent 100)}]
+    [:&--justify
+     [:&-center {:justify-content :center}]]
+    [:&--align
+     [:&-center {:align-items :center}]
+     [:&-end {:align-items :flex-end}]]
     [:&__item
      [:&--grow {:flex-grow 1}]]]
 
    [:.l-cell {:display :flex}
     [:&--fill-parent {:width (u/percent 100)
-               :height (u/percent 100)}]
+                      :height (u/percent 100)}]
     [:&--justify
      [:&-center {:justify-content :center}]]
     [:&--align
      [:&-center {:align-items :center}]
      [:&-end {:align-items :flex-end}]]]
+
+   [:.l-spacing
+    [:&--margin
+     [:&-top
+      [:&-small {:margin-top (-> v :spacing-small u/px)}]]
+     [:&-right
+      [:&-small {:margin-right (-> v :spacing-small u/px)}]]
+     [:&-bottom
+      [:&-small {:margin-bottom (-> v :spacing-small u/px)}]]
+     [:&-left
+      [:&-small {:margin-left (-> v :spacing-small u/px)}]]]]
 
    [:.l-slide-over {:height (u/percent 100)
                     :background-color (:transparent colours)
@@ -149,8 +198,26 @@
                     :transition-property :right
                     :transition-duration (-> v :transition-duration u/ms)}]])
 
+
 (def components
   [:html
+
+   [:.c-icon
+    [:&--hero {:font-size (-> v :h-size-xx-large u/px)}]]
+
+   [:.c-button {:width (-> v :button-width-medium u/px)
+                :height (-> v :button-height-medium u/px)
+                :color (:white-a colours)
+                :background-color (alpha (:black-b colours) (:alpha-low v))
+                :border-width (-> v :border-width-large u/px)
+                :border-style :solid
+                :border-color (:white-a colours)
+                :padding 0
+                :border-radius (-> v :border-radius-xx-large u/px)
+                :cursor :pointer
+                :font-family "sans-serif"
+                :font-size (-> v :p-size-large u/px)}
+    [:&:hover {:background-color (alpha (:black-b colours) (:alpha-medium v))}]]
 
    [:.c-tooling {:width (u/percent 100)
                  :height (u/percent 100)
@@ -274,43 +341,23 @@
       [:&--clickable {:cursor :pointer}]
       [:&--written {:color (:light-green colours)}]
       [:&--focused {:background-color (:light-blue colours)
-                   :color (:dark-blue colours)}]]]]])
+                    :color (:dark-blue colours)}]]]]
+
+   [:.c-page {:overflow :auto
+              :min-height (u/vh 100)}]
+
+   [:.c-hero {:margin-top (-> v :proportion-small u/vh)
+              :margin-bottom (-> v :spacing-xx-large u/px)
+              :text-align :center}
+    [:&__caption {:font-family "'Raleway', Arial"
+                  :font-size (-> v :h-size-xx-small u/px)
+                  :margin-top (-> v :spacing-large u/px)}]]])
 
 
-
-
-
-
-
-(def general
-  [:html
-   [:body {:min-height "100vh"
-
-           :font-family "sans-serif"
-           :font-size "14px"
-           :color (:white-a colours)
-           :background-color (:white-a colours)
-           :background-image "url(\"/images/blurred-background.jpg\")"
-           :background-repeat :no-repeat
-           :background-position [:center :center]
-           :background-attachements :fixed
-           :background-size :cover}]
-
-   [:h1 {:font-size "3rem"}]
-   [:h5 {:font-size "1.6rem"}]
-
-   ])
-
-
-(def pages
-  [:#root
-   [:.page {:display :flex
-            :flex-direction :column
-            :align-items :center}]])
 
 
 (def components*
-  [:#root
+  [:#js-root
    [:.loading {:display :flex
                :flex-direction :column
                :justify-content :center
@@ -321,17 +368,6 @@
                         :font-size "6rem"}]
     [:.loading-caption {:margin-top "10px"}]]
 
-   [:.hero {:margin-top "20vh"
-            :text-align :center}
-    [:.hero-visual {:display :flex
-                    :justify-content :center
-                    :align-items :center
-                    :min-height "120px"}
-     [:.hero-visual-divider {:font-size "4rem"
-                             :margin "0 15px"}]
-     [:.icon {:font-size "10rem"}]]
-    [:.hero-caption {:font-family "'Raleway', Arial"
-                     :margin "5px 0"}]]
 
    [:.options-section {:margin-top "30px"}
     [:.button {:margin-bottom "10px"}]]
@@ -368,6 +404,4 @@
    states
    layouts
    components
-
-   pages
    components*])
