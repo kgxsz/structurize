@@ -34,9 +34,11 @@
 
     (if (or (not app-initialised?)
             chsk-status-initialising?)
-      [:div.loading
-       [:span.icon.icon-coffee-cup]
-       [:h5.loading-caption "loading"]]
+      [:div.c-page
+         [:div.l-col.l-col--justify-center
+          [:div.c-hero
+           [:div.c-icon.c-icon--coffee-cup.c-icon--hero]
+           [:div.c-hero__caption "Loading"]]]]
       [page])))
 
 
@@ -136,7 +138,7 @@
      (log/debug "render unkown-page")
 
      [:div.c-page
-      [:div.l-col.l-col--fill-parent.l-col--justify-center
+      [:div.l-col.l-col--justify-center
        [:div.c-hero
         [:div.c-icon.c-icon--poop.c-icon--hero]
         [:div.c-hero__caption "Looks like you're lost!"]]

@@ -203,7 +203,7 @@
   [:html
 
    [:.c-icon
-    [:&--hero {:font-size (-> v :h-size-xx-large u/px)}]]
+    [:&--hero {:font-size (-> v :h-size-x-large u/px)}]]
 
    [:.c-button {:width (-> v :button-width-medium u/px)
                 :height (-> v :button-height-medium u/px)
