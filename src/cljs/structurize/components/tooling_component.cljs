@@ -201,7 +201,7 @@
 
         (when log? (log/debug "render tooling"))
 
-        [:div.l-overlay.l-overlay--viewport-fixed
+        [:div.l-overlay.l-overlay--fill-viewport
          [g/slide-over φ {:open? tooling-active?
                           :absolute-width 800
                           :direction :right}
@@ -210,7 +210,7 @@
             {:on-click (u/without-propagation
                         #(side-effect! [:tooling/toggle-tooling-active]))}
             [:div.c-icon.c-icon--cog]]
-           [:div.l-col.l-col--fill-height
+           [:div.l-col.l-col--fill-parent
             [:div.l-col__item.c-tooling__item
              [writes-browser φ]]
             [:div.l-col__item.l-col__item--grow.c-tooling__item

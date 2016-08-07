@@ -115,9 +115,9 @@
                  :background-color (:tranparent colours)
                  :top 0
                  :left 0}
-    [:&--viewport-fixed {:width (u/vw 100)
-                         :height (u/vh 100)
-                         :position :fixed}]
+    [:&--fill-viewport {:width (u/vw 100)
+                        :height (u/vh 100)
+                        :position :fixed}]
     [:&__content {:pointer-events :auto}]]
 
    [:.l-row {:display :flex
@@ -128,12 +128,13 @@
 
    [:.l-col {:display :flex
              :flex-direction :column}
-    [:&--fill-height {:height (u/percent 100)}]
+    [:&--fill-parent {:width (u/percent 100)
+                      :height (u/percent 100)}]
     [:&__item
      [:&--grow {:flex-grow 1}]]]
 
    [:.l-cell {:display :flex}
-    [:&--fill {:width (u/percent 100)
+    [:&--fill-parent {:width (u/percent 100)
                :height (u/percent 100)}]
     [:&--justify
      [:&-center {:justify-content :center}]]
@@ -149,7 +150,7 @@
                     :transition-duration (-> v :transition-duration u/ms)}]])
 
 (def components
-  [:#root
+  [:html
 
    [:.c-tooling {:width (u/percent 100)
                  :height (u/percent 100)
@@ -282,10 +283,11 @@
 
 
 (def general
-  [:html {:font-size (u/px 10)}
+  [:html
+   [:body {:min-height "100vh"
 
-   [:body {:font-family "sans-serif"
-           :font-size "1.4rem"
+           :font-family "sans-serif"
+           :font-size "14px"
            :color (:white-a colours)
            :background-color (:white-a colours)
            :background-image "url(\"/images/blurred-background.jpg\")"
