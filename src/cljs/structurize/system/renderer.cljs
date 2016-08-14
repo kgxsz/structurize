@@ -15,8 +15,9 @@
   (start [component]
     (log/info "initialising renderer")
     (render-root! {:config-opts config-opts
-                   :track-app (:track-app state)
-                   :track-tooling (:track-tooling state)
+                   :+tooling (:+tooling state)
+                   :+app (:+app-track state)
+                   :track (:track state)
                    :side-effect! (:side-effect! side-effect-bus)})
     component)
 

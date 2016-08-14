@@ -5,8 +5,9 @@
 
 (defn reload! []
   (renderer/render-root! {:config-opts (:config-opts system)
-                          :track-app (get-in system [:state :track-app])
-                          :track-tooling (get-in system [:state :track-tooling])
+                          :+tooling (get-in system [:state :+tooling])
+                          :+app (get-in system [:state :+app-track])
+                          :track (get-in system [:state :track])
                           :side-effect! (get-in system [:side-effect-bus :side-effect!])}))
 
 

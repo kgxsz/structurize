@@ -45,9 +45,11 @@
 
 
 (defmethod process-side-effect :tooling/go-back-in-time
-  [{:keys [read-tooling write-tooling!]} id props]
-  (let [track-index (max 0 (dec (read-tooling l/view-single (l/in [:track-index]))))
-        {:keys [paths upstream-paths]} (read-tooling l/view-single (l/in [:writes track-index]))]
+  [{:keys [write-tooling! read +tooling]} id props]
+  (let [track-index (max 0 (dec (read l/view-single
+                                      (l/*> +tooling (l/in [:track-index])))))
+        {:keys [paths upstream-paths]} (read l/view-single
+                                             (l/*> +tooling (l/in [:writes track-index])))]
     (write-tooling! [:tooling/go-back-in-time
                      (fn [t]
                        (-> t
@@ -57,10 +59,13 @@
 
 
 (defmethod process-side-effect :tooling/go-forward-in-time
-  [{:keys [read-tooling write-tooling!]} id props]
-  (let [read-write-index (read-tooling l/view-single (l/in [:read-write-index]))
-        track-index (min read-write-index (inc (read-tooling l/view-single (l/in [:track-index]))))
-        {:keys [paths upstream-paths]} (read-tooling l/view-single (l/in [:writes track-index]))]
+  [{:keys [write-tooling! read +tooling]} id props]
+  (let [read-write-index (read l/view-single
+                               (l/*> +tooling (l/in [:read-write-index])))
+        track-index (min read-write-index (inc (read l/view-single
+                                                     (l/*> +tooling (l/in [:track-index])))))
+        {:keys [paths upstream-paths]} (read l/view-single
+                                             (l/*> +tooling (l/in [:writes track-index])))]
     (write-tooling! [:tooling/go-forward-in-time
                      (fn [t]
                        (-> t
@@ -70,9 +75,11 @@
 
 
 (defmethod process-side-effect :tooling/stop-time-travelling
-  [{:keys [read-tooling write-tooling!]} id props]
-  (let [read-write-index (read-tooling l/view-single (l/in [:read-write-index]))
-        {:keys [paths upstream-paths]} (read-tooling l/view-single (l/in [:writes read-write-index]))]
+  [{:keys [write-tooling! read +tooling]} id props]
+  (let [read-write-index (read l/view-single
+                               (l/*> +tooling (l/in [:read-write-index])))
+        {:keys [paths upstream-paths]} (read l/view-single
+                                             (l/*> +tooling (l/in [:writes read-write-index])))]
     (write-tooling! [:tooling/stop-time-travellin
                      (fn [t]
                        (-> t
@@ -90,11 +97,11 @@
 
 
 (defmethod process-side-effect :comms/chsk-status-update
-  [{:keys [read-app write-app! send!]} id props]
+  [{:keys [write-app! send! read +app]} id props]
   (let [{chsk-status :status} props
         app-uninitialised? (= :uninitialised
-                              (read-app l/view-single
-                                        (l/in [:app-status])))]
+                              (read l/view-single
+                                    (l/*> +app (l/in [:app-status]))))]
 
     (write-app! [:comms/chsk-status-update
                  (fn [app]
@@ -201,8 +208,9 @@
 
 
 (defmethod process-side-effect :auth/mount-sign-in-with-github-page
-  [{:keys [config-opts read-app post! write-app! change-location!]} id props]
-  (let [{:keys [code] attempt-id :state} (read-app l/view-single (l/in [:location :query]))]
+  [{:keys [config-opts post! write-app! change-location! read +app]} id props]
+  (let [{:keys [code] attempt-id :state} (read l/view-single
+                                               (l/*> +app (l/in [:location :query])))]
     (change-location! {:query {} :replace? true})
     (when (and code attempt-id)
       (post! ["/sign-in/github" {:code code :attempt-id attempt-id}]
@@ -238,8 +246,9 @@
 
 
 (defmethod process-side-effect :playground/ping
-  [{:keys [read-app send! write-app!] :as Φ} id props]
-  (let [ping (read-app l/view-single (l/in [:playground :ping]))]
+  [{:keys [send! write-app! read +app] :as Φ} id props]
+  (let [ping (read l/view-single
+                   (l/*> +app (l/in [:playground :ping])))]
 
     (write-app! [:playground/ping
                  (fn [app]
@@ -264,13 +273,14 @@
 
 
 (defn listen-for-side-effects
-  [{:keys [config-opts read-tooling] :as Φ} <side-effects]
+  [{:keys [config-opts read +tooling] :as Φ} <side-effects]
 
   (let [log? (get-in config-opts [:tooling :log?])]
 
     (go-loop []
       (let [[id props :as side-effect] (a/<! <side-effects)
-            real-time? (apply = (read-tooling l/view (l/+> (l/in [:read-write-index]) (l/in [:track-index]))))
+            real-time? (apply = (read l/view
+                                      (l/*> +tooling (l/+> (l/in [:read-write-index]) (l/in [:track-index])))))
             tooling? (= (namespace id) "tooling")
             browser? (= (namespace id) "browser")
             comms? (= (namespace id) "comms")]
@@ -302,8 +312,9 @@
   (start [component]
     (log/info "initialising side-effector")
     (let [Φ {:config-opts config-opts
-             :read-app (:read-app state)
-             :read-tooling (:read-tooling state)
+             :+tooling (:+tooling state)
+             :+app (:+app-read-write state)
+             :read (:read state)
              :write-app! (:write-app! state)
              :write-tooling! (:write-tooling! state)
              :send! (:send! comms)

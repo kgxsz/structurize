@@ -10,7 +10,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; app-browser components
 
 
-(defn node [{:keys [config-opts track-app track-tooling side-effect!] :as φ} path _]
+(defn node [{:keys [config-opts side-effect! track +app +tooling] :as φ} path _]
   (let [log? (get-in config-opts [:tooling :log?])
         toggle-collapsed #(side-effect! [:tooling/toggle-node-collapsed {:path path}])
         toggle-focused #(side-effect! [:tooling/toggle-node-focused {:path path}])]
@@ -19,17 +19,23 @@
 
     (fn [_ _ opts]
       (let [{:keys [tail-braces first? last? downstream-focused?]} opts
-            node (track-app l/view-single (l/in path))
-            collapsed? (track-tooling l/view-single (l/in [:app-browser-props :collapsed])
-                                      #(contains? % path))
-            written? (track-tooling l/view-single (l/in [:app-browser-props :written :paths])
-                                    #(contains? % path))
-            upstream-written? (track-tooling l/view-single (l/in [:app-browser-props :written :upstream-paths])
-                                             #(contains? % path))
-            focused? (track-tooling l/view-single (l/in [:app-browser-props :focused :paths])
-                                    #(contains? % path))
-            upstream-focused? (track-tooling l/view-single (l/in [:app-browser-props :focused :upstream-paths])
-                                             #(contains? % path))
+            node (track l/view-single
+                        (l/*> +app (l/in path)))
+            collapsed? (track l/view-single
+                              (l/*> +tooling (l/in [:app-browser-props :collapsed]))
+                              #(contains? % path))
+            written? (track l/view-single
+                            (l/*> +tooling (l/in [:app-browser-props :written :paths]))
+                            #(contains? % path))
+            upstream-written? (track l/view-single
+                                     (l/*> +tooling (l/in [:app-browser-props :written :upstream-paths]))
+                                     #(contains? % path))
+            focused? (track l/view-single
+                            (l/*> +tooling (l/in [:app-browser-props :focused :paths]))
+                            #(contains? % path))
+            upstream-focused? (track l/view-single
+                                     (l/*> +tooling (l/in [:app-browser-props :focused :upstream-paths]))
+                                     #(contains? % path))
             downstream-focused? (or downstream-focused? focused?)
 
             k (last path)
@@ -97,14 +103,15 @@
           tail-braces]]))))
 
 
-(defn node-group [{:keys [config-opts track-app] :as φ} path _]
+(defn node-group [{:keys [config-opts track +app] :as φ} path _]
   (let [log? (get-in config-opts [:tooling :log?])]
 
     (when log? (log/debug "mount node-group:" path))
 
     (fn [_ _ opts]
       (let [{:keys [tail-braces downstream-focused?]} opts
-            nodes (track-app l/view-single (l/in path))
+            nodes (track l/view-single
+                         (l/*> +app (l/in path)))
             num-nodes (count nodes)]
 
         (when log? (log/debug "render node-group:" path))
@@ -122,22 +129,25 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; top-level components
 
 
-(defn writes-browser [{:keys [config-opts track-tooling side-effect!] :as φ}]
+(defn writes-browser [{:keys [config-opts track side-effect! +tooling] :as φ}]
   (let [log? (get-in config-opts [:tooling :log?])]
 
     (when log? (log/debug "mount writes-browser"))
 
     (fn []
-      (let [writes (track-tooling l/view (l/*> (l/in [:writes]) l/all-values))
-            read-write-index (track-tooling l/view-single (l/in [:read-write-index]))
-            track-index (track-tooling l/view-single (l/in [:track-index]))
+      (let [writes (track l/view
+                          (l/*> +tooling (l/in [:writes]) l/all-values))
+            read-write-index (track l/view-single
+                                    (l/*> +tooling (l/in [:read-write-index])))
+            track-index (track l/view-single
+                               (l/*> +tooling (l/in [:track-index])))
             real-time? (= track-index read-write-index)
             beginning-of-time? (zero? track-index)]
 
         (when log? (log/debug "render writes-browser"))
 
         [:div.l-row.c-writes-browser
-
+         
          [:div.l-col.c-writes-browser__controls
           [:div.c-writes-browser__controls__item.c-writes-browser__controls__item--green
            {:class (if real-time?
@@ -178,7 +188,6 @@
                 (pr-str id)]]]))]]))))
 
 
-
 (defn app-browser [{:keys [config-opts] :as φ}]
   (let [log? (get-in config-opts [:tooling :log?])]
 
@@ -190,28 +199,24 @@
        [node-group φ [] {:tail-braces "}"}]])))
 
 
-
-(defn tooling [{:keys [config-opts track-tooling side-effect!] :as φ}]
+(defn tooling [{:keys [config-opts side-effect! track +tooling] :as φ}]
   (let [log? (get-in config-opts [:tooling :log?])]
 
     (when log? (log/debug "mount tooling"))
 
     (fn []
-      (let [tooling-active? (track-tooling l/view-single (l/in [:tooling-active?]))]
-
-        (when log? (log/debug "render tooling"))
-
-        [:div.l-overlay.l-overlay--fill-viewport
-         [g/slide-over φ {:open? tooling-active?
-                          :absolute-width 800
-                          :direction :right}
-          [:div.l-overlay__content.c-tooling
-           [:div.c-tooling__handle
-            {:on-click (u/without-propagation
-                        #(side-effect! [:tooling/toggle-tooling-active]))}
-            [:div.c-icon.c-icon--cog]]
-           [:div.l-col.l-col--fill-parent
-            [:div.l-col__item.c-tooling__item
-             [writes-browser φ]]
-            [:div.l-col__item.l-col__item--grow.c-tooling__item
-             [app-browser φ]]]]]]))))
+      (when log? (log/debug "render tooling"))
+      [:div.l-overlay.l-overlay--fill-viewport
+       [g/slide-over φ {:+slide-over (l/*> +tooling (l/in [:tooling-slide-over]))
+                        :absolute-width 800
+                        :direction :right}
+        [:div.l-overlay__content.c-tooling
+         [:div.c-tooling__handle
+          {:on-click (u/without-propagation
+                      #(side-effect! [:tooling/toggle-tooling-active]))}
+          [:div.c-icon.c-icon--cog]]
+         [:div.l-col.l-col--fill-parent
+          [:div.l-col__item.c-tooling__item
+           [writes-browser φ]]
+          [:div.l-col__item.l-col__item--grow.c-tooling__item
+           [app-browser φ]]]]]])))
