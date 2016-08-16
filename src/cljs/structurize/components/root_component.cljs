@@ -1,6 +1,8 @@
 (ns structurize.components.root-component
   (:require [structurize.components.component-utils :as u]
             [structurize.components.tooling-component :refer [tooling]]
+            [structurize.system.side-effect-bus :refer [side-effect!]]
+            [structurize.system.state :refer [track]]
             [traversy.lens :as l]
             [bidi.bidi :as b]
             [reagent.core :as r]
@@ -11,30 +13,31 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; components
 
 
-(defn sign-in-with-github [{:keys [side-effect!] :as Φ}]
+(defn sign-in-with-github [φ]
   (log/debug "render sign-in-with-github")
   [:button.c-button {:on-click (u/without-propagation
-                                #(side-effect! [:auth/initialise-sign-in-with-github]))}
+                                #(side-effect! φ :auth/initialise-sign-in-with-github))}
    [:div.l-row.l-row--justify-center
     [:div.l-spacing.l-spacing--margin-right-small.c-icon.c-icon--github]
     "sign in with GitHub"]])
 
 
-(defn sign-out [{:keys [side-effect!] :as Φ}]
+(defn sign-out [Φ]
   (log/debug "render sign-out")
-  [:button.c-button {:on-click (u/without-propagation #(side-effect! [:auth/sign-out]))}
+  [:button.c-button {:on-click (u/without-propagation
+                                #(side-effect! Φ :auth/sign-out))}
    [:div.l-row.l-row--justify-center
     [:div.l-spacing.l-spacing--margin-right-small.c-icon.c-icon--exit]
     "sign out"]])
 
 
-(defn with-page-load [{:keys [track +app] :as φ} page]
-  (let [app-initialised? (track l/view-single
-                                (l/*> +app (l/in [:app-status]))
-                                (partial = :initialised))
-        chsk-status-initialising? (track l/view-single
-                                         (l/*> +app (l/in [:comms :chsk-status]))
-                                         (partial = :initialising))]
+(defn with-page-load [φ page]
+  (let [app-initialised? (track φ l/view-single
+                                  (l/in [:app-status])
+                                  (partial = :initialised))
+        chsk-status-initialising? (track φ l/view-single
+                                           (l/in [:comms :chsk-status])
+                                           (partial = :initialising))]
 
     (log/debug "render with-page-load")
 
@@ -45,23 +48,23 @@
         [:div.c-hero
          [:div.c-icon.c-icon--coffee-cup.c-icon--h-size-large]
          [:div.c-hero__caption "loading"]]]]
-      [page])))
+      [page φ])))
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; top level pages
 
 
-(defn home-page [{:keys [config-opts side-effect! track +app] :as Φ}]
+(defn home-page [Φ]
   [with-page-load Φ
-   (fn []
-     (let [me (track l/view-single
-                     (l/*> +app (l/in [:auth :me])))
-           star (track l/view-single
-                       (l/*> +app (l/in [:playground :star])))
-           heart (track l/view-single
-                        (l/*> +app (l/in [:playground :heart])))
-           pong (track l/view-single
-                       (l/*> +app (l/in [:playground :pong])))]
+   (fn [Φ]
+     (let [me (track Φ l/view-single
+                       (l/in [:auth :me]))
+           star (track Φ l/view-single
+                         (l/in [:playground :star]))
+           heart (track Φ l/view-single
+                          (l/in [:playground :heart]))
+           pong (track Φ l/view-single
+                         (l/in [:playground :pong]))]
 
        (log/debug "render home-page")
 
@@ -83,42 +86,42 @@
 
           [:div.l-spacing.l-spacing--margin-top-medium
            [:button.c-button {:on-click (u/without-propagation
-                                         #(side-effect! [:playground/inc-item
-                                                         {:path [:playground :star]
-                                                          :item-name "star"}]))}
+                                         #(side-effect! Φ :playground/inc-item
+                                                        {:path [:playground :star]
+                                                           :item-name "star"}))}
             [:div.l-row.l-row--justify-center
              [:div.l-spacing.l-spacing--margin-right-small.c-icon.c-icon--star]
              star]]]
 
           [:div.l-spacing.l-spacing--margin-top-medium
            [:button.c-button {:on-click (u/without-propagation
-                                         #(side-effect! [:playground/inc-item
-                                                         {:path [:playground :heart]
-                                                          :item-name "heart"}]))}
+                                         #(side-effect! Φ :playground/inc-item
+                                                        {:path [:playground :heart]
+                                                         :item-name "heart"}))}
             [:div.l-row.l-row--justify-center
              [:div.l-spacing.l-spacing--margin-right-small.c-icon.c-icon--heart]
              heart]]]
 
           [:div.l-spacing.l-spacing--margin-top-medium
            [:button.c-button {:on-click (u/without-propagation
-                                         #(side-effect! [:playground/ping {}]))}
+                                         #(side-effect! Φ :playground/ping {}))}
             [:div.l-row.l-row--justify-center
              [:div.l-spacing.l-spacing--margin-right-small.c-icon.c-icon--heart-pulse]
              pong]]]]]]))])
 
 
-(defn sign-in-with-github-page [{:keys [config-opts side-effect! track +app] :as Φ}]
+(defn sign-in-with-github-page [{:keys [config-opts] :as Φ}]
   [with-page-load Φ
-   (fn []
+   (fn [Φ]
      (log/debug "mount sign-in-with-github-page")
-     (side-effect! [:auth/mount-sign-in-with-github-page])
+     (side-effect! Φ :auth/mount-sign-in-with-github-page)
 
-     (fn []
-       (let [internal-error (track l/view-single
-                                   (l/*> +app (l/in [:location :query]))
+     (fn [Φ]
+       (let [internal-error (track Φ l/view-single
+                                   (l/in [:location :query])
                                    (partial = :error))
-             external-error (track l/view-single
-                                   (l/*> +app (l/in [:auth :sign-in-with-github-status]))
+             external-error (track Φ l/view-single
+                                   (l/in [:auth :sign-in-with-github-status])
                                    (partial = :failed))]
 
          (log/debug "render sign-in-with-github-page")
@@ -136,8 +139,8 @@
 
              [:div.l-col.l-col--align-center
               [:button.c-button {:on-click (u/without-propagation
-                                            #(side-effect! [:general/change-location
-                                                            {:path (b/path-for (:routes config-opts) :home)}]))}
+                                            #(side-effect! Φ :general/change-location
+                                                           {:path (b/path-for (:routes config-opts) :home)}))}
                [:div.l-row.l-row--justify-center
                 [:div.l-spacing.l-spacing--margin-right-small.c-icon.c-icon--home]
                 "go home"]]]]
@@ -151,9 +154,9 @@
               [:div.c-hero__caption "Signing you in with GitHub"]]])])))])
 
 
-(defn unknown-page [{:keys [config-opts side-effect!] :as Φ}]
+(defn unknown-page [{:keys [config-opts] :as Φ}]
   [with-page-load Φ
-   (fn []
+   (fn [Φ]
      (log/debug "render unkown-page")
 
      [:div.c-page
@@ -164,31 +167,31 @@
 
        [:div.l-col.l-col--align-center
         [:button.c-button {:on-click (u/without-propagation
-                                      #(side-effect! [:general/change-location
-                                                      {:path (b/path-for (:routes config-opts) :home)}]))}
+                                      #(side-effect! Φ :general/change-location
+                                                     {:path (b/path-for (:routes config-opts) :home)}))}
          [:div.l-row.l-row--justify-center
           [:div.l-spacing.l-spacing--margin-right-small.c-icon.c-icon--home]
           "go home"]]]]])])
 
 
 (defn root
-  [{:keys [config-opts track +app] :as Φ}]
+  [{:keys [config-opts] :as φ}]
 
   (let [tooling-enabled? (get-in config-opts [:tooling :enabled?])]
 
     (log/debug "mount root")
 
     (fn []
-      (let [handler (track l/view-single
-                           (l/*> +app (l/in [:location :handler])))]
+      (let [handler (track φ l/view-single
+                           (l/in [:location :handler]))]
 
         (log/debug "render root")
 
         [:div
          (case handler
-           :home [home-page Φ]
-           :sign-in-with-github [sign-in-with-github-page Φ]
-           :unknown [unknown-page Φ])
+           :home [home-page φ]
+           :sign-in-with-github [sign-in-with-github-page φ]
+           :unknown [unknown-page φ])
 
          (when tooling-enabled?
-           [tooling Φ])]))))
+           [tooling (assoc φ :context {:tooling? true})])]))))

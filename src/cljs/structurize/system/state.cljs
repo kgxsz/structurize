@@ -96,22 +96,22 @@
 
 (defn track
   ([Φ v +lens] (track Φ v +lens identity))
-  ([{{:keys [tooling?]} :context {:keys [!state]} :state :as Φ} v +lens f]
-   @(r/track #(let [path (if tooling?
+  ([{:keys [!state context] :as Φ} v +lens f]
+   @(r/track #(let [path (if (:tooling? context)
                            [:tooling]
                            [:app-history (get-in @!state [:tooling :track-index])])]
                 (f (v @!state (l/*> (l/in path) +lens)))))))
 
 
-(defn read [{{:keys [tooling?]} :context {:keys [!state]} :state :as Φ} v +lens]
-  (let [path (if tooling?
+(defn read [{:keys [!state context] :as Φ} v +lens]
+  (let [path (if (:tooling? context)
                [:tooling]
                [:app-history (get-in @!state [:tooling :read-write-index])])]
     (v @!state (l/*> (l/in path) +lens))))
 
 
-(defn write! [{:keys [config-opts] {:keys [tooling?]} :context {:keys [!state]} :state :as Φ} id f]
-  (if tooling?
+(defn write! [{:keys [config-opts !state context] :as Φ} id f]
+  (if (:tooling? context)
     (let [log? (get-in config-opts [:tooling :log?])]
       (when log? (log/debug "write:" id))
       (swap! !state update :tooling f))
@@ -145,37 +145,5 @@
   (start [component]
     (log/info "initialising state")
     (let [!state (make-!state config-opts)]
-      (assoc component
-             :!state !state
-
-             :+tooling (l/in [:tooling])
-
-             :+app-track (l/lens
-                          (fn [x]
-                            (let [index (get-in @!state [:tooling :track-index])]
-                              (list (get-in x [:app-history index]))))
-                          (fn [f x]
-                            (let [index (get-in @!state [:tooling :track-index])]
-                              (l/fapply-in [:app-history index] f x))))
-
-             :+app-read-write (l/lens
-                               (fn [x]
-                                 (let [index (get-in @!state [:tooling :read-write-index])]
-                                   (list (get-in x [:app-history index]))))
-                               (fn [f x]
-                                 (let [index (get-in @!state [:tooling :read-write-index])]
-                                   (l/fapply-in [:app-history index] f x))))
-
-             :track (fn track
-                      ([v +lens] (track v +lens identity))
-                      ([v +lens f]
-                       @(r/track #(f (v @!state +lens)))))
-
-             :read (fn [v +lens]
-                     (v @!state +lens))
-
-             :write-app! (make-write-app! config-opts !state)
-
-             :write-tooling! (make-write-tooling! config-opts !state))))
-
+      (assoc component :!state !state)))
   (stop [component] component))

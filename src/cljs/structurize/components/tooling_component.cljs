@@ -1,5 +1,7 @@
 (ns structurize.components.tooling-component
   (:require [structurize.components.component-utils :as u]
+            [structurize.system.side-effect-bus :refer [side-effect!]]
+            [structurize.system.state :refer [track]]
             [structurize.components.general :as g]
             [reagent.core :as r]
             [traversy.lens :as l]
@@ -10,31 +12,33 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; app-browser components
 
 
-(defn node [{:keys [config-opts side-effect! track +app +tooling] :as φ} path _]
+(defn node [{:keys [config-opts] :as φ} path _]
   (let [log? (get-in config-opts [:tooling :log?])
-        toggle-collapsed #(side-effect! [:tooling/toggle-node-collapsed {:path path}])
-        toggle-focused #(side-effect! [:tooling/toggle-node-focused {:path path}])]
+        toggle-collapsed #(side-effect! φ :tooling/toggle-node-collapsed
+                                        {:path path})
+        toggle-focused #(side-effect! φ :tooling/toggle-node-focused
+                                      {:path path})]
 
     (when log? (log/debug "mount node:" path))
 
     (fn [_ _ opts]
       (let [{:keys [tail-braces first? last? downstream-focused?]} opts
-            node (track l/view-single
-                        (l/*> +app (l/in path)))
-            collapsed? (track l/view-single
-                              (l/*> +tooling (l/in [:app-browser-props :collapsed]))
+            node (track (assoc-in φ [:context :tooling?] false) l/view-single
+                         (l/in path))
+            collapsed? (track φ l/view-single
+                              (l/in [:app-browser-props :collapsed])
                               #(contains? % path))
-            written? (track l/view-single
-                            (l/*> +tooling (l/in [:app-browser-props :written :paths]))
+            written? (track φ l/view-single
+                            (l/in [:app-browser-props :written :paths])
                             #(contains? % path))
-            upstream-written? (track l/view-single
-                                     (l/*> +tooling (l/in [:app-browser-props :written :upstream-paths]))
+            upstream-written? (track φ l/view-single
+                                     (l/in [:app-browser-props :written :upstream-paths])
                                      #(contains? % path))
-            focused? (track l/view-single
-                            (l/*> +tooling (l/in [:app-browser-props :focused :paths]))
+            focused? (track φ l/view-single
+                            (l/in [:app-browser-props :focused :paths])
                             #(contains? % path))
-            upstream-focused? (track l/view-single
-                                     (l/*> +tooling (l/in [:app-browser-props :focused :upstream-paths]))
+            upstream-focused? (track φ l/view-single
+                                     (l/in [:app-browser-props :focused :upstream-paths])
                                      #(contains? % path))
             downstream-focused? (or downstream-focused? focused?)
 
@@ -103,15 +107,15 @@
           tail-braces]]))))
 
 
-(defn node-group [{:keys [config-opts track +app] :as φ} path _]
+(defn node-group [{:keys [config-opts] :as φ} path _]
   (let [log? (get-in config-opts [:tooling :log?])]
 
     (when log? (log/debug "mount node-group:" path))
 
     (fn [_ _ opts]
       (let [{:keys [tail-braces downstream-focused?]} opts
-            nodes (track l/view-single
-                         (l/*> +app (l/in path)))
+            nodes (track (assoc-in φ [:context :tooling?] false) l/view-single
+                         (l/in path))
             num-nodes (count nodes)]
 
         (when log? (log/debug "render node-group:" path))
@@ -129,25 +133,24 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; top-level components
 
 
-(defn writes-browser [{:keys [config-opts track side-effect! +tooling] :as φ}]
+(defn writes-browser [{:keys [config-opts] :as φ}]
   (let [log? (get-in config-opts [:tooling :log?])]
 
     (when log? (log/debug "mount writes-browser"))
 
     (fn []
-      (let [writes (track l/view
-                          (l/*> +tooling (l/in [:writes]) l/all-values))
-            read-write-index (track l/view-single
-                                    (l/*> +tooling (l/in [:read-write-index])))
-            track-index (track l/view-single
-                               (l/*> +tooling (l/in [:track-index])))
+      (let [writes (track φ l/view
+                          (l/*> (l/in [:writes]) l/all-values))
+            read-write-index (track φ l/view-single
+                                    (l/in [:read-write-index]))
+            track-index (track φ l/view-single
+                               (l/in [:track-index]))
             real-time? (= track-index read-write-index)
             beginning-of-time? (zero? track-index)]
 
         (when log? (log/debug "render writes-browser"))
 
         [:div.l-row.c-writes-browser
-         
          [:div.l-col.c-writes-browser__controls
           [:div.c-writes-browser__controls__item.c-writes-browser__controls__item--green
            {:class (if real-time?
@@ -155,7 +158,7 @@
                      :c-writes-browser__controls__item--clickable)
             :on-click (when-not real-time?
                         (u/without-propagation
-                         #(side-effect! [:tooling/stop-time-travelling])))}
+                         #(side-effect! φ :tooling/stop-time-travelling)))}
            [:div.c-icon.c-icon--control-play]]
 
           [:div.c-writes-browser__controls__item.c-writes-browser__controls__item--yellow
@@ -163,7 +166,7 @@
                                                      :c-writes-browser__controls__item--clickable}))
             :on-click (when-not real-time?
                         (u/without-propagation
-                         #(side-effect! [:tooling/go-forward-in-time])))}
+                         #(side-effect! φ :tooling/go-forward-in-time)))}
            [:div.c-icon.c-icon--control-next]]
 
           [:div.c-writes-browser__controls__item.c-writes-browser__controls__item--yellow
@@ -172,7 +175,7 @@
                                 (not beginning-of-time?) (conj :c-writes-browser__controls__item--clickable)))
             :on-click (when (not beginning-of-time?)
                         (u/without-propagation
-                         #(side-effect! [:tooling/go-back-in-time])))}
+                         #(side-effect! φ :tooling/go-back-in-time)))}
            [:div.c-icon.c-icon--control-prev]]]
 
          [:div.l-row
@@ -199,21 +202,23 @@
        [node-group φ [] {:tail-braces "}"}]])))
 
 
-(defn tooling [{:keys [config-opts side-effect! track +tooling] :as φ}]
-  (let [log? (get-in config-opts [:tooling :log?])]
+(defn tooling [{:keys [config-opts] :as φ}]
+  (let [log? (get-in config-opts [:tooling :log?])
+        +slide-over (l/in [:tooling-slide-over])]
 
     (when log? (log/debug "mount tooling"))
 
     (fn []
       (when log? (log/debug "render tooling"))
       [:div.l-overlay.l-overlay--fill-viewport
-       [g/slide-over φ {:+slide-over (l/*> +tooling (l/in [:tooling-slide-over]))
+       [g/slide-over φ {:+slide-over +slide-over
                         :absolute-width 800
                         :direction :right}
         [:div.l-overlay__content.c-tooling
          [:div.c-tooling__handle
           {:on-click (u/without-propagation
-                      #(side-effect! [:tooling/toggle-tooling-active]))}
+                      #(side-effect! φ :toooling/toggle-tooling-slide-over
+                                     {:+slide-over +slide-over}))}
           [:div.c-icon.c-icon--cog]]
          [:div.l-col.l-col--fill-parent
           [:div.l-col__item.c-tooling__item

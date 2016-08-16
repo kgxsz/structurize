@@ -5,10 +5,12 @@
 
 (defn reload! []
   (renderer/render-root! {:config-opts (:config-opts system)
-                          :+tooling (get-in system [:state :+tooling])
-                          :+app (get-in system [:state :+app-track])
-                          :track (get-in system [:state :track])
-                          :side-effect! (get-in system [:side-effect-bus :side-effect!])}))
+                          :!state (get-in system [:state :!state])
+                          :<side-effects (get-in system [:side-effect-bus :<side-effects])
+                          :history (get-in system [:browser :history])
+                          :chsk (get-in system [:comms :chsk])
+                          :chsk-state (get-in system [:comms :chsk-state])
+                          :chsk-send (get-in system [:comms :chsk-send])}))
 
 
 (defn ^:export start []
