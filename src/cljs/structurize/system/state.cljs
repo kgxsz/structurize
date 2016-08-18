@@ -33,39 +33,6 @@
      (into #{} (concat removed-paths added-paths))))
 
 
-(defn make-write-app! [config-opts !state]
-  (fn [[id f]]
-    (let [state @!state
-          index (get-in state [:tooling :read-write-index])
-          real-time? (= (get-in state [:tooling :read-write-index])
-                        (get-in state [:tooling :track-index]))
-          pre-app (get-in state [:app-history index])
-          post-app (f pre-app)
-          paths (make-paths post-app pre-app)
-          upstream-paths (u/make-upstream-paths paths)]
-
-      (log/debug "write:" id)
-
-      (swap! !state #(cond-> %
-                       true (update-in [:tooling :read-write-index] inc)
-                       real-time? (update-in [:tooling :track-index] inc)
-                       true (assoc-in [:tooling :writes (inc index)] {:id id
-                                                                   :n (inc index)
-                                                                   :paths paths
-                                                                   :upstream-paths upstream-paths
-                                                                   :t (t/now)})
-                       real-time? (assoc-in [:tooling :app-browser-props :written] {:paths paths
-                                                                           :upstream-paths upstream-paths})
-                       true (assoc-in [:app-history (inc index)] post-app))))))
-
-
-(defn make-write-tooling! [config-opts !state]
-  (let [log? (get-in config-opts [:tooling :log?])]
-    (fn [[id f]]
-      (when log? (log/debug "write:" id))
-      (swap! !state update :tooling f))))
-
-
 (defn make-!state [config-opts]
   (r/atom {:app-history {0 {:playground {:heart 0
                                          :star 3

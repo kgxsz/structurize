@@ -18,7 +18,7 @@
 (defmulti process-side-effect (fn [_ id _] id))
 
 
-(defmethod process-side-effect :toooling/toggle-tooling-slide-over
+(defmethod process-side-effect :tooling/toggle-tooling-slide-over
   [Φ id {:keys [+slide-over] :as props}]
   (write! Φ :tooling/toggle-tooling-slide-over
          (fn [x]

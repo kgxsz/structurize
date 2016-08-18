@@ -217,7 +217,7 @@
         [:div.l-overlay__content.c-tooling
          [:div.c-tooling__handle
           {:on-click (u/without-propagation
-                      #(side-effect! φ :toooling/toggle-tooling-slide-over
+                      #(side-effect! φ :tooling/toggle-tooling-slide-over
                                      {:+slide-over +slide-over}))}
           [:div.c-icon.c-icon--cog]]
          [:div.l-col.l-col--fill-parent
