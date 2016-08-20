@@ -29,7 +29,7 @@
   [Φ id {:keys [path] :as props}]
   (write! Φ :tooling/toggle-node-collapsed
           (fn [x]
-            (update-in x [:app-browser-props :collapsed]
+            (update-in x [:tooling :app-browser-props :collapsed]
                        #(if (contains? % path)
                           (disj % path)
                           (conj % path))))))
@@ -40,54 +40,54 @@
   (write! Φ :tooling/toggle-node-focused
          (fn [x]
            (-> x
-               (update-in [:app-browser-props :focused :paths]
+               (update-in [:tooling :app-browser-props :focused :paths]
                           #(if (empty? %) #{path} #{}))
-               (update-in [:app-browser-props :focused :upstream-paths]
+               (update-in [:tooling :app-browser-props :focused :upstream-paths]
                           #(if (empty? %) (u/make-upstream-paths #{path}) #{}))))))
 
 
 (defmethod process-side-effect :tooling/go-back-in-time
   [Φ id props]
   (let [track-index (max 0 (dec (read Φ l/view-single
-                                      (l/in [:track-index]))))
+                                      (l/in [:tooling :track-index]))))
         {:keys [paths upstream-paths]} (read Φ l/view-single
-                                             (l/in [:writes track-index]))]
+                                             (l/in [:tooling :writes track-index]))]
     (write! Φ :tooling/go-back-in-time
             (fn [x]
               (-> x
-                  (assoc :track-index track-index)
-                  (assoc-in [:app-browser-props :written] {:paths (or paths #{})
-                                                           :upstream-paths (or upstream-paths #{})}))))))
+                  (assoc-in [:tooling :track-index] track-index)
+                  (assoc-in [:tooling :app-browser-props :written] {:paths (or paths #{})
+                                                                    :upstream-paths (or upstream-paths #{})}))))))
 
 
 (defmethod process-side-effect :tooling/go-forward-in-time
   [Φ id props]
   (let [read-write-index (read Φ l/view-single
-                               (l/in [:read-write-index]))
+                               (l/in [:tooling :read-write-index]))
         track-index (min read-write-index (inc (read Φ l/view-single
-                                                     (l/in [:track-index]))))
+                                                     (l/in [:tooling :track-index]))))
         {:keys [paths upstream-paths]} (read Φ l/view-single
-                                             (l/in [:writes track-index]))]
+                                             (l/in [:tooling :writes track-index]))]
     (write! Φ :tooling/go-forward-in-time
             (fn [x]
               (-> x
-                  (assoc :track-index track-index)
-                  (assoc-in [:app-browser-props :written] {:paths (or paths #{})
-                                                           :upstream-paths (or upstream-paths #{})}))))))
+                  (assoc-in [:tooling :track-index] track-index)
+                  (assoc-in [:tooling :app-browser-props :written] {:paths (or paths #{})
+                                                                    :upstream-paths (or upstream-paths #{})}))))))
 
 
 (defmethod process-side-effect :tooling/stop-time-travelling
   [Φ id props]
   (let [read-write-index (read Φ l/view-single
-                               (l/in [:read-write-index]))
+                               (l/in [:tooling :read-write-index]))
         {:keys [paths upstream-paths]} (read Φ l/view-single
-                                             (l/in [:writes read-write-index]))]
+                                             (l/in [:tooling :writes read-write-index]))]
     (write! Φ :tooling/stop-time-travellin
             (fn [x]
               (-> x
-                  (assoc :track-index read-write-index)
-                  (assoc-in [:app-browser-props :written] {:paths (or paths #{})
-                                                           :upstream-paths (or upstream-paths #{})}))))))
+                  (assoc-in [:tooling :track-index] read-write-index)
+                  (assoc-in [:tooling :app-browser-props :written] {:paths (or paths #{})
+                                                                    :upstream-paths (or upstream-paths #{})}))))))
 
 
 (defmethod process-side-effect :browser/change-location

@@ -64,30 +64,29 @@
 (defn track
   ([Φ v +lens] (track Φ v +lens identity))
   ([{:keys [!state context] :as Φ} v +lens f]
-   @(r/track #(let [path (if (:tooling? context)
-                           [:tooling]
-                           [:app-history (get-in @!state [:tooling :track-index])])]
-                (f (v @!state (l/*> (l/in path) +lens)))))))
+   (if (:tooling? context)
+     @(r/track #(f (v @!state +lens)))
+     @(r/track #(let [index (get-in @!state [:tooling :track-index])]
+                 (f (v @!state (l/*> (l/in [:app-history index]) +lens))))))))
 
 
 (defn read [{:keys [!state context] :as Φ} v +lens]
-  (let [path (if (:tooling? context)
-               [:tooling]
-               [:app-history (get-in @!state [:tooling :read-write-index])])]
-    (v @!state (l/*> (l/in path) +lens))))
+  (if (:tooling? context)
+    (v @!state +lens)
+    (let [index (get-in @!state [:tooling :read-write-index])]
+      (v @!state (l/*> (l/in [:app-history index]) +lens)))))
 
 
 (defn write! [{:keys [config-opts !state context] :as Φ} id f]
   (if (:tooling? context)
     (let [log? (get-in config-opts [:tooling :log?])]
       (when log? (log/debug "write:" id))
-      (swap! !state update :tooling f))
+      (swap! !state f))
     (let [state @!state
           index (get-in state [:tooling :read-write-index])
           real-time? (= (get-in state [:tooling :read-write-index])
                         (get-in state [:tooling :track-index]))
           pre-app (get-in state [:app-history index])
-
           post-app (f pre-app)
           paths (make-paths post-app pre-app)
           upstream-paths (u/make-upstream-paths paths)]
