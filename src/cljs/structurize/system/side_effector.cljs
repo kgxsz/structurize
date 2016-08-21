@@ -277,17 +277,18 @@
           log? (get-in config-opts [:tooling :log?])
           real-time? (apply = (l/view @!state (l/+> (l/in [:tooling :read-write-index])
                                                     (l/in [:tooling :track-index]))))
-          browser? (= (namespace id) "browser")
-          comms? (= (namespace id) "comms")]
+          tooling? (:tooling? context)
+          browser? (:browser? context)
+          comms? (:comms? context)]
 
       (cond
         (or browser? comms?) (do
                                (log/debug "side-effect:" id)
                                (process-side-effect Φ id props))
 
-        (:tooling? context) (do
-                              (when log? (log/debug "side-effect:" id))
-                              (process-side-effect Φ id props))
+        tooling? (do
+                   (when log? (log/debug "side-effect:" id))
+                   (process-side-effect Φ id props))
 
         real-time? (do
                      (log/debug "side-effect:" id)

@@ -79,14 +79,14 @@
 
   (start [component]
     (log/info "initialising browser")
-    (let [history (make-history)]
-
+    (let [history (make-history)
+          φ {:context {:browser? true}
+             :config-opts config-opts
+             :!state (:!state state)
+             :<side-effects (:<side-effects side-effect-bus)
+             :history history}]
       (log/info "begin listening for navigation from the browser")
-      (listen-for-navigation {:config-opts config-opts
-                              :!state (:!state state)
-                              :<side-effects (:<side-effects side-effect-bus)
-                              :history history})
-
+      (listen-for-navigation φ)
       (assoc component :history history)))
 
   (stop [component] component))
