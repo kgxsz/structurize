@@ -1,7 +1,7 @@
 (ns structurize.system.browser
   (:require [bidi.bidi :as b]
             [cemerick.url :refer [map->query query->map]]
-            [structurize.system.side-effect-bus :refer [side-effect!]]
+            [structurize.system.utils :refer [side-effect!]]
             [clojure.string :as str]
             [com.stuartsierra.component :as component]
             [goog.events :as events]
@@ -10,8 +10,7 @@
   (:import [goog.history Html5History EventType]))
 
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; history setup
-
+;; helper functions ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defn make-transformer
   "Custom transformer required to manage query parameters."
@@ -46,35 +45,13 @@
                     (side-effect! Φ :browser/change-location
                                   {:location location})))]
     (doto history
-      (goog.events/listen EventType.NAVIGATE #(handler %))
+      (events/listen EventType.NAVIGATE #(handler %))
       (.setEnabled true))))
 
 
-(defn change-location!
-  "Updates the browser's location accordingly. The browser will fire a navigation
-   event if the location changes, which will be dealt with by a listener.
+;; component setup ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-   Params:
-   prefix - the part before the path, set it if you want to navigate to a different site
-   path - the path you wish to navigate to
-   query - map of query params
-   replace? - ensures that the browser replaces the current location in history"
-  [{:keys [history] :as Φ} {:keys [prefix path query replace?]}]
-
-  (let [query-string (when-not (str/blank? (map->query query)) (str "?" (map->query query)))
-        current-path (-> (.getToken history) (str/split "?") first)
-        token (str (or path current-path) query-string)]
-    (log/debug "dispatching change of location to browser:" (str prefix token))
-    (cond
-      prefix (set! js/window.location (str prefix token))
-      replace? (.replaceToken history token)
-      :else (.setToken history token))))
-
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; component setup
-
-
-(defrecord Browser [config-opts state side-effect-bus]
+(defrecord Browser [config-opts state side-effector]
   component/Lifecycle
 
   (start [component]
@@ -83,7 +60,7 @@
           φ {:context {:browser? true}
              :config-opts config-opts
              :!state (:!state state)
-             :<side-effects (:<side-effects side-effect-bus)
+             :<side-effects (:<side-effects side-effector)
              :history history}]
       (log/info "begin listening for navigation from the browser")
       (listen-for-navigation φ)

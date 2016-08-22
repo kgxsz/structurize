@@ -1,6 +1,5 @@
 (ns structurize.components.general
-  (:require [structurize.system.side-effect-bus :refer [side-effect!]]
-            [structurize.system.state :refer [track]]
+  (:require [structurize.system.utils :refer [side-effect! track]]
             [traversy.lens :as l])
   (:require-macros [structurize.components.macros :refer [log-info log-debug log-error]]))
 

@@ -1,8 +1,7 @@
 (ns structurize.components.root-component
   (:require [structurize.components.utils :as u]
             [structurize.components.tooling-component :refer [tooling]]
-            [structurize.system.side-effect-bus :refer [side-effect!]]
-            [structurize.system.state :refer [track]]
+            [structurize.system.utils :refer [track side-effect!]]
             [traversy.lens :as l]
             [bidi.bidi :as b]
             [reagent.core :as r])
@@ -10,8 +9,7 @@
                    [structurize.components.macros :refer [log-info log-debug log-error]]))
 
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; components
-
+;; helper components ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defn sign-in-with-github [φ]
   (log-debug φ "render sign-in-with-github")
@@ -51,8 +49,7 @@
       [page φ])))
 
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; top level pages
-
+;; top level page components ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defn home-page [Φ]
   [with-page-load Φ
@@ -173,6 +170,8 @@
           [:div.l-spacing.l-spacing--margin-right-small.c-icon.c-icon--home]
           "go home"]]]]])])
 
+
+;; root component ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defn root
   [{:keys [config-opts] :as φ}]

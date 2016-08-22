@@ -1,14 +1,12 @@
 (ns structurize.system.comms
   (:require [com.stuartsierra.component :as component]
-            [structurize.system.side-effect-bus :refer [side-effect!]]
+            [structurize.system.utils :refer [side-effect!]]
             [taoensso.sente :as sente]
             [taoensso.timbre :as log])
-  (:require-macros [cljs.core.async.macros :refer [go]])
   (:import [goog.history Html5History EventType]))
 
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; multi-method message handling
-
+;; backend to frontend message handling ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defmulti process-received-message (fn [_ event-message] (:id event-message)))
 
@@ -28,8 +26,7 @@
   (log/debug "no handler for received message:" id))
 
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; comms setup
-
+;; helper functions ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defn make-receive-message
   "Returns a function that receives a message and processes it appropriately via multimethods"
@@ -40,79 +37,9 @@
     (process-received-message φ event-message)))
 
 
-(defn send!
-  "Takes a message to send, an mutation is emitted
-   when the message is dispatched, and another when the message reply is received.
+;; component setup ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-   Params:
-   message - the sente message, in the form of a vector, with id
-   timeout - in milliseconds"
-  [{:keys [chsk-send] :as φ} id params {:keys [timeout on-success on-failure]}]
-
-  (let [φ (assoc φ :context {:comms? true})]
-
-    (log/debug "dispatching message to server:" id)
-    (side-effect! φ :comms/message-sent
-                  {:message-id id})
-
-    (chsk-send
-     [id params]
-     (or timeout 10000)
-     (fn [reply]
-       (if (sente/cb-success? reply)
-         (let [[id _] reply]
-           (log/debug "received a message reply from server:" id)
-           (side-effect! φ :comms/message-reply-received
-                         {:message-id id :reply reply :on-success on-success}))
-         (do
-           (log/warn "message failed with:" reply)
-           (side-effect! φ :comms/message-failed
-                         {:message-id id :reply reply :on-failure on-failure})))))))
-
-
-(defn post!
-  "Makes an ajax post to the server. A mutation is emitted
-   when the request is made, and another when the response is received, one subtelty
-   worth mentioning is that posting is only used to perform session mutating actions,
-   as such, we need to reconnect the chsk upon the successful receipt of a post response.
-
-   Params:
-   path - path to post to
-   params - map of params to post
-   timeout - in milliseconds"
-  [{:keys [chsk chsk-state] :as φ} path params {:keys [timeout on-success on-failure]}]
-
-  (let [φ (assoc φ :context {:comms? true})]
-    (log/debug "dispatching post to server:" path)
-
-    (side-effect! φ :comms/post-sent
-                  {:path path})
-
-    (sente/ajax-lite
-     path
-     {:method :post
-      :timeout-ms (or timeout 10000)
-      :params (merge params (select-keys @chsk-state [:csrf-token]))}
-     (fn [response]
-       (if (:success? response)
-         (do
-           (log/debug "received a post response from server:" path)
-           (side-effect! φ :comms/post-response-received
-                         {:path path :response response :on-success on-success})
-
-           ;; we reconnect the websocket connection here to pick up any changes
-           ;; in the session that may have come about with the post request
-           (sente/chsk-reconnect! chsk))
-         (do
-           (log/warn "post failed with:" response)
-           (side-effect! φ :comms/post-failed
-                         {:path path :response response :on-failure on-failure})))))))
-
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; component setup
-
-
-(defrecord Comms [config-opts state side-effect-bus]
+(defrecord Comms [config-opts state side-effector]
   component/Lifecycle
 
   (start [component]
@@ -122,7 +49,7 @@
           φ {:context {:comms? true}
              :config-opts config-opts
              :!state (:!state state)
-             :<side-effects (:<side-effects side-effect-bus)
+             :<side-effects (:<side-effects side-effector)
              :chsk chsk
              :chsk-state chsk-state
              :chsk-send chsk-send}]

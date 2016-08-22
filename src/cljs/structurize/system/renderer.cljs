@@ -9,18 +9,19 @@
   (r/render [root Φ] (js/document.getElementById "js-root")))
 
 
-(defrecord Renderer [config-opts state side-effect-bus browser comms]
+(defrecord Renderer [config-opts state side-effector browser comms]
   component/Lifecycle
 
   (start [component]
     (log/info "initialising renderer")
-    (render-root! {:config-opts config-opts
-                   :!state (:!state state)
-                   :<side-effects (:<side-effects side-effect-bus)
-                   :history (:history browser)
-                   :chsk (:chsk comms)
-                   :chsk-state (:chsk-state comms)
-                   :chsk-send (:chsk-send comms)})
+    (r/render [root {:config-opts config-opts
+                     :!state (:!state state)
+                     :<side-effects (:<side-effects side-effector)
+                     :history (:history browser)
+                     :chsk (:chsk comms)
+                     :chsk-state (:chsk-state comms)
+                     :chsk-send (:chsk-send comms)}]
+              (js/document.getElementById "js-root"))
     component)
 
   (stop [component] component))

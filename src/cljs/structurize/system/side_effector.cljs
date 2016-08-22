@@ -1,19 +1,15 @@
 (ns structurize.system.side-effector
-  (:require [structurize.system.utils :as u]
-            [structurize.system.state :refer [read write!]]
-            [structurize.system.browser :refer [change-location!]]
-            [structurize.system.comms :refer [post! send!]]
+  (:require [structurize.system.utils :as u :refer [read write! change-location! post! send!]]
             [structurize.components.general :as g]
             [bidi.bidi :as b]
             [traversy.lens :as l]
             [com.stuartsierra.component :as component]
             [cljs.core.async :as a]
             [taoensso.timbre :as log])
-  (:require-macros [cljs.core.async.macros :refer [go go-loop]]))
+  (:require-macros [cljs.core.async.macros :refer [go-loop]]))
 
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; multi-method side-effect handling
-
+;; side-effect handling ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defmulti process-side-effect (fn [_ id _] id))
 
@@ -266,8 +262,7 @@
   (log/warn "failed to process side-effect:" id))
 
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; side-effector setup
-
+;; helper functions ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defn listen-for-side-effects
   [<side-effects]
@@ -299,16 +294,16 @@
     (recur)))
 
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; component setup
+;; component setup ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-
-(defrecord SideEffector [config-opts side-effect-bus]
+(defrecord SideEffector [config-opts]
   component/Lifecycle
 
   (start [component]
     (log/info "initialising side-effector")
-    (log/info "begin listening for side effects")
-    (listen-for-side-effects (:<side-effects side-effect-bus))
-    component)
+    (let [<side-effects (a/chan)]
+      (log/info "begin listening for side effects")
+      (listen-for-side-effects <side-effects)
+      (assoc component :<side-effects <side-effects)))
 
   (stop [component] component))

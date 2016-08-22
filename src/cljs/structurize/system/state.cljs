@@ -1,39 +1,10 @@
 (ns structurize.system.state
-  (:require [structurize.system.utils :as u]
-            [cljs-time.core :as t]
-            [clojure.data :as data]
-            [com.stuartsierra.component :as component]
-            [traversy.lens :as l]
+  (:require [com.stuartsierra.component :as component]
             [reagent.core :as r]
             [taoensso.timbre :as log]))
 
 
-;; helpers ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-
-(defn map->paths
-  "This function takes a map and returns a list of every possible path in the map.
-   For example {:a 1 :b {:c 2 :d 3}} would give ((:a) (:b :c) (:b :d))."
-  [m]
-
-  (if (or (not (map? m)) (empty? m))
-    '(())
-    (for [[k v] m
-          subkey (map->paths v)]
-      (cons k subkey))))
-
-
-(defn make-paths
-  "This function finds the path to every changed node between the two maps."
-  [post pre]
-
-  (let [[added removed _] (data/diff post pre)
-        removed-paths (if removed (map->paths removed) [])
-        added-paths (if added (map->paths added) [])]
-     (into #{} (concat removed-paths added-paths))))
-
-
-(defn make-!state [config-opts]
+(defn ->!state [config-opts]
   (r/atom {:app-history {0 {:playground {:heart 0
                                          :star 3
                                          :ping 0
@@ -58,58 +29,10 @@
                                                    :upstream-paths #{}}}}}))
 
 
-;; component setup ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-
-(defn track
-  ([Φ v +lens] (track Φ v +lens identity))
-  ([{:keys [!state context] :as Φ} v +lens f]
-   (if (:tooling? context)
-     @(r/track #(f (v @!state +lens)))
-     @(r/track #(let [index (get-in @!state [:tooling :track-index])]
-                 (f (v @!state (l/*> (l/in [:app-history index]) +lens))))))))
-
-
-(defn read [{:keys [!state context] :as Φ} v +lens]
-  (if (:tooling? context)
-    (v @!state +lens)
-    (let [index (get-in @!state [:tooling :read-write-index])]
-      (v @!state (l/*> (l/in [:app-history index]) +lens)))))
-
-
-(defn write! [{:keys [config-opts !state context] :as Φ} id f]
-  (if (:tooling? context)
-    (let [log? (get-in config-opts [:tooling :log?])]
-      (when log? (log/debug "write:" id))
-      (swap! !state f))
-    (let [state @!state
-          index (get-in state [:tooling :read-write-index])
-          real-time? (= (get-in state [:tooling :read-write-index])
-                        (get-in state [:tooling :track-index]))
-          pre-app (get-in state [:app-history index])
-          post-app (f pre-app)
-          paths (make-paths post-app pre-app)
-          upstream-paths (u/make-upstream-paths paths)]
-
-      (log/debug "write:" id)
-
-      (swap! !state #(cond-> %
-                       true (update-in [:tooling :read-write-index] inc)
-                       real-time? (update-in [:tooling :track-index] inc)
-                       true (assoc-in [:tooling :writes (inc index)] {:id id
-                                                                      :n (inc index)
-                                                                      :paths paths
-                                                                      :upstream-paths upstream-paths
-                                                                      :t (t/now)})
-                       real-time? (assoc-in [:tooling :app-browser-props :written] {:paths paths
-                                                                                    :upstream-paths upstream-paths})
-                       true (assoc-in [:app-history (inc index)] post-app))))))
-
-
 (defrecord State [config-opts]
   component/Lifecycle
   (start [component]
     (log/info "initialising state")
-    (let [!state (make-!state config-opts)]
+    (let [!state (->!state config-opts)]
       (assoc component :!state !state)))
   (stop [component] component))

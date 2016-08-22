@@ -1,7 +1,6 @@
 (ns structurize.components.tooling-component
   (:require [structurize.components.utils :as u]
-            [structurize.system.side-effect-bus :refer [side-effect!]]
-            [structurize.system.state :refer [track]]
+            [structurize.system.utils :refer [track side-effect!]]
             [structurize.components.general :as g]
             [reagent.core :as r]
             [traversy.lens :as l])
@@ -11,8 +10,7 @@
 (declare node-group)
 
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; app-browser components
-
+;; app-browser components ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defn node [φ path _]
   (let [toggle-collapsed #(side-effect! φ :tooling/toggle-node-collapsed
@@ -133,8 +131,7 @@
            [node φ path {:tail-braces tail-braces :first? first? :last? last? :downstream-focused? downstream-focused?}]]))])))
 
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; top-level components
-
+;; top level browser components ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defn writes-browser [φ]
   (log-debug φ "mount writes-browser")
@@ -200,6 +197,8 @@
     [:div.c-app-browser
      [node-group φ [] {:tail-braces "}"}]]))
 
+
+;; tooling component ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defn tooling [φ]
   (let [+slide-over (l/in [:tooling :tooling-slide-over])]
