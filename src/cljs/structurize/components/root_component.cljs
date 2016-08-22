@@ -1,20 +1,20 @@
 (ns structurize.components.root-component
-  (:require [structurize.components.component-utils :as u]
+  (:require [structurize.components.utils :as u]
             [structurize.components.tooling-component :refer [tooling]]
             [structurize.system.side-effect-bus :refer [side-effect!]]
             [structurize.system.state :refer [track]]
             [traversy.lens :as l]
             [bidi.bidi :as b]
-            [reagent.core :as r]
-            [taoensso.timbre :as log])
-  (:require-macros [cljs.core.async.macros :refer [go]]))
+            [reagent.core :as r])
+  (:require-macros [cljs.core.async.macros :refer [go]]
+                   [structurize.components.macros :refer [log-info log-debug log-error]]))
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; components
 
 
 (defn sign-in-with-github [φ]
-  (log/debug "render sign-in-with-github")
+  (log-debug φ "render sign-in-with-github")
   [:button.c-button {:on-click (u/without-propagation
                                 #(side-effect! φ :auth/initialise-sign-in-with-github))}
    [:div.l-row.l-row--justify-center
@@ -23,7 +23,7 @@
 
 
 (defn sign-out [Φ]
-  (log/debug "render sign-out")
+  (log-debug Φ "render sign-out")
   [:button.c-button {:on-click (u/without-propagation
                                 #(side-effect! Φ :auth/sign-out))}
    [:div.l-row.l-row--justify-center
@@ -39,7 +39,7 @@
                                            (l/in [:comms :chsk-status])
                                            (partial = :initialising))]
 
-    (log/debug "render with-page-load")
+    (log-debug φ "render with-page-load")
 
     (if (or (not app-initialised?)
             chsk-status-initialising?)
@@ -66,7 +66,7 @@
            pong (track Φ l/view-single
                          (l/in [:playground :pong]))]
 
-       (log/debug "render home-page")
+       (log-debug Φ "render home-page")
 
        [:div.c-page
         [:div.l-col.l-col--justify-center
@@ -113,7 +113,7 @@
 (defn sign-in-with-github-page [{:keys [config-opts] :as Φ}]
   [with-page-load Φ
    (fn [Φ]
-     (log/debug "mount sign-in-with-github-page")
+     (log-debug Φ "mount sign-in-with-github-page")
      (side-effect! Φ :auth/mount-sign-in-with-github-page)
 
      (fn [Φ]
@@ -124,7 +124,7 @@
                                    (l/in [:auth :sign-in-with-github-status])
                                    (partial = :failed))]
 
-         (log/debug "render sign-in-with-github-page")
+         (log-debug Φ "render sign-in-with-github-page")
 
          [:div.c-page
           (if (or internal-error external-error)
@@ -157,7 +157,7 @@
 (defn unknown-page [{:keys [config-opts] :as Φ}]
   [with-page-load Φ
    (fn [Φ]
-     (log/debug "render unkown-page")
+     (log-debug Φ "render unkown-page")
 
      [:div.c-page
       [:div.l-col.l-col--justify-center
@@ -179,13 +179,13 @@
 
   (let [tooling-enabled? (get-in config-opts [:tooling :enabled?])]
 
-    (log/debug "mount root")
+    (log-debug Φ "mount root")
 
     (fn []
       (let [handler (track φ l/view-single
                            (l/in [:location :handler]))]
 
-        (log/debug "render root")
+        (log-debug Φ "render root")
 
         [:div
          (case handler

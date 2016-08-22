@@ -20,4 +20,3 @@
                          [true :unknown]]]))
 
   (stop [component] component))
-

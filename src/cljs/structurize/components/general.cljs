@@ -1,8 +1,8 @@
 (ns structurize.components.general
-  (:require [taoensso.timbre :as log]
-            [structurize.system.side-effect-bus :refer [side-effect!]]
+  (:require [structurize.system.side-effect-bus :refer [side-effect!]]
             [structurize.system.state :refer [track]]
-            [traversy.lens :as l]))
+            [traversy.lens :as l])
+  (:require-macros [structurize.components.macros :refer [log-info log-debug log-error]]))
 
 (defn +slide-over-open? [+slide-over]
   (l/*> +slide-over (l/in [:open?])))
@@ -13,7 +13,7 @@
 (defn slide-over
   [φ {:keys [+slide-over absolute-width direction]} content]
   (let [open? (track φ l/view-single (+slide-over-open? +slide-over))]
-    (log/debug "render slide-over")
+    (log-debug φ "render slide-over")
     [:div.l-slide-over {:style {:width (str absolute-width "px")
                                 direction (if open? 0 (str (- absolute-width) "px"))}}
      content]))

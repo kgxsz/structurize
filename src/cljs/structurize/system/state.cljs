@@ -1,5 +1,5 @@
 (ns structurize.system.state
-  (:require [structurize.system.system-utils :as u]
+  (:require [structurize.utils :as u]
             [cljs-time.core :as t]
             [clojure.data :as data]
             [com.stuartsierra.component :as component]

@@ -1,4 +1,4 @@
-(ns structurize.components.component-utils)
+(ns structurize.components.utils)
 
 
 (defn ->class
