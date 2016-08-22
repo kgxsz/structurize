@@ -73,7 +73,7 @@
                                leiningen.garden]
 
                        :cljsbuild {:builds [{:id "structurize"
-                                             :source-paths ["src/cljs" "src/cljc" "env/prod/clj"]
+                                             :source-paths ["src/cljs" "src/cljc" "env/prod/cljs"]
                                              :compiler {:output-to "resources/public/js/structurize.js"
                                                         :main "structurize.runner"
                                                         :asset-path "/js/out"
