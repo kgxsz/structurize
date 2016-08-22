@@ -1,5 +1,5 @@
 (ns structurize.system.side-effector
-  (:require [structurize.utils :as u]
+  (:require [structurize.system.utils :as u]
             [structurize.system.state :refer [read write!]]
             [structurize.system.browser :refer [change-location!]]
             [structurize.system.comms :refer [post! send!]]

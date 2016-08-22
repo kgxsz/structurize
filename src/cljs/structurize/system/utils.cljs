@@ -1,4 +1,4 @@
-(ns structurize.utils)
+(ns structurize.system.utils)
 
 
 (defn make-upstream-paths [paths]
