@@ -179,13 +179,13 @@
 
   (let [tooling-enabled? (get-in config-opts [:tooling :enabled?])]
 
-    (log-debug Φ "mount root")
+    (log-debug φ "mount root")
 
     (fn []
       (let [handler (track φ l/view-single
                            (l/in [:location :handler]))]
 
-        (log-debug Φ "render root")
+        (log-debug φ "render root")
 
         [:div
          (case handler
