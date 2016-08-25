@@ -9,6 +9,8 @@
             [taoensso.timbre :as log]))
 
 
+;; handlers ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
 (defn root-page-handler [request]
   (let [root-page (html5
                    [:head
@@ -86,8 +88,7 @@
   {:status 200 :session nil})
 
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; component setup
-
+;; component setup ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defrecord Handlers [config-opts db comms]
   component/Lifecycle

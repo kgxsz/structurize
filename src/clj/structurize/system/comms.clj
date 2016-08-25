@@ -7,13 +7,12 @@
             [taoensso.timbre :as log]))
 
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; multi-method handling
+;; frontend to backend message handling ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(defmulti process-receive-message (fn [_ event-message] (:id event-message)))
 
 
-(defmulti handler (fn [_ event-message] (:id event-message)))
-
-
-(defmethod handler :auth/initialise-sign-in-with-github
+(defmethod process-receive-message :auth/initialise-sign-in-with-github
   [{:keys [config-opts db]} {:keys [uid ?reply-fn] [id ?data] :event}]
 
   (let [client-id (get-in config-opts [:github-auth :client-id])
@@ -26,49 +25,47 @@
     (?reply-fn [id {:attempt-id attempt-id :client-id client-id :scope scope :redirect-prefix redirect-prefix}])))
 
 
-(defmethod handler :general/initialise-app
+(defmethod process-receive-message :general/initialise-app
   [{:keys [config-opts db]} {:keys [uid ?reply-fn] [id ?data] :event}]
   (let [user (some-> (get-in @db [:users uid]) (select-keys [:name :email :login :avatar-url]))]
     (?reply-fn [id {:me user}])))
 
 
-(defmethod handler :playground/ping
+(defmethod process-receive-message :playground/ping
   [{:keys [config-opts db]} {:keys [uid ?reply-fn] [id ?data] :event}]
   (let [{:keys [ping]} ?data]
     (go (<! (timeout 2000))
         (?reply-fn [id {:pong ping}]))))
 
 
-(defmethod handler :chsk/ws-ping
+(defmethod process-receive-message :chsk/ws-ping
   [φ event-message])
 
 
-(defmethod handler :chsk/uidport-open
+(defmethod process-receive-message :chsk/uidport-open
   [φ event-message])
 
 
-(defmethod handler :chsk/uidport-close
+(defmethod process-receive-message :chsk/uidport-close
   [φ event-message])
 
 
-(defmethod handler :default
+(defmethod process-receive-message :default
   [φ {:keys [id]}]
   (log/debug "unhandled event-message:" id))
 
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; top level handling
+;; helper functions ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-
-(defn make-handler
-  "Returns a function that receives a message and handles it appropriately via multimethods"
+(defn make-receive-message
+  "Returns a function that receives a message and processes it appropriately via multimethods"
   [φ]
   (fn [{:keys [id client-id uid] :as event-message}]
     (log/debugf "received %s from client %s with uid %s" id client-id uid)
-    (handler φ event-message)))
+    (process-receive-message φ event-message)))
 
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; component setup
-
+;; component setup ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defrecord Comms [config-opts db]
   component/Lifecycle
@@ -76,7 +73,7 @@
   (start [component]
     (log/info "initialising comms")
     (let [chsk-conn (sente/make-channel-socket! sente-web-server-adapter (get-in config-opts [:comms :chsk-opts]))
-          stop-chsk-router! (sente/start-chsk-router! (:ch-recv chsk-conn) (make-handler {:config-opts config-opts :db db}))]
+          stop-chsk-router! (sente/start-chsk-router! (:ch-recv chsk-conn) (make-receive-message {:config-opts config-opts :db db}))]
       (assoc component
              :chsk-conn chsk-conn
              :stop-chsk-router! stop-chsk-router!)))

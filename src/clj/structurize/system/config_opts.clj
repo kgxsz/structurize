@@ -5,8 +5,10 @@
             [camel-snake-kebab.core :as csk]))
 
 
-(defn load-config
-  "Loads pubic and private config from hardocded locations, then merges them.
+;; helper functions ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(defn get-config
+  "Goes and gets pubic and private config from hardcoded locations, then merges them.
    If no private file is present, will simply give an empty map in its place."
   []
 
@@ -23,7 +25,7 @@
    before going to the config map to get a value."
   []
 
-  (let [config (load-config)]
+  (let [config (get-config)]
     (fn [kw {:keys [type]}]
       (if-let [v (-> kw name csk/->SCREAMING_SNAKE_CASE System/getenv)]
         (case type
@@ -31,6 +33,8 @@
           v)
         (get config kw)))))
 
+
+;; component setup ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defrecord ConfigOpts []
   component/Lifecycle
