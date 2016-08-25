@@ -4,7 +4,7 @@
             [taoensso.timbre :as log]))
 
 
-(defn ->!state [config-opts]
+(defn make-!state [config-opts]
   (r/atom {:app-history {0 {:playground {:heart 0
                                          :star 3
                                          :ping 0
@@ -33,6 +33,5 @@
   component/Lifecycle
   (start [component]
     (log/info "initialising state")
-    (let [!state (->!state config-opts)]
-      (assoc component :!state !state)))
+    (assoc component :!state (make-!state config-opts)))
   (stop [component] component))

@@ -5,7 +5,7 @@
             [taoensso.timbre :as log]))
 
 
-(defn render-root! [Φ]
+(defn render-root [Φ]
   (r/render [root Φ] (js/document.getElementById "js-root")))
 
 
@@ -14,14 +14,13 @@
 
   (start [component]
     (log/info "initialising renderer")
-    (r/render [root {:config-opts config-opts
-                     :!state (:!state state)
-                     :<side-effects (:<side-effects side-effector)
-                     :history (:history browser)
-                     :chsk (:chsk comms)
-                     :chsk-state (:chsk-state comms)
-                     :chsk-send (:chsk-send comms)}]
-              (js/document.getElementById "js-root"))
+    (render-root {:config-opts config-opts
+                  :!state (:!state state)
+                  :<side-effects (:<side-effects side-effector)
+                  :history (:history browser)
+                  :chsk (:chsk comms)
+                  :chsk-state (:chsk-state comms)
+                  :chsk-send (:chsk-send comms)}) 
     component)
 
   (stop [component] component))

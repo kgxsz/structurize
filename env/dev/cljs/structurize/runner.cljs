@@ -3,8 +3,8 @@
             [structurize.system.renderer :as renderer]))
 
 
-(defn reload! []
-  (renderer/render-root! {:config-opts (:config-opts system)
+(defn reload []
+  (renderer/render-root {:config-opts (:config-opts system)
                           :!state (get-in system [:state :!state])
                           :<side-effects (get-in system [:side-effector :<side-effects])
                           :history (get-in system [:browser :history])

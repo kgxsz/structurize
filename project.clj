@@ -44,7 +44,7 @@
 
                    :cljsbuild {:builds [{:id "structurize"
                                          :source-paths ["src/cljs" "src/cljc" "env/dev/cljs"]
-                                         :figwheel {:on-jsload "structurize.runner/reload!"}
+                                         :figwheel {:on-jsload "structurize.runner/reload"}
                                          :compiler {:output-to "resources/public/js/structurize.js"
                                                     :main "structurize.runner"
                                                     :asset-path "/js/out"

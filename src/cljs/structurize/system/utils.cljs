@@ -13,7 +13,10 @@
 
 ;; general utilities ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defn make-upstream-paths [paths]
+(defn make-upstream-paths
+  "This function takes paths and returns a set of all sub-paths within them."
+  [paths]
+
   (->> paths
        (map drop-last)
        (remove empty?)
@@ -23,15 +26,15 @@
        set))
 
 
-(defn map->paths
-  "This function takes a map and returns a list of every possible path in the map.
+(defn make-all-paths
+  "This function takes a map and returns a list of all paths in the map.
    For example {:a 1 :b {:c 2 :d 3}} would give ((:a) (:b :c) (:b :d))."
   [m]
 
   (if (or (not (map? m)) (empty? m))
     '(())
     (for [[k v] m
-          subkey (map->paths v)]
+          subkey (make-all-paths v)]
       (cons k subkey))))
 
 
@@ -40,14 +43,22 @@
   [post pre]
 
   (let [[added removed _] (data/diff post pre)
-        removed-paths (if removed (map->paths removed) [])
-        added-paths (if added (map->paths added) [])]
+        removed-paths (if removed (make-all-paths removed) [])
+        added-paths (if added (make-all-paths added) [])]
     (into #{} (concat removed-paths added-paths))))
 
 
 ;; state related functions ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defn track
+  "Derefs a reagent track into the app at current track index.
+   If in a tooling context, the track will act from the root of state.
+
+   Params:
+   v - traversy view or view-single
+   +lens - The lens into the app at current track-index (or state root if in a tooling context)
+   f - the function whose output change will determine whether the track is triggered"
+
   ([Φ v +lens] (track Φ v +lens identity))
   ([{:keys [!state context] :as Φ} v +lens f]
    (if (:tooling? context)
@@ -56,14 +67,30 @@
                  (f (v @!state (l/*> (l/in [:app-history index]) +lens))))))))
 
 
-(defn read [{:keys [!state context] :as Φ} v +lens]
+(defn read
+  "Reads into the app at current read-write index.
+   If in a tooling context, the read will act from the root of state.
+
+   Params:
+   v - traversy view or view-single
+   +lens - The lens into the app at current track-index (or state root if in a tooling context)"
+  [{:keys [!state context] :as Φ} v +lens]
+
   (if (:tooling? context)
     (v @!state +lens)
     (let [index (get-in @!state [:tooling :read-write-index])]
       (v @!state (l/*> (l/in [:app-history index]) +lens)))))
 
 
-(defn write! [{:keys [config-opts !state context] :as Φ} id f]
+(defn write!
+  "Writes into the app at current read-write index.
+   If in a tooling context, the write will act from the root of state.
+
+   Params:
+   id - the write id, used in tooling
+   f - the mutating function"
+  [{:keys [config-opts !state context] :as Φ} id f]
+
   (if (:tooling? context)
     (let [log? (get-in config-opts [:tooling :log?])]
       (when log? (log/debug "write:" id))
@@ -95,6 +122,9 @@
 ;; side-effector related functions ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defn side-effect!
+  "Dispatches a side-effect into the channel, to be picked
+   up by the appropriate listnener and processed."
+
   ([Φ id] (side-effect! Φ id {}))
   ([{:keys [<side-effects] :as Φ} id props]
    (go (a/>! <side-effects [Φ id props]))))
