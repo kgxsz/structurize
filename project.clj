@@ -52,7 +52,7 @@
                                                     :source-map true}}]}
 
                    :garden {:builds [{:id "main"
-                                      :source-paths ["src/clj" "src/cljc"]
+                                      :source-paths ["src/cljc"]
                                       :stylesheet structurize.styles.main/main
                                       :compiler {:output-to "resources/public/css/structurize.css"
                                                  :pretty-print? true}}]}
@@ -80,7 +80,7 @@
                                                         :optimizations :advanced}}]}
 
                        :garden {:builds [{:id "main"
-                                          :source-paths ["src/clj" "src/cljc"]
+                                          :source-paths ["src/cljc"]
                                           :stylesheet structurize.styles.main/main
                                           :compiler {:output-to "resources/public/css/structurize.css"
                                                      :pretty-print? false}}]}}})
