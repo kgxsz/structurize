@@ -32,4 +32,4 @@
       (let [loaded? (track φ l/view-single (l/*> +image (in [:loaded?])))]
         [:img.l-cell.l-cell--fill-parent.c-image
          {:class (u/->class {:c-image--transparent (not loaded?)})
-          :src (when loaded? src)}]))}))
+          :src src}]))}))

@@ -1,7 +1,7 @@
-(ns structurize.components.root-component
+(ns structurize.components.root
   (:require [structurize.components.utils :as u]
             [structurize.components.general :as g]
-            [structurize.components.tooling-component :refer [tooling]]
+            [structurize.components.tooling :refer [tooling]]
             [structurize.system.utils :refer [track side-effect!]]
             [structurize.lens :refer [in]]
             [traversy.lens :as l]

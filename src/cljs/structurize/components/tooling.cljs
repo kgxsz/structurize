@@ -1,4 +1,4 @@
-(ns structurize.components.tooling-component
+(ns structurize.components.tooling
   (:require [structurize.components.utils :as u]
             [structurize.system.utils :refer [track side-effect!]]
             [structurize.lens :refer [in]]
