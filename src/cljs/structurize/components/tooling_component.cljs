@@ -52,16 +52,13 @@
             empty-group-node? (and (map? v) (empty? node))
             node-value? (not (map? v))
             show-tail-braces? (and last? (or collapsed? empty-group-node? node-value?))
-            node-key-class (u/->class
-                            (cond-> #{}
-                              downstream-focused? (conj :c-app-browser__node__key--downstream-focused)
-                              first? (conj :c-app-browser__node__key--first)
-                              (or focused? upstream-focused?) (conj :c-app-browser__node__key--focused)
-                              (or written? upstream-written?) (conj :c-app-browser__node__key--written)))
-            node-value-class (u/->class (cond-> #{}
-                                          (or focused? downstream-focused?) (conj :c-app-browser__node__value--focused)
-                                          (or collapsed-group-node? collapsed?) (conj :c-app-browser__node__value--clickable)
-                                          (or written? upstream-written?) (conj :c-app-browser__node__value--written)))]
+            node-key-class (u/->class {:c-app-browser__node__key--downstream-focused downstream-focused?
+                                       :c-app-browser__node__key--first first?
+                                       :c-app-browser__node__key--focused (or focused? upstream-focused?)
+                                       :c-app-browser__node__key--written (or written? upstream-written?)})
+            node-value-class (u/->class {:c-app-browser__node__value--focused (or focused? downstream-focused?)
+                                         :c-app-browser__node__value--clickable (or collapsed-group-node? collapsed?)
+                                         :c-app-browser__node__value--written (or written? upstream-written?)})]
 
         (log-debug φ "render node:" path)
 
@@ -161,17 +158,16 @@
          [:div.c-icon.c-icon--control-play]]
 
         [:div.c-writes-browser__controls__item.c-writes-browser__controls__item--yellow
-         {:class (when-not real-time? (u/->class #{:c-writes-browser__controls__item--opaque
-                                                   :c-writes-browser__controls__item--clickable}))
+         {:class (when-not real-time? (u/->class {:c-writes-browser__controls__item--opaque true
+                                                  :c-writes-browser__controls__item--clickable true}))
           :on-click (when-not real-time?
                       (u/without-propagation
                        #(side-effect! φ :tooling/go-forward-in-time)))}
          [:div.c-icon.c-icon--control-next]]
 
         [:div.c-writes-browser__controls__item.c-writes-browser__controls__item--yellow
-         {:class (u/->class (cond-> #{}
-                              (not real-time?) (conj :c-writes-browser__controls__item--opaque)
-                              (not beginning-of-time?) (conj :c-writes-browser__controls__item--clickable)))
+         {:class (u/->class {:c-writes-browser__controls__item--opaque (not real-time?)
+                             :c-writes-browser__controls__item--clickable (not beginning-of-time?)})
           :on-click (when (not beginning-of-time?)
                       (u/without-propagation
                        #(side-effect! φ :tooling/go-back-in-time)))}

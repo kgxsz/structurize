@@ -215,6 +215,10 @@
     [:&--h-size-xx-large {:font-size (-> v :h-size-xx-large u/px)}]
     [:&--h-size-large {:font-size (-> v :h-size-large u/px)}]]
 
+   [:.c-image {:transition-property :opacity
+               :transition-duration (-> v :transition-duration u/ms)}
+    [:&--transparent {:opacity 0}]]
+
    [:.c-button {:width (-> v :button-width-medium u/px)
                 :height (-> v :button-height-medium u/px)
                 :color (:white-a colours)
@@ -365,6 +369,7 @@
                   :margin-top (-> v :spacing-x-large u/px)}]
     [:&__avatar {:width (-> v :avatar-width-medium u/px)
                  :height (-> v :avatar-height-medium u/px)
+                 :z-index 0;
                  :background-color (alpha (:black-b colours) (:alpha-low v))
                  :border-style :solid
                  :overflow :hidden

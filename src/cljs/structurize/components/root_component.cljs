@@ -71,7 +71,6 @@
         [:div.l-col.l-col--justify-center
          (if me
            [:div.l-col.l-col--align-center.c-hero
-            [:img.c-hero__avatar {:src (:avatar-url me)}]
             [:div.c-hero__avatar
              [g/image Φ {:+image (in [:home-page :hero-avatar-image])
                          :src (:avatar-url me)}]]

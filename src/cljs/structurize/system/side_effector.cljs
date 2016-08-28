@@ -6,6 +6,7 @@
             [traversy.lens :as l]
             [com.stuartsierra.component :as component]
             [cljs.core.async :as a]
+            [goog.dom :as dom]
             [taoensso.timbre :as log])
   (:require-macros [cljs.core.async.macros :refer [go-loop]]))
 
@@ -259,10 +260,37 @@
 
 
 (defmethod process-side-effect :image/did-mount
+  [Φ id {:keys [+image node src] :as props}]
+  (let [image (js/Image.)]
+
+    (write! Φ :image/did-mount
+            (fn [x]
+              (l/update x +image (l/put {:node node
+                                         :loaded? false}))))
+
+    (set! (.-onload image) (fn []
+                             (write! Φ :image/loaded
+                                     (fn [x]
+                                       (l/update x (l/*> +image (in [:loaded?])) (l/put true))))
+                             #_(set! (.-src node) src)))
+
+    (set! (.-src image) src)))
+
+
+#_(defmethod process-side-effect :image/did-mount
   [Φ id {:keys [+image node] :as props}]
-  (write! Φ :image/did-mount
-          (fn [x]
-            (l/update x (l/*> +image (in [:node])) (l/put {:node node})))))
+  (let [el (dom/getElement node)]
+
+    (js/console.warn el)
+    (js/console.warn node)
+
+    (set! (.-onload el) (fn [] (js/console.warn "image loaded!")))
+    (write! Φ :image/did-mount
+            (fn [x]
+              (l/update x (l/*> +image (in [:node])) (l/put {:node node}))))
+    (js/console.warn "image mounted!")))
+
+
 
 
 (defmethod process-side-effect :default

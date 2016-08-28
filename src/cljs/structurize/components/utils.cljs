@@ -2,10 +2,12 @@
 
 
 (defn ->class
-  "Takes a set of keywords and transforms it
-   into a string suitable for hiccup's class prop."
+  "Takes a map of keywords and booleans and transforms it
+   into a class string suitable for hiccup's class prop."
   [classes]
-  (->> (map name classes)
+  (->> classes
+       (filter second)
+       (map (comp name first))
        (interpose " ")
        (apply str)))
 
