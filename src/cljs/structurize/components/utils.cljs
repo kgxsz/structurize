@@ -13,7 +13,3 @@
 (defn without-propagation [& fs]
   "Takes functions to run, and stops the event propagation."
   (fn [e] (doseq [f fs] (f)) (.stopPropagation e)))
-
-
-
-

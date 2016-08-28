@@ -367,6 +367,7 @@
                  :height (-> v :avatar-height-medium u/px)
                  :background-color (alpha (:black-b colours) (:alpha-low v))
                  :border-style :solid
+                 :overflow :hidden
                  :border-width (-> v :border-width-large u/px)
                  :border-radius (-> v :avatar-height-medium u/px)}]
     [:&__inter-icon {:font-size (-> v :h-size-large u/px)
