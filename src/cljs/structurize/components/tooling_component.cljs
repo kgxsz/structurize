@@ -1,9 +1,10 @@
 (ns structurize.components.tooling-component
   (:require [structurize.components.utils :as u]
             [structurize.system.utils :refer [track side-effect!]]
+            [structurize.lens :refer [in]]
+            [traversy.lens :as l]
             [structurize.components.general :as g]
-            [reagent.core :as r]
-            [traversy.lens :as l])
+            [reagent.core :as r])
   (:require-macros [structurize.components.macros :refer [log-info log-debug log-error]]))
 
 
@@ -23,23 +24,23 @@
     (fn [_ _ opts]
       (let [{:keys [tail-braces first? last? downstream-focused?]} opts
             track-index (track φ l/view-single
-                               (l/in [:tooling :track-index]))
+                               (in [:tooling :track-index]))
             node (track φ l/view-single
-                        (l/*> (l/in [:app-history track-index]) (l/in path)))
+                        (l/*> (in [:app-history track-index]) (l/in path)))
             collapsed? (track φ l/view-single
-                              (l/in [:tooling :app-browser-props :collapsed])
+                              (in [:tooling :app-browser-props :collapsed])
                               #(contains? % path))
             written? (track φ l/view-single
-                            (l/in [:tooling :app-browser-props :written :paths])
+                            (in [:tooling :app-browser-props :written :paths])
                             #(contains? % path))
             upstream-written? (track φ l/view-single
-                                     (l/in [:tooling :app-browser-props :written :upstream-paths])
+                                     (in [:tooling :app-browser-props :written :upstream-paths])
                                      #(contains? % path))
             focused? (track φ l/view-single
-                            (l/in [:tooling :app-browser-props :focused :paths])
+                            (in [:tooling :app-browser-props :focused :paths])
                             #(contains? % path))
             upstream-focused? (track φ l/view-single
-                                     (l/in [:tooling :app-browser-props :focused :upstream-paths])
+                                     (in [:tooling :app-browser-props :focused :upstream-paths])
                                      #(contains? % path))
             downstream-focused? (or downstream-focused? focused?)
 
@@ -114,9 +115,9 @@
   (fn [_ _ opts]
     (let [{:keys [tail-braces downstream-focused?]} opts
           track-index (track φ l/view-single
-                             (l/in [:tooling :track-index]))
+                             (in [:tooling :track-index]))
           nodes (track φ l/view-single
-                       (l/*> (l/in [:app-history track-index]) (l/in path)))
+                       (l/*> (in [:app-history track-index]) (l/in path)))
           num-nodes (count nodes)]
 
       (log-debug φ "render node-group:" path)
@@ -138,11 +139,11 @@
 
   (fn []
     (let [writes (track φ l/view
-                        (l/*> (l/in [:tooling :writes]) l/all-values))
+                        (l/*> (in [:tooling :writes]) l/all-values))
           read-write-index (track φ l/view-single
-                                  (l/in [:tooling :read-write-index]))
+                                  (in [:tooling :read-write-index]))
           track-index (track φ l/view-single
-                             (l/in [:tooling :track-index]))
+                             (in [:tooling :track-index]))
           real-time? (= track-index read-write-index)
           beginning-of-time? (zero? track-index)]
 
@@ -201,7 +202,7 @@
 ;; tooling component ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defn tooling [φ]
-  (let [+slide-over (l/in [:tooling :tooling-slide-over])]
+  (let [+slide-over (in [:tooling :tooling-slide-over])]
 
     (log-debug φ "mount tooling")
 

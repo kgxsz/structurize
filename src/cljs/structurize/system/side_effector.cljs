@@ -2,6 +2,7 @@
   (:require [structurize.system.utils :as u :refer [read write! change-location! post! send!]]
             [structurize.components.general :as g]
             [bidi.bidi :as b]
+            [structurize.lens :refer [in]]
             [traversy.lens :as l]
             [com.stuartsierra.component :as component]
             [cljs.core.async :as a]
@@ -45,9 +46,9 @@
 (defmethod process-side-effect :tooling/go-back-in-time
   [Φ id props]
   (let [track-index (max 0 (dec (read Φ l/view-single
-                                      (l/in [:tooling :track-index]))))
+                                      (in [:tooling :track-index]))))
         {:keys [paths upstream-paths]} (read Φ l/view-single
-                                             (l/in [:tooling :writes track-index]))]
+                                             (in [:tooling :writes track-index]))]
     (write! Φ :tooling/go-back-in-time
             (fn [x]
               (-> x
@@ -59,11 +60,11 @@
 (defmethod process-side-effect :tooling/go-forward-in-time
   [Φ id props]
   (let [read-write-index (read Φ l/view-single
-                               (l/in [:tooling :read-write-index]))
+                               (in [:tooling :read-write-index]))
         track-index (min read-write-index (inc (read Φ l/view-single
-                                                     (l/in [:tooling :track-index]))))
+                                                     (in [:tooling :track-index]))))
         {:keys [paths upstream-paths]} (read Φ l/view-single
-                                             (l/in [:tooling :writes track-index]))]
+                                             (in [:tooling :writes track-index]))]
     (write! Φ :tooling/go-forward-in-time
             (fn [x]
               (-> x
@@ -75,9 +76,9 @@
 (defmethod process-side-effect :tooling/stop-time-travelling
   [Φ id props]
   (let [read-write-index (read Φ l/view-single
-                               (l/in [:tooling :read-write-index]))
+                               (in [:tooling :read-write-index]))
         {:keys [paths upstream-paths]} (read Φ l/view-single
-                                             (l/in [:tooling :writes read-write-index]))]
+                                             (in [:tooling :writes read-write-index]))]
     (write! Φ :tooling/stop-time-travellin
             (fn [x]
               (-> x
@@ -97,7 +98,7 @@
   [Φ id {chsk-status :status :as props}]
   (let [app-uninitialised? (= :uninitialised
                               (read Φ l/view-single
-                                    (l/in [:app-status])))]
+                                    (in [:app-status])))]
 
     (write! Φ :comms/chsk-status-update
             (fn [x]
@@ -202,7 +203,7 @@
 (defmethod process-side-effect :auth/mount-sign-in-with-github-page
   [{:keys [config-opts] :as Φ} id props]
   (let [{:keys [code] attempt-id :state} (read Φ l/view-single
-                                               (l/in [:location :query]))]
+                                               (in [:location :query]))]
     (change-location! Φ {:query {} :replace? true})
     (when (and code attempt-id)
       (post! Φ "/sign-in/github"
@@ -240,7 +241,7 @@
 (defmethod process-side-effect :playground/ping
   [Φ id props]
   (let [ping (read Φ l/view-single
-                   (l/in [:playground :ping]))]
+                   (in [:playground :ping]))]
 
     (write! Φ :playground/ping
             (fn [x]
@@ -257,6 +258,13 @@
                                              (assoc-in x [:playground :ping-status] :failed))))})))
 
 
+(defmethod process-side-effect :image/did-mount
+  [Φ id {:keys [+image node] :as props}]
+  (write! Φ :image/did-mount
+          (fn [x]
+            (l/update x (l/*> +image (in [:node])) (l/put {:node node})))))
+
+
 (defmethod process-side-effect :default
   [_ id _]
   (log/warn "failed to process side-effect:" id))
@@ -270,8 +278,8 @@
   (go-loop []
     (let [[{:keys [config-opts !state context] :as Φ} id props] (a/<! <side-effects)
           log? (get-in config-opts [:tooling :log?])
-          real-time? (apply = (l/view @!state (l/+> (l/in [:tooling :read-write-index])
-                                                    (l/in [:tooling :track-index]))))
+          real-time? (apply = (l/view @!state (l/+> (in [:tooling :read-write-index])
+                                                    (in [:tooling :track-index]))))
           tooling? (:tooling? context)
           browser? (:browser? context)
           comms? (:comms? context)]

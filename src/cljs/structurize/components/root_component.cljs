@@ -1,7 +1,9 @@
 (ns structurize.components.root-component
   (:require [structurize.components.utils :as u]
+            [structurize.components.general :as g]
             [structurize.components.tooling-component :refer [tooling]]
             [structurize.system.utils :refer [track side-effect!]]
+            [structurize.lens :refer [in]]
             [traversy.lens :as l]
             [bidi.bidi :as b]
             [reagent.core :as r])
@@ -31,10 +33,10 @@
 
 (defn with-page-load [φ page]
   (let [app-initialised? (track φ l/view-single
-                                  (l/in [:app-status])
+                                  (in [:app-status])
                                   (partial = :initialised))
         chsk-status-initialising? (track φ l/view-single
-                                           (l/in [:comms :chsk-status])
+                                           (in [:comms :chsk-status])
                                            (partial = :initialising))]
 
     (log-debug φ "render with-page-load")
@@ -55,21 +57,24 @@
   [with-page-load Φ
    (fn [Φ]
      (let [me (track Φ l/view-single
-                       (l/in [:auth :me]))
+                       (in [:auth :me]))
            star (track Φ l/view-single
-                         (l/in [:playground :star]))
+                         (in [:playground :star]))
            heart (track Φ l/view-single
-                          (l/in [:playground :heart]))
+                          (in [:playground :heart]))
            pong (track Φ l/view-single
-                         (l/in [:playground :pong]))]
+                         (in [:playground :pong]))]
 
        (log-debug Φ "render home-page")
 
        [:div.c-page
         [:div.l-col.l-col--justify-center
          (if me
-           [:div.c-hero
+           [:div.l-col.l-col--align-center.c-hero
             [:img.c-hero__avatar {:src (:avatar-url me)}]
+            [:div.c-hero__avatar
+             [g/image Φ {:+image (in [:home-page :hero-avatar-image])
+                         :src (:avatar-url me)}]]
             [:div.c-hero__caption "Hello @" (:login me)]]
 
            [:div.c-hero
@@ -115,10 +120,10 @@
 
      (fn [Φ]
        (let [internal-error (track Φ l/view-single
-                                   (l/in [:location :query])
+                                   (in [:location :query])
                                    (partial = :error))
              external-error (track Φ l/view-single
-                                   (l/in [:auth :sign-in-with-github-status])
+                                   (in [:auth :sign-in-with-github-status])
                                    (partial = :failed))]
 
          (log-debug Φ "render sign-in-with-github-page")
@@ -182,7 +187,7 @@
 
     (fn []
       (let [handler (track φ l/view-single
-                           (l/in [:location :handler]))]
+                           (in [:location :handler]))]
 
         (log-debug φ "render root")
 
