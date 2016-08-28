@@ -26,10 +26,10 @@
 
 (defn image [φ {:keys [+image src]}]
   (r/create-class
-   {:component-did-mount #(side-effect! φ :image/did-mount {:+image +image :node (r/dom-node %) :src src})
+   {:component-did-mount #(side-effect! φ :image/did-mount {:+image +image :src src})
     :reagent-render
     (fn []
       (let [loaded? (track φ l/view-single (l/*> +image (in [:loaded?])))]
         [:img.l-cell.l-cell--fill-parent.c-image
          {:class (u/->class {:c-image--transparent (not loaded?)})
-          :src src}]))}))
+          :src (when loaded? src)}]))}))
