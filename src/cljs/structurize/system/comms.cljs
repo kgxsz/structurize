@@ -12,9 +12,9 @@
 
 
 (defmethod process-received-message :chsk/state
-  [{:keys [config-opts] :as Φ} {:keys [event id ?data] :as event-message}]
+  [{:keys [config-opts] :as Φ} {:keys [event id] [old-state new-state] :?data :as event-message}]
   (side-effect! Φ :comms/chsk-status-update
-                {:status (if (:open? ?data) :open :closed)}))
+                {:status (if (:open? new-state) :open :closed)}))
 
 
 (defmethod process-received-message :chsk/handshake
@@ -32,7 +32,7 @@
   "Returns a function that receives a message and processes it appropriately via multimethods"
   [{:keys [config-opts] :as φ}]
 
-  (fn [{:keys [event id ?data] :as event-message}]
+  (fn [{:keys [event id data] :as event-message}]
     (log/debug "received message from server:" id)
     (process-received-message φ event-message)))
 

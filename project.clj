@@ -10,7 +10,7 @@
                  [ring "1.4.0"]
                  [medley "0.7.1"]
                  [ring/ring-defaults "0.1.5"]
-                 [com.taoensso/sente "1.8.0-beta1"]
+                 [com.taoensso/sente "1.10.0"]
                  [com.taoensso/timbre "4.1.4"]
                  [org.clojure/data.json "0.2.6"]
                  [traversy "0.4.0"]
