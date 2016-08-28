@@ -36,7 +36,7 @@
 
                    :dependencies [[org.clojure/tools.namespace "0.2.11"]]
 
-                   :plugins [[lein-figwheel "0.5.0-2"]]
+                   :plugins [[lein-figwheel "0.5.6"]]
 
                    :repl-options {:init-ns structurize.main
                                   :init (structurize.main/start!)
