@@ -159,7 +159,7 @@
          [:div.c-icon.c-icon--control-play]]
 
         [:div.c-writes-browser__controls__item.c-writes-browser__controls__item--yellow
-         {:class (when time-travelling? (u/->class {:c-writes-browser__controls__item--opaque (and time-travelling? (not end-of-time?))
+         {:class (when time-travelling? (u/->class {:c-writes-browser__controls__item--opaque time-travelling?
                                                     :c-writes-browser__controls__item--clickable (not end-of-time?)}))
           :on-click (when-not end-of-time?
                       (u/without-propagation
@@ -167,7 +167,7 @@
          [:div.c-icon.c-icon--control-next]]
 
         [:div.c-writes-browser__controls__item.c-writes-browser__controls__item--yellow
-         {:class (u/->class {:c-writes-browser__controls__item--opaque (and time-travelling? (not beginning-of-time?))
+         {:class (u/->class {:c-writes-browser__controls__item--opaque time-travelling?
                              :c-writes-browser__controls__item--clickable (not beginning-of-time?)})
           :on-click (when-not beginning-of-time?
                       (u/without-propagation
