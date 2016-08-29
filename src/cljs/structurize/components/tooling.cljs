@@ -141,7 +141,9 @@
                                   (in [:tooling :read-write-index]))
           track-index (track φ l/view-single
                              (in [:tooling :track-index]))
-          real-time? (= track-index read-write-index)
+          time-travelling? (track φ l/view-single
+                                  (in [:tooling :time-travelling?]))
+          end-of-time? (= read-write-index track-index)
           beginning-of-time? (zero? track-index)]
 
       (log-debug φ "render writes-browser")
@@ -149,26 +151,25 @@
       [:div.l-row.c-writes-browser
        [:div.l-col.c-writes-browser__controls
         [:div.c-writes-browser__controls__item.c-writes-browser__controls__item--green
-         {:class (if real-time?
-                   :c-writes-browser__controls__item--opaque
-                   :c-writes-browser__controls__item--clickable)
-          :on-click (when-not real-time?
+         {:class (u/->class {:c-writes-browser__controls__item--opaque (not time-travelling?)
+                             :c-writes-browser__controls__item--clickable (and end-of-time? time-travelling?)})
+          :on-click (when (and time-travelling? end-of-time?)
                       (u/without-propagation
                        #(side-effect! φ :tooling/stop-time-travelling)))}
          [:div.c-icon.c-icon--control-play]]
 
         [:div.c-writes-browser__controls__item.c-writes-browser__controls__item--yellow
-         {:class (when-not real-time? (u/->class {:c-writes-browser__controls__item--opaque true
-                                                  :c-writes-browser__controls__item--clickable true}))
-          :on-click (when-not real-time?
+         {:class (when time-travelling? (u/->class {:c-writes-browser__controls__item--opaque (and time-travelling? (not end-of-time?))
+                                                    :c-writes-browser__controls__item--clickable (not end-of-time?)}))
+          :on-click (when-not end-of-time?
                       (u/without-propagation
                        #(side-effect! φ :tooling/go-forward-in-time)))}
          [:div.c-icon.c-icon--control-next]]
 
         [:div.c-writes-browser__controls__item.c-writes-browser__controls__item--yellow
-         {:class (u/->class {:c-writes-browser__controls__item--opaque (not real-time?)
+         {:class (u/->class {:c-writes-browser__controls__item--opaque (and time-travelling? (not beginning-of-time?))
                              :c-writes-browser__controls__item--clickable (not beginning-of-time?)})
-          :on-click (when (not beginning-of-time?)
+          :on-click (when-not beginning-of-time?
                       (u/without-propagation
                        #(side-effect! φ :tooling/go-back-in-time)))}
          [:div.c-icon.c-icon--control-prev]]]

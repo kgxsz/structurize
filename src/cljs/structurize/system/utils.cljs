@@ -97,8 +97,7 @@
       (swap! !state f))
     (let [state @!state
           index (get-in state [:tooling :read-write-index])
-          real-time? (= (get-in state [:tooling :read-write-index])
-                        (get-in state [:tooling :track-index]))
+          time-travelling? (get-in state [:tooling :time-travelling?])
           pre-app (get-in state [:app-history index])
           post-app (f pre-app)
           paths (make-paths post-app pre-app)
@@ -108,14 +107,14 @@
 
       (swap! !state #(cond-> %
                        true (update-in [:tooling :read-write-index] inc)
-                       real-time? (update-in [:tooling :track-index] inc)
+                       (not time-travelling?) (update-in [:tooling :track-index] inc)
                        true (assoc-in [:tooling :writes (inc index)] {:id id
                                                                       :n (inc index)
                                                                       :paths paths
                                                                       :upstream-paths upstream-paths
                                                                       :t (t/now)})
-                       real-time? (assoc-in [:tooling :app-browser-props :written] {:paths paths
-                                                                                    :upstream-paths upstream-paths})
+                       (not time-travelling?) (assoc-in [:tooling :app-browser-props :written] {:paths paths
+                                                                                                :upstream-paths upstream-paths})
                        true (assoc-in [:app-history (inc index)] post-app))))))
 
 

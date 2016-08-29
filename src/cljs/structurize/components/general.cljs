@@ -25,12 +25,16 @@
 
 ;; image ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defn image [φ {:keys [+image src]}]
-  (r/create-class
-   {:component-did-mount #(side-effect! φ :image/did-mount {:+image +image :src src})
-    :reagent-render
-    (fn []
-      (let [loaded? (track φ l/view-single (l/*> +image (in [:loaded?])))]
-        [:img.l-cell.l-cell--fill-parent.c-image
-         {:class (u/->class {:c-image--transparent (not loaded?)})
-          :src src}]))}))
+(defn image [φ {:keys [src]}]
+  (log-debug φ "mount image")
+  (let [+image (in [:home-page :hero-avatar-image])]
+    (r/create-class
+     {:component-did-mount #(side-effect! φ :image/did-mount {:+image +image :src src})
+      :component-did-update  #(side-effect! φ :image/did-update)
+      :reagent-render
+      (fn []
+        (let [loaded? (track φ l/view-single (l/*> +image (in [:loaded?])))]
+          (log-debug φ "render image")
+          [:img.l-cell.l-cell--fill-parent.c-image
+           {:class (u/->class {:c-image--transparent (not loaded?)})
+            :src src}]))})))

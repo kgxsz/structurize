@@ -72,7 +72,7 @@
          (if me
            [:div.l-col.l-col--align-center.c-hero
             [:div.c-hero__avatar
-             [g/image Φ {:+image (in [:home-page :hero-avatar-image])
+             [g/image Φ {#_#_:+image (in [:home-page :hero-avatar-image])
                          :src (:avatar-url me)}]]
             [:div.c-hero__caption "Hello @" (:login me)]]
 

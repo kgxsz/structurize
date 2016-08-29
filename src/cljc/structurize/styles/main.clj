@@ -276,6 +276,7 @@
                 :align-items :center
                 :width (-> v :filling-medium u/px)
                 :height (-> v :filling-medium u/px)
+                :cursor :not-allowed
                 :margin-bottom (-> v :spacing-x-small u/px)
                 :border-radius (-> v :filling-medium (/ 2) u/px)
                 :font-size (-> v :p-size-small u/px)

@@ -20,6 +20,7 @@
 
            :tooling {:track-index 0
                      :read-write-index 0
+                     :time-travelling? false
                      :tooling-slide-over {:open? true}
                      :writes {}
                      :app-browser-props {:written {:paths #{}
