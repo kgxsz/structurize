@@ -275,11 +275,6 @@
     (set! (.-src image) src)))
 
 
-(defmethod process-side-effect :image/did-update
-  [Φ id props]
-  (js/console.warn "image updated"))
-
-
 (defmethod process-side-effect :default
   [_ id _]
   (log/warn "failed to process side-effect:" id))
