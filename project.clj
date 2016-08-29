@@ -1,8 +1,8 @@
 (defproject structurize "0.1.0-SNAPSHOT"
 
-  :dependencies [[org.clojure/clojure "1.7.0"]
-                 [org.clojure/clojurescript "1.8.51"]
-                 [org.clojure/core.async "0.2.374"]
+  :dependencies [[org.clojure/clojure "1.9.0-alpha10"]
+                 [org.clojure/clojurescript "1.9.227"]
+                 [org.clojure/core.async "0.2.385"]
                  [com.stuartsierra/component "0.3.1"]
                  [bidi "1.25.0"]
                  [http-kit "2.1.18"]
