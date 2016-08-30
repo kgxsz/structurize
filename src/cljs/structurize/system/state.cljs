@@ -112,6 +112,3 @@
     (log/info "initialising state")
     (assoc component :!state (make-!state config-opts)))
   (stop [component] component))
-
-
-
