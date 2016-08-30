@@ -1,5 +1,8 @@
 (ns structurize.components.general
-  (:require [structurize.system.utils :refer [side-effect! track]]
+  (:require [structurize.system.side-effector :refer [process-side-effect side-effect!]]
+            [structurize.system.state :refer [track read write!]]
+            [structurize.system.browser :refer [change-location!]]
+            [structurize.system.comms :refer [send! post!]]
             [structurize.components.utils :as u]
             [structurize.lens :refer [in]]
             [structurize.types :as t]
@@ -45,3 +48,18 @@
         [:img.l-cell.l-cell--fill-parent.c-image
          {:class (u/->class {:c-image--transparent (not loaded?)})
           :src src}]))}))
+
+
+;; side-effects ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(defmethod process-side-effect :image/did-mount
+  [Φ id {:keys [+image src] :as props}]
+  (let [image (js/Image.)]
+    (write! Φ :image/did-mount
+            (fn [x]
+              (l/update x (l/*> +image (in [:loaded?])) (l/put false))))
+    (set! (.-onload image) (fn []
+                             (write! Φ :image/loaded
+                                     (fn [x]
+                                       (l/update x (l/*> +image (in [:loaded?])) (l/put true))))))
+    (set! (.-src image) src)))

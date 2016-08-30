@@ -1,8 +1,11 @@
 (ns structurize.components.root
-  (:require [structurize.components.utils :as u]
+  (:require [structurize.system.side-effector :refer [process-side-effect side-effect!]]
+            [structurize.system.state :refer [track read write!]]
+            [structurize.system.browser :refer [change-location!]]
+            [structurize.system.comms :refer [send! post!]]
+            [structurize.components.utils :as u]
             [structurize.components.general :as g]
             [structurize.components.tooling :refer [tooling]]
-            [structurize.system.utils :refer [track side-effect!]]
             [structurize.lens :refer [in]]
             [traversy.lens :as l]
             [bidi.bidi :as b]
@@ -198,3 +201,86 @@
 
          (when tooling-enabled?
            [tooling (assoc φ :context {:tooling? true})])]))))
+
+
+;; side-effects ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(defmethod process-side-effect :general/change-location
+  [Φ id {:keys [path] :as props}]
+  (change-location! Φ {:path path}))
+
+
+(defmethod process-side-effect :auth/initialise-sign-in-with-github
+  [{:keys [config-opts] :as Φ} id props]
+  (send! Φ :auth/initialise-sign-in-with-github
+         {}
+         {:on-success (fn [[_ {:keys [client-id attempt-id scope redirect-prefix]}]]
+                        (let [redirect-uri (str redirect-prefix (b/path-for (:routes config-opts) :sign-in-with-github))]
+                          (change-location! Φ {:prefix "https://github.com"
+                                               :path "/login/oauth/authorize"
+                                               :query {:client_id client-id
+                                                       :state attempt-id
+                                                       :scope scope
+                                                       :redirect_uri redirect-uri}})))
+          :on-failure (fn [reply]
+                        (write! Φ :auth/sign-in-with-github-failed
+                                (fn [x]
+                                  (assoc-in x [:auth :sign-in-with-github-failed?] true))))}))
+
+
+(defmethod process-side-effect :auth/mount-sign-in-with-github-page
+  [{:keys [config-opts] :as Φ} id props]
+  (let [{:keys [code] attempt-id :state} (read Φ l/view-single
+                                               (in [:location :query]))]
+    (change-location! Φ {:query {} :replace? true})
+    (when (and code attempt-id)
+      (post! Φ "/sign-in/github"
+             {:code code :attempt-id attempt-id}
+             {:on-success (fn [response]
+                            (change-location! Φ {:path (b/path-for (:routes config-opts) :home)}))
+              :on-failure (fn [response]
+                            (write! Φ :auth/sign-in-with-github-failed
+                                    (fn [x]
+                                      (assoc-in x [:auth :sign-in-with-github-failed?] true))))}))))
+
+
+(defmethod process-side-effect :auth/sign-out
+  [Φ id props]
+  (post! Φ "/sign-out"
+         {}
+         {:on-success (fn [response]
+                        (write! Φ :auth/sign-out
+                                (fn [x]
+                                  (assoc x :auth {}))))
+          :on-failure (fn [response]
+                        (write! Φ :auth/sign-out-failed
+                                (fn [x]
+                                  (assoc-in x [:auth :sign-out-status] :failed))))}))
+
+
+(defmethod process-side-effect :playground/inc-item
+  [Φ id {:keys [path item-name] :as props}]
+  (let [mutation-id (keyword (str "playground/inc-" item-name))]
+    (write! Φ mutation-id
+            (fn [x]
+              (update-in x path inc)))))
+
+
+(defmethod process-side-effect :playground/ping
+  [Φ id props]
+  (let [ping (read Φ l/view-single
+                   (in [:playground :ping]))]
+
+    (write! Φ :playground/ping
+            (fn [x]
+              (update-in x [:playground :ping] inc)))
+
+    (send! Φ :playground/ping
+           {:ping (inc ping)}
+           {:on-success (fn [[id payload]]
+                          (write! Φ :playground/pong
+                                  (fn [x]
+                                    (assoc-in x [:playground :pong] (:pong payload)))))
+            :on-failure (fn [reply] (write! Φ :playground/ping-failed
+                                           (fn [x]
+                                             (assoc-in x [:playground :ping-status] :failed))))})))

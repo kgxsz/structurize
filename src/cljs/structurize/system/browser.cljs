@@ -1,13 +1,36 @@
 (ns structurize.system.browser
-  (:require [bidi.bidi :as b]
+  (:require [structurize.system.side-effector :refer [process-side-effect side-effect!]]
+            [structurize.system.state :refer [write!]]
+            [bidi.bidi :as b]
             [cemerick.url :refer [map->query query->map]]
-            [structurize.system.utils :refer [side-effect!]]
             [clojure.string :as str]
             [com.stuartsierra.component :as component]
             [goog.events :as events]
             [medley.core :as m]
             [taoensso.timbre :as log])
   (:import [goog.history Html5History EventType]))
+
+;; exposed functions ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(defn change-location!
+  "Updates the browser's location accordingly. The browser will fire a navigation
+   event if the location changes, which will be dealt with by a listener.
+
+   Params:
+   prefix - the part before the path, set it if you want to navigate to a different site
+   path - the path you wish to navigate to
+   query - map of query params
+   replace? - ensures that the browser replaces the current location in history"
+  [{:keys [history] :as Φ} {:keys [prefix path query replace?]}]
+
+  (let [query-string (when-not (str/blank? (map->query query)) (str "?" (map->query query)))
+        current-path (-> (.getToken history) (str/split "?") first)
+        token (str (or path current-path) query-string)]
+    (log/debug "dispatching change of location to browser:" (str prefix token))
+    (cond
+      prefix (set! js/window.location (str prefix token))
+      replace? (.replaceToken history token)
+      :else (.setToken history token))))
 
 
 ;; helper functions ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -68,3 +91,11 @@
 
   (stop [component] component))
 
+
+;; side-effects ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(defmethod process-side-effect :browser/change-location
+  [Φ id {:keys [location] :as props}]
+  (write! Φ :browser/change-location
+          (fn [x]
+            (assoc x :location location))))
