@@ -143,8 +143,7 @@
 
              [:div.l-col.l-col--align-center
               [:button.c-button {:on-click (u/without-propagation
-                                            #(side-effect! Φ :general/change-location
-                                                           {:path (b/path-for (:routes config-opts) :home)}))}
+                                            #(side-effect! Φ :general/go-home))}
                [:div.l-row.l-row--justify-center
                 [:div.l-spacing.l-spacing--margin-right-small.c-icon.c-icon--home]
                 "go home"]]]]
@@ -171,8 +170,7 @@
 
        [:div.l-col.l-col--align-center
         [:button.c-button {:on-click (u/without-propagation
-                                      #(side-effect! Φ :general/change-location
-                                                     {:path (b/path-for (:routes config-opts) :home)}))}
+                                      #(side-effect! Φ :general/go-home))}
          [:div.l-row.l-row--justify-center
           [:div.l-spacing.l-spacing--margin-right-small.c-icon.c-icon--home]
           "go home"]]]]])])
@@ -205,9 +203,9 @@
 
 ;; side-effects ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defmethod process-side-effect :general/change-location
-  [Φ id {:keys [path] :as props}]
-  (change-location! Φ {:path path}))
+(defmethod process-side-effect :general/go-home
+  [{:keys [config-opts] :as Φ} id props]
+  (change-location! Φ {:path (b/path-for (:routes config-opts) :home)}))
 
 
 (defmethod process-side-effect :auth/initialise-sign-in-with-github
