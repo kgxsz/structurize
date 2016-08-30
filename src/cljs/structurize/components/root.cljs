@@ -4,7 +4,7 @@
             [structurize.system.browser :refer [change-location!]]
             [structurize.system.comms :refer [send! post!]]
             [structurize.components.utils :as u]
-            [structurize.components.general :as g]
+            [structurize.components.image :refer [image]]
             [structurize.components.tooling :refer [tooling]]
             [structurize.lens :refer [in]]
             [traversy.lens :as l]
@@ -75,7 +75,7 @@
          (if me
            [:div.l-col.l-col--align-center.c-hero
             [:div.c-hero__avatar
-             [g/image Φ {:+image (in [:home-page :hero-avatar-image])
+             [image Φ {:+image (in [:home-page :hero-avatar-image])
                          :src (:avatar-url me)}]]
             [:div.c-hero__caption "Hello @" (:login me)]]
 

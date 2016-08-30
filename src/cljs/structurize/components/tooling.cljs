@@ -4,10 +4,10 @@
             [structurize.system.browser :refer [change-location!]]
             [structurize.system.comms :refer [send! post!]]
             [structurize.system.utils :as su]
+            [structurize.components.slide-over :refer [slide-over toggle-slide-over]]
             [structurize.components.utils :as u]
             [structurize.lens :refer [in]]
             [traversy.lens :as l]
-            [structurize.components.general :as g]
             [reagent.core :as r])
   (:require-macros [structurize.components.macros :refer [log-info log-debug log-error]]))
 
@@ -209,9 +209,9 @@
 
     (fn []
       [:div.l-overlay.l-overlay--fill-viewport
-       [g/slide-over φ {:+slide-over +slide-over
-                        :absolute-width 800
-                        :direction :right}
+       [slide-over φ {:+slide-over +slide-over
+                      :absolute-width 800
+                      :direction :right}
         [:div.l-overlay__content.c-tooling
          [:div.c-tooling__handle
           {:on-click (u/without-propagation
@@ -231,7 +231,7 @@
   [Φ id {:keys [+slide-over] :as props}]
   (write! Φ :tooling/toggle-tooling-slide-over
          (fn [x]
-           (g/toggle-slide-over! x +slide-over))))
+           (toggle-slide-over x +slide-over))))
 
 
 (defmethod process-side-effect :tooling/toggle-node-collapsed
