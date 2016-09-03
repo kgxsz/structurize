@@ -179,16 +179,17 @@
     [:&__item
      [:&--grow {:flex-grow 1}]]]
 
-   [:.l-cell {:display :flex}
+   [:.l-cell
     [:&--fill-parent {:width (u/percent 100)
                       :height (u/percent 100)}]
     [:&--justify
-     [:&-center {:justify-content :center}]]
+     [:&-center {:display :flex
+                 :justify-content :center}]]
     [:&--align
-     [:&-center {:align-items :center}]
-     [:&-end {:align-items :flex-end}]]]
-
-   [:.l-spacing
+     [:&-center {:display :flex
+                 :align-items :center}]
+     [:&-end {:display :flex
+              :align-items :flex-end}]]
     [:&--margin
      [:&-top
       [:&-small {:margin-top (-> v :spacing-small u/px)}]
@@ -198,14 +199,7 @@
      [:&-bottom
       [:&-small {:margin-bottom (-> v :spacing-small u/px)}]]
      [:&-left
-      [:&-small {:margin-left (-> v :spacing-small u/px)}]]]]
-
-   [:.l-slide-over {:height (u/percent 100)
-                    :background-color (:transparent colours)
-                    :position :absolute
-                    :top 0
-                    :transition-property :right
-                    :transition-duration (-> v :transition-duration u/ms)}]])
+      [:&-small {:margin-left (-> v :spacing-small u/px)}]]]]])
 
 
 (def components
@@ -218,6 +212,13 @@
    [:.c-image {:transition-property :opacity
                :transition-duration (-> v :transition-duration u/ms)}
     [:&--transparent {:opacity 0}]]
+
+   [:.c-slide-over {:height (u/percent 100)
+                    :background-color (:transparent colours)
+                    :position :absolute
+                    :top 0
+                    :transition-property :right
+                    :transition-duration (-> v :transition-duration u/ms)}]
 
    [:.c-button {:width (-> v :button-width-medium u/px)
                 :height (-> v :button-height-medium u/px)

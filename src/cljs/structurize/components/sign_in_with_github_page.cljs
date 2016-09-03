@@ -48,7 +48,7 @@
               [:button.c-button {:on-click (u/without-propagation
                                             #(side-effect! Φ :sign-in-with-gitub-page/go-home))}
                [:div.l-row.l-row--justify-center
-                [:div.l-spacing.l-spacing--margin-right-small.c-icon.c-icon--home]
+                [:div.l-cell.l-cell--margin-right-small.c-icon.c-icon--home]
                 "go home"]]]]
 
             [:div.l-col.l-col--justify-center

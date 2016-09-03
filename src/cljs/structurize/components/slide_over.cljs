@@ -38,7 +38,7 @@
          (s/valid? ::direction direction)]}
   (let [open? (track φ l/view-single (->+slide-over-open? +slide-over))]
     (log-debug φ "render slide-over")
-    [:div.l-slide-over {:style {:width (str absolute-width "px")
+    [:div.c-slide-over {:style {:width (str absolute-width "px")
                                 direction (if open? 0 (str (- absolute-width) "px"))}}
      content]))
 

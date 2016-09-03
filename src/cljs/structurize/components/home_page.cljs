@@ -23,7 +23,7 @@
   [:button.c-button {:on-click (u/without-propagation
                                 #(side-effect! φ :home-page/initialise-sign-in-with-github))}
    [:div.l-row.l-row--justify-center
-    [:div.l-spacing.l-spacing--margin-right-small.c-icon.c-icon--github]
+    [:div.l-cell.l-cell--margin-right-small.c-icon.c-icon--github]
     "sign in with GitHub"]])
 
 
@@ -32,7 +32,7 @@
   [:button.c-button {:on-click (u/without-propagation
                                 #(side-effect! Φ :home-page/sign-out))}
    [:div.l-row.l-row--justify-center
-    [:div.l-spacing.l-spacing--margin-right-small.c-icon.c-icon--exit]
+    [:div.l-cell.l-cell--margin-right-small.c-icon.c-icon--exit]
     "sign out"]])
 
 
@@ -68,29 +68,29 @@
             [sign-out Φ]
             [sign-in-with-github Φ])
 
-          [:div.l-spacing.l-spacing--margin-top-medium
+          [:div.l-cell.l-cell--margin-top-medium
            [:button.c-button {:on-click (u/without-propagation
                                          #(side-effect! Φ :home-page/inc-item
                                                         {:path [:playground :star]
                                                          :item-name "star"}))}
             [:div.l-row.l-row--justify-center
-             [:div.l-spacing.l-spacing--margin-right-small.c-icon.c-icon--star]
+             [:div.l-cell.l-cell--margin-right-small.c-icon.c-icon--star]
              star]]]
 
-          [:div.l-spacing.l-spacing--margin-top-medium
+          [:div.l-cell.l-cell--margin-top-medium
            [:button.c-button {:on-click (u/without-propagation
                                          #(side-effect! Φ :home-page/inc-item
                                                         {:path [:playground :heart]
                                                          :item-name "heart"}))}
             [:div.l-row.l-row--justify-center
-             [:div.l-spacing.l-spacing--margin-right-small.c-icon.c-icon--heart]
+             [:div.l-cell.l-cell--margin-right-small.c-icon.c-icon--heart]
              heart]]]
 
-          [:div.l-spacing.l-spacing--margin-top-medium
+          [:div.l-cell.l-cell--margin-top-medium
            [:button.c-button {:on-click (u/without-propagation
                                          #(side-effect! Φ :home-page/ping {}))}
             [:div.l-row.l-row--justify-center
-             [:div.l-spacing.l-spacing--margin-right-small.c-icon.c-icon--heart-pulse]
+             [:div.l-cell.l-cell--margin-right-small.c-icon.c-icon--heart-pulse]
              pong]]]]]]))])
 
 
