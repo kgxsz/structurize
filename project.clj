@@ -16,6 +16,7 @@
                  [traversy "0.4.0"]
                  [clj-time "0.11.0"]
                  [garden "1.3.2"]
+                 [cljsjs/lodash "4.11.2-0"]
                  [camel-snake-kebab "0.3.2"]
                  [com.andrewmcveigh/cljs-time "0.4.0"]
                  [reagent "0.6.0-alpha"]
