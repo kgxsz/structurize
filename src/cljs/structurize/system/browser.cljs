@@ -121,16 +121,26 @@
 
 (defmethod process-side-effect :browser/resize
   [{:keys [config-opts] :as Φ} id props]
-  (let [{:keys [xs sm md lg]} (:breakpoints config-opts)
-        viewport-width (.-width (dom/getViewportSize))
+  (let [{:keys [xs sm md lg]} (get-in config-opts [:viewport :breakpoints])
+        width (.-width (dom/getViewportSize))
         breakpoint (cond
-                     (< viewport-width xs) :xs
-                     (< viewport-width sm) :sm
-                     (< viewport-width md) :md
-                     (< viewport-width lg) :lg
-                     :else :xl)]
+                     (< width xs) :xs
+                     (< width sm) :sm
+                     (< width md) :md
+                     (< width lg) :lg
+                     :else :xl)
+        {:keys [max-col-width min-col-width min-col-n]} (get-in config-opts [:viewport :grid])
+        gutter (get-in config-opts [:viewport :grid :gutter breakpoint])
+        col-n (max min-col-n (quot (- width gutter) (+ min-col-width gutter)))
+        col-width (min max-col-width (int (/ (- width (* (inc col-n) gutter)) col-n)))
+        margin (- width (* col-n (+ col-width gutter)) gutter)]
+
     (write! Φ :browser/resize
             (fn [x]
-              (assoc x :viewport {:width viewport-width
+              (assoc x :viewport {:width width
                                   :height (.-height (dom/getViewportSize))
-                                  :breakpoint breakpoint})))))
+                                  :breakpoint breakpoint
+                                  :grid {:col-n col-n
+                                         :col-width col-width
+                                         :margin margin
+                                         :gutter gutter}})))))
