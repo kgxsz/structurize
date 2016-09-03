@@ -55,7 +55,7 @@
    :h-size-xx-large 100
 
    :spacing-xx-small 2
-   :spacing-x-small 5
+   :spacing-x-small 6
    :spacing-small 8
    :spacing-medium 10
    :spacing-large 15
@@ -127,12 +127,7 @@
    [:body {:font-family "sans-serif"
            :font-size (-> v :p-size-medium u/px)
            :color (:white-a colours)
-           :background-color (:white-a colours)
-           :background-image "url(\"/images/blurred-background.jpg\")"
-           :background-repeat :no-repeat
-           :background-position [:center :center]
-           :background-attachements :fixed
-           :background-size :cover}]
+           :background-color (:white-a colours)}]
 
    [:#js-root {:width (u/vw 100)
                :height (u/vh 100)}]])
@@ -233,6 +228,7 @@
                 :font-family "sans-serif"
                 :font-size (-> v :p-size-large u/px)}
     [:&:hover {:background-color (alpha (:black-b colours) (:alpha-medium v))}]]
+
 
    [:.c-tooling {:width (u/percent 100)
                  :height (u/percent 100)
