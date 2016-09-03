@@ -86,6 +86,7 @@
                             :location {:path nil
                                        :handler :unknown
                                        :query nil}
+                            :viewport {}
                             :app-status :uninitialised
                             :comms {:chsk-status :initialising
                                     :message {}

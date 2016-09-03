@@ -6,9 +6,12 @@
             [clojure.string :as str]
             [com.stuartsierra.component :as component]
             [goog.events :as events]
+            [goog.dom :as dom]
             [medley.core :as m]
             [taoensso.timbre :as log])
-  (:import [goog.history Html5History EventType]))
+  (:import goog.history.Html5History
+           goog.history.EventType
+           goog.dom.ViewportSizeMonitor))
 
 ;; exposed functions ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -72,6 +75,19 @@
       (.setEnabled true))))
 
 
+(defn listen-for-resize [{:keys [config-opts] :as Φ}]
+  (let [handler (js/window._.debounce (fn []
+                                        (side-effect! Φ :browser/resize))
+                                      500
+                                      #js {:trailing true})]
+
+    ;; trigger an initial resize
+    (side-effect! Φ :browser/resize)
+
+    (doto (ViewportSizeMonitor.)
+      (events/listen events/EventType.RESIZE handler))))
+
+
 ;; component setup ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defrecord Browser [config-opts state side-effector]
@@ -87,6 +103,8 @@
              :history history}]
       (log/info "begin listening for navigation from the browser")
       (listen-for-navigation φ)
+      (log/info "begin listening for resize from the browser")
+      (listen-for-resize φ)
       (assoc component :history history)))
 
   (stop [component] component))
@@ -99,3 +117,20 @@
   (write! Φ :browser/change-location
           (fn [x]
             (assoc x :location location))))
+
+
+(defmethod process-side-effect :browser/resize
+  [{:keys [config-opts] :as Φ} id props]
+  (let [{:keys [xs sm md lg]} (:breakpoints config-opts)
+        viewport-width (.-width (dom/getViewportSize))
+        breakpoint (cond
+                     (< viewport-width xs) :xs
+                     (< viewport-width sm) :sm
+                     (< viewport-width md) :md
+                     (< viewport-width lg) :lg
+                     :else :xl)]
+    (write! Φ :browser/resize
+            (fn [x]
+              (assoc x :viewport {:width viewport-width
+                                  :height (.-height (dom/getViewportSize))
+                                  :breakpoint breakpoint})))))

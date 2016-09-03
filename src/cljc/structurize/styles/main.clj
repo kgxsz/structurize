@@ -204,7 +204,6 @@
 
 (def components
   [:html
-
    [:.c-icon
     [:&--h-size-xx-large {:font-size (-> v :h-size-xx-large u/px)}]
     [:&--h-size-large {:font-size (-> v :h-size-large u/px)}]]

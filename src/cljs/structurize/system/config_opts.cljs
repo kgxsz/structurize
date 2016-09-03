@@ -13,6 +13,11 @@
            :tooling {:enabled? true
                      :log? false
                      :max-processed-mutations 50}
+           :breakpoints {:xs 544
+                         :sm 768
+                         :md 992
+                         :lg 1200
+                         :xl :infinity}
            :comms {:chsk-opts {:type :auto
                                :packer :edn}}
            :routes ["/" [["" :home]
