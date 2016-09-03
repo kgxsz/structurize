@@ -7,6 +7,7 @@
             [structurize.components.utils :as u]
             [structurize.components.image :refer [image]]
             [structurize.components.with-page-load :refer [with-page-load]]
+            [structurize.components.grid :refer [grid]]
             [structurize.lens :refer [in]]
             [structurize.types :as t]
             [cljs.spec :as s]
@@ -50,8 +51,44 @@
 
        (log-debug Φ "render home-page")
 
-       [:div.c-page
-        [:div.l-col.l-col--justify-center
+       [:div
+        [grid Φ
+         {:center {:hidden #{}
+                   :c (fn [Φ {:keys [width col-n col-width gutter margin-left margin-right]}]
+                        [:div {:style {:height 600
+                                       :width width
+                                       :background-color :pink}}
+                         ":center"])}
+          :left {:hidden #{:xs :sm}
+                 :c (fn [Φ {:keys [width col-n col-width gutter margin-left margin-right]}]
+                      [:div {:style {:height 300
+                                     :width width
+                                     :background-color :red}}
+                       ":left"
+                       [:div {:style {:height 300
+                                      :width width
+                                      :background-color :red}}]])}
+          :right {:hidden #{:xs :sm :md}
+                  :c (fn [Φ {:keys [width col-n col-width gutter margin-left margin-right]}]
+                       [:div {:style {:height 400
+                                      :width width
+                                      :min-width width
+                                      :background-color :orange}}
+                        ":right"])}
+          :top {:hidden #{}
+                :c (fn [Φ {:keys [width col-n col-width gutter margin-left margin-right]}]
+                     [:div {:style {:height 200
+                                    :width width
+                                    :background-color :purple}}
+                      ":top"])}
+          :bottom {:hidden #{:xs}
+                   :c (fn [Φ {:keys [width col-n col-width gutter margin-left margin-right]}]
+                        [:div {:style {:height 200
+                                       :width width
+                                       :background-color :aqua}}
+                         ":bottom"])}}]
+
+        #_[:div.l-col.l-col--justify-center
          (if me
            [:div.l-col.l-col--align-center.c-hero
             [:div.c-hero__avatar
@@ -91,7 +128,8 @@
                                          #(side-effect! Φ :home-page/ping {}))}
             [:div.l-row.l-row--justify-center
              [:div.l-cell.l-cell--margin-right-small.c-icon.c-icon--heart-pulse]
-             pong]]]]]]))])
+             pong]]]]]]
+       ))])
 
 
 ;; side-effects ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
