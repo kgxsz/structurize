@@ -14,13 +14,6 @@
 
 ;; components ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defn placeholder [φ]
-  (r/create-class
-   {:component-did-mount #(side-effect! φ :image/placeholder-did-mount {:node (r/dom-node %)})
-    :reagent-render (fn []
-                      [:div.l-cell.l-cell--fill-parent.c-image__placeholder {:style {:position :absolute}}])}))
-
-
 (defn image [φ {:keys [+image src size pos-x pos-y] :or {size :cover pos-x "50%" pos-y "50%"}}]
   {:pre [(s/valid? ::t/lens +image)
          (s/valid? (s/or ::t/url string?) src)]}
@@ -30,13 +23,11 @@
     :reagent-render (fn []
                       (let [{:keys [loaded?]} (track φ l/view-single +image)]
                         (log-debug φ "render image")
-                        [:div.l-cell.l-cell--fill-parent.c-image
-                         [placeholder φ]
-                         [:div.l-cell.l-cell--fill-parent.c-image__content {:class (u/->class {:c-image__content--transparent (not loaded?)})
-                                                                            :style {:background (str "url(" src ")")
-                                                                                    :background-size size
-                                                                                    :background-position [pos-x pos-y]
-                                                                                    :background-repeat :no-repeat}}]]))}))
+                        [:div.l-cell.l-cell--fill-parent.c-image {:class (u/->class {:c-image--transparent (not loaded?)})
+                                                                  :style {:background (str "url(" src ")")
+                                                                          :background-size size
+                                                                          :background-position [pos-x pos-y]
+                                                                          :background-repeat :no-repeat}}]))}))
 
 
 ;; side-effects ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -52,24 +43,3 @@
                                      (fn [x]
                                        (l/update x +image #(assoc % :loaded? true))))))
     (set! (.-src image) src)))
-
-
-(defmethod process-side-effect :image/placeholder-did-mount [Φ id {:keys [node] :as props}]
-  (let [colour (rand-nth ["#B39EB5" "#F49AC2" "#FF6961" "#03C03C" "#AEC6CF"
-                          "#836953" "#FDFD96" "#C23B22" "#DEA5A4" "#77DD77"
-                          "#FFB347" "#B19CD9" "#779ECB" "#966FD6" "#CFCFC4"])
-        sel (d3.select node)
-        t (doto (textures.lines)
-            (.size 5)
-            (.strokeWidth 1)
-            (.stroke colour))
-        svg (doto (.append sel "svg")
-              (.attr "height" "100%")
-              (.attr "width" "100%")
-              (.call t))
-        r (doto (.append svg "rect")
-            (.attr "x" 0)
-            (.attr "y" 0)
-            (.attr "width" "100%")
-            (.attr "height" "100%")
-            (.style "fill" (.url t)))]))

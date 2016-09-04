@@ -213,12 +213,9 @@
     [:&--h-size-xx-large {:font-size (-> v :h-size-xx-large u/px)}]
     [:&--h-size-large {:font-size (-> v :h-size-large u/px)}]]
 
-   [:.c-image {:position :relative}
-    [:&__placeholder {:position :absolute
-                      :z-index -1}]
-    [:&__content {:transition-property :opacity
-                  :transition-duration (-> v :transition-duration u/ms)}
-     [:&--transparent {:opacity 0}]]]
+   [:.c-image {:transition-property :opacity
+               :transition-duration (-> v :transition-duration u/ms)}
+    [:&--transparent {:opacity 0}]]
 
    [:.c-slide-over {:height (u/percent 100)
                     :background-color (:transparent colours)
