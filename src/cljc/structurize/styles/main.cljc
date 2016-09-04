@@ -376,7 +376,7 @@
     [:&__lip {:height (-> v :masthead-height u/px)
               :position :absolute
               :top (-> v :masthead-height - u/px)
-              :background-color (alpha (:black-b colours) (:alpha-low v))}]
+              :background-color (alpha (:black-b colours) (:alpha-medium v))}]
     [:&__avatar {:width (-> v :avatar-width-medium u/px)
                  :height (-> v :avatar-height-medium u/px)
                  :position :absolute
@@ -391,7 +391,7 @@
                           :font-size (-> v :p-size-xx-large u/px)}]
     [:&__secondary-content {:font-family "'Raleway', Arial"
                             :color (:grey-a colours)
-                            :font-size (-> v :p-size-xx-large u/px)}]]
+                            :font-size (-> v :p-size-large u/px)}]]
 
    [:.c-hero {:height (-> v :hero-image-ratio u/vw)
               :min-height (-> v :hero-image-min-height u/px)

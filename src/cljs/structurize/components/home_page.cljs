@@ -60,8 +60,7 @@
   [:div.l-row.c-masthead {:style {:width (+ width margin-left margin-right)}}
    [:div.l-cell.l-cell--width-100.c-masthead__lip
     [:div.l-cell.l-cell--align-center.l-cell--height-100.c-masthead__primary-content {:style {:margin-left (+ margin-left (* 2 gutter) col-width)}}
-     "Keigo's Superstore"]
-    ]
+     "Keigo's Superstore"]]
    [:div.l-cell.l-cell--justify-center {:style {:width (+ col-width (* 2 gutter))
                                                 :margin-left margin-left
                                                 :padding-left gutter
@@ -70,8 +69,7 @@
      [image Φ {:+image (in [:home-page :masthead-avatar-image])
                :src #_(:avatar-url me) "https://avatars.githubusercontent.com/u/5012793?v=3"}]]]
    [:div.l-cell.l-cell--align-center.c-masthead__secondary-content
-    "The Something Collection"
-    ]])
+    "The Something Collection"]])
 
 
 (defn home-page [Φ]
@@ -90,8 +88,11 @@
 
        [:div
         [:div.c-hero
-         [image Φ {:+image (in [:home-page :hero-image])
-                   :src "images/hero-b.png"}]]
+         (let [src (rand-nth ["images/hero-1.png" "images/hero-2.png" "images/hero-3.png"
+                              "images/hero-4.png" "images/hero-5.png" "images/hero-6.png"
+                              "images/hero-7.png" "images/hero-8.png" "images/hero-9.png"])]
+           [image Φ {:+image (in [:home-page :hero-image])
+                     :src src}])]
         [triptych Φ {:center {:hidden #{}
                               :c masthead}}]
         [triptych Φ {:center {:hidden #{}
