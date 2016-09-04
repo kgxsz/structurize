@@ -28,7 +28,7 @@
     (if (or (not app-initialised?)
             chsk-status-initialising?)
       [:div.c-page
-       [:div.l-col.l-col--justify-center
+       #_[:div.l-col.l-col--justify-center
         [:div.c-hero
          [:div.c-icon.c-icon--coffee-cup.c-icon--h-size-large]
          [:div.c-hero__caption "loading"]]]]

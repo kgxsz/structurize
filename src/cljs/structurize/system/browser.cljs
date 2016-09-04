@@ -78,7 +78,7 @@
 (defn listen-for-resize [{:keys [config-opts] :as Φ}]
   (let [handler (js/window._.debounce (fn []
                                         (side-effect! Φ :browser/resize))
-                                      500
+                                      100
                                       #js {:trailing true})]
 
     ;; trigger an initial resize

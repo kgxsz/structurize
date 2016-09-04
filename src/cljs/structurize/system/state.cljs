@@ -96,7 +96,7 @@
            :tooling {:track-index 0
                      :read-write-index 0
                      :time-travelling? false
-                     :tooling-slide-over {:open? true}
+                     :tooling-slide-over {:open? false}
                      :writes {}
                      :app-browser-props {:written {:paths #{}
                                                    :upstream-paths #{}}

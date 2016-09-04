@@ -12,7 +12,7 @@
    :black-a "#000000"
    :black-b "#000A14"
    :white-a "#FFFFFF"
-   :white-b "#F6F9FC"
+   :white-b "#F2F2F2"
    :white-c "#DDDDDD"
    :grey-a "#505A64"
    :grey-b "#343337"
@@ -91,6 +91,12 @@
 
    :avatar-height-medium 100
 
+   :masthead-height 35
+
+   :hero-image-ratio 20
+   :hero-image-min-height 120
+   :hero-image-max-height 480
+
    :transition-duration 200
 
    :proportion-x-small 25
@@ -127,7 +133,7 @@
    [:body {:font-family "sans-serif"
            :font-size (-> v :p-size-medium u/px)
            :color (:white-a colours)
-           :background-color (:white-a colours)}]
+           :background-color (:white-b colours)}]
 
    [:#js-root {:width (u/vw 100)
                :height (u/vh 100)}]])
@@ -156,6 +162,8 @@
 
    [:.l-row {:display :flex
              :flex-direction :row}
+    [:&--fill-parent {:width (u/percent 100)
+                      :height (u/percent 100)}]
     [:&--height-100 {:height (u/percent 100)}]
     [:&--justify
      [:&-center {:justify-content :center}]
@@ -205,9 +213,12 @@
     [:&--h-size-xx-large {:font-size (-> v :h-size-xx-large u/px)}]
     [:&--h-size-large {:font-size (-> v :h-size-large u/px)}]]
 
-   [:.c-image {:transition-property :opacity
-               :transition-duration (-> v :transition-duration u/ms)}
-    [:&--transparent {:opacity 0}]]
+   [:.c-image {:position :relative}
+    [:&__placeholder {:position :absolute
+                      :z-index -1}]
+    [:&__content {:transition-property :opacity
+                  :transition-duration (-> v :transition-duration u/ms)}
+     [:&--transparent {:opacity 0}]]]
 
    [:.c-slide-over {:height (u/percent 100)
                     :background-color (:transparent colours)
@@ -357,16 +368,18 @@
       [:&--focused {:background-color (:light-blue colours)
                     :color (:dark-blue colours)}]]]]
 
-   [:.c-page {:overflow :auto
-              :min-height (u/vh 100)}]
+   [:.c-masthead {:height (-> v :masthead-height u/px)
+                  :position :relative
+                  :background-color (:white-a colours)}
+    [:.c]]
 
-   [:.c-hero {:margin-top (-> v :proportion-x-small u/vh)
-              :margin-bottom (-> v :spacing-xx-large u/px)
-              :text-align :center}
-    [:&__caption {:font-family "'Raleway', Arial"
+   [:.c-hero {:height (-> v :hero-image-ratio u/vw)
+              :min-height (-> v :hero-image-min-height u/px)
+              :max-height (-> v :hero-image-max-height u/px)}
+    #_[:&__caption {:font-family "'Raleway', Arial"
                   :font-size (-> v :h-size-x-small u/px)
                   :margin-top (-> v :spacing-x-large u/px)}]
-    [:&__avatar {:width (-> v :avatar-width-medium u/px)
+    #_[:&__avatar {:width (-> v :avatar-width-medium u/px)
                  :height (-> v :avatar-height-medium u/px)
                  :z-index 0;
                  :background-color (alpha (:black-b colours) (:alpha-low v))
@@ -374,7 +387,7 @@
                  :overflow :hidden
                  :border-width (-> v :border-width-large u/px)
                  :border-radius (-> v :avatar-height-medium u/px)}]
-    [:&__inter-icon {:font-size (-> v :h-size-large u/px)
+    #_[:&__inter-icon {:font-size (-> v :h-size-large u/px)
                      :margin-top (-> v :spacing-large u/px)
                      :margin-left (-> v :spacing-x-large u/px)
                      :margin-right (-> v :spacing-x-large u/px)}]]])

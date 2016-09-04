@@ -37,73 +37,9 @@
     "sign out"]])
 
 
-(defn hero [Φ]
+(defn pod [Φ {:keys [orientation colour size width] :as props}]
   (r/create-class
-   {:component-did-mount (fn [this]
-                           #_(let [sel (d3.select (r/dom-node this))
-                                 t (doto (textures.lines)
-                                     (.size 5)
-                                     (.strokeWidth 1)
-                                     (.stroke "#CB99C9"))
-                                 svg (doto (.append sel "svg")
-                                       (.style "height" "100%")
-                                       (.style "width" "100%")
-                                       (.call t))
-                                 r (doto (.append svg "rect")
-                                     (.attr "x" 0)
-                                     (.attr "y" 0)
-                                     (.attr "width" "100%")
-                                     (.attr "height" "100%")
-                                     (.style "fill" (.url t)))]))
-    :reagent-render
-    (fn []
-      [:div {:style {:height 400}}
-       [image Φ {:+image (in [:home-page :hero-image])
-                 :src "images/hero.png"}]])}))
-
-
-(defn masthead [Φ]
-  (r/create-class
-   {:component-did-mount (fn [this]
-                           (let [sel (d3.select (r/dom-node this))
-                                 t (doto (textures.lines)
-                                     (.size 5)
-                                     (.strokeWidth 1)
-                                     (.stroke "#495159"))
-                                 svg (doto (.append sel "svg")
-                                       (.style "height" "100%")
-                                       (.style "width" "100%")
-                                       (.call t))
-                                 r (doto (.append svg "rect")
-                                     (.attr "x" 0)
-                                     (.attr "y" 0)
-                                     (.attr "width" "100%")
-                                     (.attr "height" "100%")
-                                     (.style "fill" (.url t)))]))
-    :reagent-render
-    (fn []
-      [:div {:style {:height 70}}])}))
-
-
-(defn pod [Φ {:keys [orientation colour size width]}]
-  (r/create-class
-   {:component-did-mount (fn [this]
-                           (let [sel (d3.select (r/dom-node this))
-                                 t (doto (textures.lines)
-                                     (.size size)
-                                     (.strokeWidth width)
-                                     (.orientation orientation)
-                                     (.stroke colour))
-                                 svg (doto (.append sel "svg")
-                                       (.style "height" "100%")
-                                       (.style "width" "100%")
-                                       (.call t))
-                                 r (doto (.append svg "rect")
-                                     (.attr "x" 0)
-                                     (.attr "y" 0)
-                                     (.attr "width" "100%")
-                                     (.attr "height" "100%")
-                                     (.style "fill" (.url t)))]))
+   {:component-did-mount #(side-effect! Φ :home-page/pod-did-mount (merge props {:node (r/dom-node %)}))
     :reagent-render
     (fn []
       [:div {:style {:height (+ 200 (rand 200))}}])}))
@@ -118,6 +54,16 @@
                           "#836953" "#FDFD96" "#C23B22" "#DEA5A4" "#77DD77"
                           "#FFB347" "#B19CD9" "#779ECB" "#966FD6" "#CFCFC4"])]
     [pod Φ {:orientation "6/8" :colour colour :width 1 :size 5}]))
+
+
+(defn masthead [Φ {:keys [width col-n col-width gutter margin-left margin-right]}]
+  [:div.c-masthead {:style {:width (+ width margin-left margin-right)
+                            :padding-left gutter
+                            :padding-right gutter}}
+
+   [:div.c-masthead__banana]
+
+   ])
 
 
 (defn home-page [Φ]
@@ -135,15 +81,11 @@
        (log-debug Φ "render home-page")
 
        [:div
-        [hero Φ]
+        [:div.c-hero
+         [image Φ {:+image (in [:home-page :hero-image])
+                   :src "images/hero-b.png"}]]
         [triptych Φ {:center {:hidden #{}
-                          :c (fn [Φ {:keys [width col-n col-width gutter margin-left margin-right]}]
-                               [:div {:style {:width width
-                                              :padding-left gutter
-                                              :padding-right gutter
-                                              :margin-left margin-left
-                                              :margin-right margin-right}}
-                                [masthead Φ]])}}]
+                              :c masthead}}]
         [triptych Φ {:center {:hidden #{}
                           :c (fn [Φ {:keys [width col-n col-width gutter margin-left margin-right]}]
                                [:div.l-row.l-row--justify-space-between {:style {:width width
@@ -182,7 +124,7 @@
              [:div.l-col.l-col--align-center.c-hero
               [:div.c-hero__avatar
                [image Φ {:+image (in [:home-page :hero-avatar-image])
-                         :src (:avatar-url me)}]]
+                         :src (:avatar-url me) #_"https://avatars.githubusercontent.com/u/5012793?v=3"}]]
               [:div.c-hero__caption "Hello @" (:login me)]]
 
              [:div.c-hero
@@ -281,3 +223,21 @@
             :on-failure (fn [reply] (write! Φ :playground/ping-failed
                                            (fn [x]
                                              (assoc-in x [:playground :ping-status] :failed))))})))
+
+(defmethod process-side-effect :home-page/pod-did-mount [Φ id {:keys [node size width orientation colour] :as props}]
+  (let [sel (d3.select node)
+        t (doto (textures.lines)
+            (.size size)
+            (.strokeWidth width)
+            (.orientation orientation)
+            (.stroke colour))
+        svg (doto (.append sel "svg")
+              (.style "height" "100%")
+              (.style "width" "100%")
+              (.call t))
+        r (doto (.append svg "rect")
+            (.attr "x" 0)
+            (.attr "y" 0)
+            (.attr "width" "100%")
+            (.attr "height" "100%")
+            (.style "fill" (.url t)))]))
