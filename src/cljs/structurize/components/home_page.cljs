@@ -10,6 +10,7 @@
             [structurize.components.grid :refer [grid]]
             [structurize.lens :refer [in]]
             [structurize.types :as t]
+            [medley.core :as m]
             [cljs.spec :as s]
             [bidi.bidi :as b]
             [traversy.lens :as l]
@@ -37,6 +38,22 @@
     "sign out"]])
 
 
+(defn grid-column [Φ {:keys [width gutter cs]}]
+  (log-debug Φ "render pod column")
+  [:div {:style {:width width}}
+   (doall
+    (for [[i c] (m/indexed cs)]
+      [:div {:key i
+             :style {:margin-top gutter}}
+       [c Φ]]))]
+
+  #_[:button.c-button {:on-click (u/without-propagation
+                                #(side-effect! Φ :home-page/sign-out))}
+   [:div.l-row.l-row--justify-center
+    [:div.l-cell.l-cell--margin-right-small.c-icon.c-icon--exit]
+    "sign out"]])
+
+
 (defn home-page [Φ]
   [with-page-load Φ
    (fn [Φ]
@@ -55,36 +72,68 @@
         [grid Φ
          {:center {:hidden #{}
                    :c (fn [Φ {:keys [width col-n col-width gutter margin-left margin-right]}]
-                        [:div {:style {:height 600
-                                       :width width
-                                       :background-color :pink}}
-                         ":center"])}
+                        [:div.l-row.l-row--justify-space-between {:style {:width width
+                                                                          :padding-left gutter
+                                                                          :padding-right gutter
+                                                                          :margin-left margin-left
+                                                                          :margin-right margin-right}}
+                         (doall
+                          (for [i (range col-n)]
+                            ^{:key i}
+                            [grid-column Φ
+                             {:width col-width
+                              :gutter gutter
+                              :cs [(fn [Φ]
+                                     [:div {:style {:height (+ 200 (rand 200))
+                                                    :background-color :pink}}])
+                                   (fn [Φ]
+                                     [:div {:style {:height (+ 200 (rand 200))
+                                                    :background-color :purple}}])
+                                   (fn [Φ]
+                                     [:div {:style {:height (+ 200 (rand 200))
+                                                    :background-color :green}}])]}]))])}
           :left {:hidden #{:xs :sm}
-                 :c (fn [Φ {:keys [width col-n col-width gutter margin-left margin-right]}]
-                      [:div {:style {:height 300
-                                     :width width
-                                     :background-color :red}}
-                       ":left"
-                       [:div {:style {:height 300
-                                      :width width
-                                      :background-color :red}}]])}
+                 :c (fn [Φ {:keys [width col-n col-width gutter margin-left]}]
+                      [:div.l-col.l-col--align-start {:style {:width width
+                                                              :padding-left gutter
+                                                              :margin-left margin-left}}
+                       [grid-column Φ
+                        {:width col-width
+                         :gutter gutter
+                         :cs [(fn [Φ]
+                                [:div {:style {:height 240
+                                               :background-color :green}}])
+                              (fn [Φ]
+                                [:div {:style {:height 340
+                                               :background-color :red}}])]}]])}
           :right {:hidden #{:xs :sm :md}
-                  :c (fn [Φ {:keys [width col-n col-width gutter margin-left margin-right]}]
-                       [:div {:style {:height 400
-                                      :width width
-                                      :min-width width
-                                      :background-color :orange}}
-                        ":right"])}
+                  :c (fn [Φ {:keys [width col-n col-width gutter margin-right]}]
+                       [:div.l-col.l-col--align-end {:style {:width width
+                                                             :padding-right gutter
+                                                             :margin-right margin-right}}
+                        [grid-column Φ
+                         {:width col-width
+                          :gutter gutter
+                          :cs [(fn [Φ]
+                                 [:div {:style {:height 240
+                                                :background-color :orange}}])
+                               (fn [Φ]
+                                 [:div {:style {:height 340
+                                                :background-color :blue}}])]}]])}
           :top {:hidden #{}
                 :c (fn [Φ {:keys [width col-n col-width gutter margin-left margin-right]}]
                      [:div {:style {:height 200
                                     :width width
+                                    :margin-left margin-left
+                                    :margin-right margin-right
                                     :background-color :purple}}
                       ":top"])}
           :bottom {:hidden #{:xs}
                    :c (fn [Φ {:keys [width col-n col-width gutter margin-left margin-right]}]
                         [:div {:style {:height 200
                                        :width width
+                                       :margin-left margin-left
+                                       :margin-right margin-right
                                        :background-color :aqua}}
                          ":bottom"])}}]
 

@@ -19,10 +19,9 @@
 ;; components ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defn grid [φ {:keys [center left right top bottom] :as props}]
-  (let [{:keys [width] :as viewport} (track φ l/view-single
+  (let [{:keys [width grid] :as viewport} (track φ l/view-single
                                             (in [:viewport]))
-        {:keys [col-n col-width gutter margin] :as grid} (track φ l/view-single
-                                                                (in [:viewport :grid]))
+        {:keys [col-n col-width gutter margin]} grid
         {center-c :c center-hidden :hidden} center
         {left-c :c left-hidden :hidden} left
         {right-c :c right-hidden :hidden} right
@@ -34,13 +33,13 @@
     [:div.c-grid
      (when (visible? top viewport)
        [top-c φ (assoc grid
-                       :width width
+                       :width (- width margin)
                        :margin-left (/ margin 2)
                        :margin-right (/ margin 2))])
      [:div.l-row
       (when (visible? left viewport)
         [left-c φ (assoc grid
-                         :width (+ (* 2 gutter) (/ margin 2) col-width)
+                         :width (+ gutter col-width)
                          :col-n 1
                          :margin-left (/ margin 2)
                          :margin-right 0)])
@@ -48,9 +47,9 @@
         (let [left-visible? (visible? left viewport)
               right-visible? (visible? right viewport)]
           [center-c φ (assoc grid
-                             :width (cond-> (+ (* col-n col-width) (* (inc col-n) gutter) margin)
-                                      left-visible? (- (+ (* 2 gutter) (/ margin 2) col-width))
-                                      right-visible? (- (+ (* 2 gutter) (/ margin 2) col-width)))
+                             :width (cond-> (+ (* col-n col-width) (* (inc col-n) gutter))
+                                      left-visible? (- (+ gutter col-width))
+                                      right-visible? (- (+ gutter col-width)))
                              :col-n (cond-> col-n
                                       left-visible? dec
                                       right-visible? dec)
@@ -58,18 +57,12 @@
                              :margin-right (if right-visible? 0 (/ margin 2)))]))
       (when (visible? right viewport)
         [right-c φ (assoc grid
-                          :width (+ (* 2 gutter) (/ margin 2) col-width)
+                          :width (+ gutter col-width)
                           :col-n 1
                           :margin-left (/ margin 2)
                           :margin-right 0)])]
      (when (visible? bottom viewport)
        [bottom-c φ (assoc grid
-                          :width width
+                          :width (- width margin)
                           :margin-left (/ margin 2)
                           :margin-right (/ margin 2))])]))
-
-
-;; side-effects ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-(defmethod process-side-effect :grid/did-mount
-  [Φ id props])
