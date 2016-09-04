@@ -56,7 +56,7 @@
 
 
 (defn masthead-left [Φ {:keys [width col-n col-width gutter margin-left]}]
-  [:div.l-cell.l-cell--justify-end {:style {:width (+ width margin-left)}}
+  [:div.l-cell.l-cell--justify-end.c-masthead {:style {:width (+ width margin-left)}}
    [:div.c-masthead__lip {:style {:width (+ width margin-left)}}]
    [:div.l-cell.l-cell--justify-center {:style {:width col-width}}
     [:div.c-masthead__avatar
@@ -64,7 +64,7 @@
                :src #_(:avatar-url me) "https://avatars.githubusercontent.com/u/5012793?v=3"}]]]])
 
 (defn masthead-center [Φ {:keys [width col-n col-width gutter margin-left margin-right]}]
-  [:div.l-cell.l-cell--justify-start {:style {:width (+ width margin-left margin-right)}}
+  [:div.l-cell.l-cell--justify-start.c-masthead {:style {:width (+ width margin-left margin-right)}}
    [:div.c-masthead__lip {:style {:width (+ width margin-left margin-right)}}
     [:div.l-cell.l-cell--align-center.l-cell--height-100.c-masthead__primary-content {:style {:padding-left (+ margin-left gutter)
                                                                                               :padding-right (+ margin-right gutter)}}
@@ -89,17 +89,18 @@
        (log-debug Φ "render home-page")
 
        [:div
-        [:div.c-hero
-         (let [src (rand-nth ["images/hero-1.png" "images/hero-2.png" "images/hero-3.png"
-                              "images/hero-4.png" "images/hero-5.png" "images/hero-6.png"
-                              "images/hero-7.png" "images/hero-8.png" "images/hero-9.png"])]
-           [image Φ {:+image (in [:home-page :hero-image])
-                     :src src}])]
-        [:div.c-masthead
-         [triptych Φ {:left {:hidden #{:xs :sm}
-                             :c masthead-left}
-                      :center {:hidden #{}
-                               :c masthead-center}}]]
+        [triptych Φ {:center {:hidden #{}
+                              :c (fn [Φ {:keys [width col-n col-width gutter margin-left margin-right]}]
+                                   (let [src (rand-nth ["images/hero-1.png" "images/hero-2.png" "images/hero-3.png"
+                                                        "images/hero-4.png" "images/hero-5.png" "images/hero-6.png"
+                                                        "images/hero-7.png" "images/hero-8.png" "images/hero-9.png"])]
+                                     [:div.c-hero {:style {:width (+ width margin-left margin-right)}}
+                                      [image Φ {:+image (in [:home-page :hero-image])
+                                                :src src}]]))}}]
+        [triptych Φ {:left {:hidden #{:xs :sm}
+                            :c masthead-left}
+                     :center {:hidden #{}
+                              :c masthead-center}}]
         [triptych Φ {:left {:hidden #{:xs :sm}
                             :c (fn [Φ {:keys [width col-n col-width gutter margin-left]}]
                                  [:div.l-col.l-col--align-start {:style {:width width

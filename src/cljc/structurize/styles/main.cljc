@@ -394,6 +394,7 @@
               :position :absolute
               :top (-> v :masthead-height - u/px)
               :background-color (alpha (:black-b colours) (:alpha-medium v))}]
+
     [:&__avatar {:width (-> v :avatar-width-medium u/px)
                  :height (-> v :avatar-height-medium u/px)
                  :position :absolute
