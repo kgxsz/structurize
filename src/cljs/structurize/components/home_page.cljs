@@ -61,7 +61,9 @@
                             :padding-left gutter
                             :padding-right gutter}}
 
-   [:div.c-masthead__banana]
+   [:div.c-masthead__banana
+
+    ]
 
    ])
 
