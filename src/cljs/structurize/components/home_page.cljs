@@ -7,7 +7,7 @@
             [structurize.components.utils :as u]
             [structurize.components.image :refer [image]]
             [structurize.components.with-page-load :refer [with-page-load]]
-            [structurize.components.grid :refer [grid grid-column]]
+            [structurize.components.triptych :refer [triptych triptych-column]]
             [structurize.lens :refer [in]]
             [structurize.types :as t]
             [cljs.spec :as s]
@@ -37,156 +37,183 @@
     "sign out"]])
 
 
-(defn pod [Φ]
+(defn hero [Φ]
   (r/create-class
-   {:component-did-mount (fn []
-                           (let [svg (.append (d3.select "#hi") "svg")
-                                 t (.thicker (textures.lines))
-                                 _ (.call svg t)
-                                 c (doto (.append svg "circle")
-                                     (.attr "cx" 100)
-                                     (.attr "cy" 100)
-                                     (.attr "r" 80)
+   {:component-did-mount (fn [this]
+                           (let [sel (d3.select (r/dom-node this))
+                                 t (doto (textures.lines)
+                                     (.size 5)
+                                     (.strokeWidth 1)
+                                     (.stroke "#CB99C9"))
+                                 svg (doto (.append sel "svg")
+                                       (.style "height" "100%")
+                                       (.style "width" "100%")
+                                       (.call t))
+                                 r (doto (.append svg "rect")
+                                     (.attr "x" 0)
+                                     (.attr "y" 0)
+                                     (.attr "width" "100%")
+                                     (.attr "height" "100%")
                                      (.style "fill" (.url t)))]))
     :reagent-render
     (fn []
-      [:div#hi {:style {:height (+ 200 (rand 200))
-                        :background-color :pink}}
+      [:div {:style {:height 400}}])}))
 
 
+(defn masthead [Φ]
+  (r/create-class
+   {:component-did-mount (fn [this]
+                           (let [sel (d3.select (r/dom-node this))
+                                 t (doto (textures.lines)
+                                     (.size 5)
+                                     (.strokeWidth 1)
+                                     (.stroke "#AEC6CF"))
+                                 svg (doto (.append sel "svg")
+                                       (.style "height" "100%")
+                                       (.style "width" "100%")
+                                       (.call t))
+                                 r (doto (.append svg "rect")
+                                     (.attr "x" 0)
+                                     (.attr "y" 0)
+                                     (.attr "width" "100%")
+                                     (.attr "height" "100%")
+                                     (.style "fill" (.url t)))]))
+    :reagent-render
+    (fn []
+      [:div {:style {:height 70}}])}))
 
 
+(defn pod [Φ {:keys [orientation colour size width]}]
+  (r/create-class
+   {:component-did-mount (fn [this]
+                           (let [sel (d3.select (r/dom-node this))
+                                 t (doto (textures.lines)
+                                     (.size size)
+                                     (.strokeWidth width)
+                                     (.orientation orientation)
+                                     (.stroke colour))
+                                 svg (doto (.append sel "svg")
+                                       (.style "height" "100%")
+                                       (.style "width" "100%")
+                                       (.call t))
+                                 r (doto (.append svg "rect")
+                                     (.attr "x" 0)
+                                     (.attr "y" 0)
+                                     (.attr "width" "100%")
+                                     (.attr "height" "100%")
+                                     (.style "fill" (.url t)))]))
+    :reagent-render
+    (fn []
+      [:div {:style {:height (+ 200 (rand 200))}}])}))
 
-       ])})
 
-  )
+(defn aux-pod [Φ]
+  [pod Φ {:orientation "2/8" :colour "#77DD77" :width 1 :size 5}])
+
+
+(defn content-pod [Φ]
+  (let [colour (rand-nth ["#B39EB5" "#F49AC2" "#FF6961" "#03C03C" "#AEC6CF" "#836953" "#FDFD96"])]
+    [pod Φ {:orientation "6/8" :colour colour :width 1 :size 5}]))
 
 
 (defn home-page [Φ]
   [with-page-load Φ
    (fn [Φ]
      (let [me (track Φ l/view-single
-                       (in [:auth :me]))
+                     (in [:auth :me]))
            star (track Φ l/view-single
-                         (in [:playground :star]))
+                       (in [:playground :star]))
            heart (track Φ l/view-single
-                          (in [:playground :heart]))
+                        (in [:playground :heart]))
            pong (track Φ l/view-single
-                         (in [:playground :pong]))]
+                       (in [:playground :pong]))]
 
        (log-debug Φ "render home-page")
 
        [:div
-        [grid Φ
-         {:center {:hidden #{}
-                   :c (fn [Φ {:keys [width col-n col-width gutter margin-left margin-right]}]
-                        [:div.l-row.l-row--justify-space-between {:style {:width width
-                                                                          :padding-left gutter
-                                                                          :padding-right gutter
-                                                                          :margin-left margin-left
-                                                                          :margin-right margin-right}}
-                         (doall
-                          (for [i (range col-n)]
-                            ^{:key i}
-                            [grid-column Φ
-                             {:width col-width
-                              :gutter gutter
-                              :cs [(fn [Φ]
-                                     [:div {:style {:height (+ 200 (rand 200))
-                                                    :background-color :pink}}])
-                                   (fn [Φ]
-                                     [:div {:style {:height (+ 200 (rand 200))
-                                                    :background-color :purple}}])
-                                   (fn [Φ]
-                                     [:div {:style {:height (+ 200 (rand 200))
-                                                    :background-color :green}}])]}]))])}
-          :left {:hidden #{:xs :sm}
-                 :c (fn [Φ {:keys [width col-n col-width gutter margin-left]}]
-                      [:div.l-col.l-col--align-start {:style {:width width
-                                                              :padding-left gutter
-                                                              :margin-left margin-left}}
-                       [grid-column Φ
-                        {:width col-width
-                         :gutter gutter
-                         :cs [pod
-                              (fn [Φ]
-                                [:div {:style {:height 240
-                                               :background-color :green}}])
-                              (fn [Φ]
-                                [:div {:style {:height 340
-                                               :background-color :red}}])]}]])}
-          :right {:hidden #{:xs :sm :md}
-                  :c (fn [Φ {:keys [width col-n col-width gutter margin-right]}]
-                       [:div.l-col.l-col--align-end {:style {:width width
-                                                             :padding-right gutter
-                                                             :margin-right margin-right}}
-                        [grid-column Φ
-                         {:width col-width
-                          :gutter gutter
-                          :cs [(fn [Φ]
-                                 [:div {:style {:height 240
-                                                :background-color :orange}}])
-                               (fn [Φ]
-                                 [:div {:style {:height 340
-                                                :background-color :blue}}])]}]])}
-          :top {:hidden #{}
-                :c (fn [Φ {:keys [width col-n col-width gutter margin-left margin-right]}]
-                     [:div {:style {:height 200
-                                    :width width
-                                    :margin-left margin-left
-                                    :margin-right margin-right
-                                    :background-color :purple}}
-                      ":top"])}
-          :bottom {:hidden #{:xs}
-                   :c (fn [Φ {:keys [width col-n col-width gutter margin-left margin-right]}]
-                        [:div {:style {:height 200
-                                       :width width
-                                       :margin-left margin-left
-                                       :margin-right margin-right
-                                       :background-color :aqua}}
-                         ":bottom"])}}]
+        [hero Φ]
+        [triptych Φ {:center {:hidden #{}
+                          :c (fn [Φ {:keys [width col-n col-width gutter margin-left margin-right]}]
+                               [:div {:style {:width width
+                                              :padding-left gutter
+                                              :padding-right gutter
+                                              :margin-left margin-left
+                                              :margin-right margin-right}}
+                                [masthead Φ]])}}]
+        [triptych Φ {:center {:hidden #{}
+                          :c (fn [Φ {:keys [width col-n col-width gutter margin-left margin-right]}]
+                               [:div.l-row.l-row--justify-space-between {:style {:width width
+                                                                                 :padding-left gutter
+                                                                                 :padding-right gutter
+                                                                                 :margin-left margin-left
+                                                                                 :margin-right margin-right}}
+                                (doall
+                                 (for [i (range col-n)]
+                                   ^{:key i}
+                                   [triptych-column Φ
+                                    {:width col-width
+                                     :gutter gutter
+                                     :cs [content-pod content-pod content-pod]}]))])}
+                 :left {:hidden #{:xs :sm}
+                        :c (fn [Φ {:keys [width col-n col-width gutter margin-left]}]
+                             [:div.l-col.l-col--align-start {:style {:width width
+                                                                     :padding-left gutter
+                                                                     :margin-left margin-left}}
+                              [triptych-column Φ
+                               {:width col-width
+                                :gutter gutter
+                                :cs [aux-pod aux-pod]}]])}
+                 :right {:hidden #{:xs :sm :md}
+                         :c (fn [Φ {:keys [width col-n col-width gutter margin-right]}]
+                              [:div.l-col.l-col--align-end {:style {:width width
+                                                                    :padding-right gutter
+                                                                    :margin-right margin-right}}
+                               [triptych-column Φ
+                                {:width col-width
+                                 :gutter gutter
+                                 :cs [aux-pod]}]])}}]
 
         #_[:div.l-col.l-col--justify-center
-         (if me
-           [:div.l-col.l-col--align-center.c-hero
-            [:div.c-hero__avatar
-             [image Φ {:+image (in [:home-page :hero-avatar-image])
+           (if me
+             [:div.l-col.l-col--align-center.c-hero
+              [:div.c-hero__avatar
+               [image Φ {:+image (in [:home-page :hero-avatar-image])
                          :src (:avatar-url me)}]]
-            [:div.c-hero__caption "Hello @" (:login me)]]
+              [:div.c-hero__caption "Hello @" (:login me)]]
 
-           [:div.c-hero
-            [:div.c-icon.c-icon--mustache.c-icon--h-size-xx-large]
-            [:div.c-hero__caption "Hello there"]])
+             [:div.c-hero
+              [:div.c-icon.c-icon--mustache.c-icon--h-size-xx-large]
+              [:div.c-hero__caption "Hello there"]])
 
-         [:div.l-col.l-col--align-center
-          (if me
-            [sign-out Φ]
-            [sign-in-with-github Φ])
+           [:div.l-col.l-col--align-center
+            (if me
+              [sign-out Φ]
+              [sign-in-with-github Φ])
 
-          [:div.l-cell.l-cell--margin-top-medium
-           [:button.c-button {:on-click (u/without-propagation
-                                         #(side-effect! Φ :home-page/inc-item
-                                                        {:path [:playground :star]
-                                                         :item-name "star"}))}
-            [:div.l-row.l-row--justify-center
-             [:div.l-cell.l-cell--margin-right-small.c-icon.c-icon--star]
-             star]]]
+            [:div.l-cell.l-cell--margin-top-medium
+             [:button.c-button {:on-click (u/without-propagation
+                                           #(side-effect! Φ :home-page/inc-item
+                                                          {:path [:playground :star]
+                                                           :item-name "star"}))}
+              [:div.l-row.l-row--justify-center
+               [:div.l-cell.l-cell--margin-right-small.c-icon.c-icon--star]
+               star]]]
 
-          [:div.l-cell.l-cell--margin-top-medium
-           [:button.c-button {:on-click (u/without-propagation
-                                         #(side-effect! Φ :home-page/inc-item
-                                                        {:path [:playground :heart]
-                                                         :item-name "heart"}))}
-            [:div.l-row.l-row--justify-center
-             [:div.l-cell.l-cell--margin-right-small.c-icon.c-icon--heart]
-             heart]]]
+            [:div.l-cell.l-cell--margin-top-medium
+             [:button.c-button {:on-click (u/without-propagation
+                                           #(side-effect! Φ :home-page/inc-item
+                                                          {:path [:playground :heart]
+                                                           :item-name "heart"}))}
+              [:div.l-row.l-row--justify-center
+               [:div.l-cell.l-cell--margin-right-small.c-icon.c-icon--heart]
+               heart]]]
 
-          [:div.l-cell.l-cell--margin-top-medium
-           [:button.c-button {:on-click (u/without-propagation
-                                         #(side-effect! Φ :home-page/ping {}))}
-            [:div.l-row.l-row--justify-center
-             [:div.l-cell.l-cell--margin-right-small.c-icon.c-icon--heart-pulse]
-             pong]]]]]]
+            [:div.l-cell.l-cell--margin-top-medium
+             [:button.c-button {:on-click (u/without-propagation
+                                           #(side-effect! Φ :home-page/ping {}))}
+              [:div.l-row.l-row--justify-center
+               [:div.l-cell.l-cell--margin-right-small.c-icon.c-icon--heart-pulse]
+               pong]]]]]]
        ))])
 
 

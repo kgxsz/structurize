@@ -18,14 +18,14 @@
                                     :md 992
                                     :lg 1200
                                     :xl :infinity}
-                      :grid {:gutter {:xs 6
-                                      :sm 6
-                                      :md 10
-                                      :lg 10
-                                      :xl 10}
-                             :max-col-width 220
-                             :min-col-width 190
-                             :min-col-n 2}}
+                      :triptych {:gutter {:xs 6
+                                          :sm 6
+                                          :md 10
+                                          :lg 10
+                                          :xl 10}
+                                 :max-col-width 220
+                                 :min-col-width 190
+                                 :min-col-n 2}}
            :comms {:chsk-opts {:type :auto
                                :packer :edn}}
            :routes ["/" [["" :home]
