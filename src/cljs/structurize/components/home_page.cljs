@@ -38,9 +38,11 @@
 
 
 (defn pod [Φ {:keys [orientation colour size width] :as props}]
+  (log-debug Φ "mount pod")
   (r/create-class
    {:component-did-mount #(side-effect! Φ :home-page/pod-did-mount (merge props {:node (r/dom-node %)}))
     :reagent-render (fn []
+                      (log-debug Φ "render pod")
                       [:div {:style {:height (+ 200 (rand 200))}}])}))
 
 
@@ -77,18 +79,21 @@
 (defn home-page [Φ]
   [with-page-load Φ
    (fn [Φ]
-     (let [me (track Φ l/view-single
-                     (in [:auth :me]))
-           star (track Φ l/view-single
-                       (in [:playground :star]))
-           heart (track Φ l/view-single
-                        (in [:playground :heart]))
-           pong (track Φ l/view-single
-                       (in [:playground :pong]))]
+     (let [#_#_me (track Φ l/view-single
+                         (in [:auth :me]))
+           #_#_star (track Φ l/view-single
+                           (in [:playground :star]))
+           #_#_heart (track Φ l/view-single
+                            (in [:playground :heart]))
+           #_#_pong (track Φ l/view-single
+                           (in [:playground :pong]))]
 
        (log-debug Φ "render home-page")
 
-       [:div.l-cell.l-cell--margin-bottom-medium
+       [:div.l-cell.l-cell--margin-bottom-medium.c-page
+        [triptych Φ {:center {:hidden #{}
+                              :c (fn [Φ {:keys [width col-n col-width gutter margin-left margin-right]}]
+                                   [:div.c-header {:style {:width (+ width margin-left margin-right)}}])}}]
         [triptych Φ {:center {:hidden #{}
                               :c (fn [Φ {:keys [width col-n col-width gutter margin-left margin-right]}]
                                    (let [src (rand-nth ["images/hero-1.png" "images/hero-2.png" "images/hero-3.png"
@@ -132,7 +137,7 @@
                                    [triptych-column Φ
                                     {:width col-width
                                      :gutter gutter
-                                 :cs [aux-pod]}]])}}]
+                                     :cs [aux-pod]}]])}}]
 
         #_[:div.l-col.l-col--justify-center
            (if me

@@ -91,6 +91,7 @@
 
    :avatar-height-medium 130
 
+   :header-height 50
    :masthead-height 35
 
    :hero-image-ratio 20
@@ -153,6 +154,7 @@
                  :pointer-events :none
                  :position :absolute
                  :background-color (:tranparent colours)
+                 :z-index 1
                  :top 0
                  :left 0}
     [:&--fill-viewport {:width (u/vw 100)
@@ -234,6 +236,8 @@
 
 (def components
   [:html
+   [:.c-page {:padding-top (-> v :header-height u/px)}]
+
    [:.c-icon
     [:&--h-size-xx-large {:font-size (-> v :h-size-xx-large u/px)}]
     [:&--h-size-large {:font-size (-> v :h-size-large u/px)}]]
@@ -280,7 +284,7 @@
                  :border-top-left-radius (-> v :border-radius-medium u/px)
                  :border-bottom-left-radius (-> v :border-radius-medium u/px)
                  :position :absolute
-                 :top (-> v :spacing-medium u/px)
+                 :bottom (-> v :spacing-medium u/px)
                  :left (-> v :filling-medium - u/px)}]
 
 
@@ -389,6 +393,12 @@
       [:&--written {:color (:light-green colours)}]
       [:&--focused {:background-color (:light-blue colours)
                     :color (:dark-blue colours)}]]]]
+
+   [:.c-header {:height (-> v :header-height u/px)
+                :position :fixed
+                :top 0
+                :z-index 1
+                :background-color (:white-a colours)}]
 
    [:.c-masthead {:height (-> v :masthead-height u/px)
                   :position :relative
