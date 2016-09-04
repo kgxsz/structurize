@@ -40,9 +40,8 @@
 (defn pod [Φ {:keys [orientation colour size width] :as props}]
   (r/create-class
    {:component-did-mount #(side-effect! Φ :home-page/pod-did-mount (merge props {:node (r/dom-node %)}))
-    :reagent-render
-    (fn []
-      [:div {:style {:height (+ 200 (rand 200))}}])}))
+    :reagent-render (fn []
+                      [:div {:style {:height (+ 200 (rand 200))}}])}))
 
 
 (defn aux-pod [Φ]
@@ -56,19 +55,22 @@
     [pod Φ {:orientation "6/8" :colour colour :width 1 :size 5}]))
 
 
-(defn masthead [Φ {:keys [width col-n col-width gutter margin-left margin-right]}]
-  [:div.l-row.c-masthead {:style {:width (+ width margin-left margin-right)}}
-   [:div.l-cell.l-cell--width-100.c-masthead__lip
-    [:div.l-cell.l-cell--align-center.l-cell--height-100.c-masthead__primary-content {:style {:margin-left (+ margin-left (* 2 gutter) col-width)}}
-     "Keigo's Superstore"]]
-   [:div.l-cell.l-cell--justify-center {:style {:width (+ col-width (* 2 gutter))
-                                                :margin-left margin-left
-                                                :padding-left gutter
-                                                :padding-right gutter}}
+(defn masthead-left [Φ {:keys [width col-n col-width gutter margin-left]}]
+  [:div.l-cell.l-cell--justify-end {:style {:width (+ width margin-left)}}
+   [:div.c-masthead__lip {:style {:width (+ width margin-left)}}]
+   [:div.l-cell.l-cell--justify-center {:style {:width col-width}}
     [:div.c-masthead__avatar
      [image Φ {:+image (in [:home-page :masthead-avatar-image])
-               :src #_(:avatar-url me) "https://avatars.githubusercontent.com/u/5012793?v=3"}]]]
-   [:div.l-cell.l-cell--align-center.c-masthead__secondary-content
+               :src #_(:avatar-url me) "https://avatars.githubusercontent.com/u/5012793?v=3"}]]]])
+
+(defn masthead-center [Φ {:keys [width col-n col-width gutter margin-left margin-right]}]
+  [:div.l-cell.l-cell--justify-start {:style {:width (+ width margin-left margin-right)}}
+   [:div.c-masthead__lip {:style {:width (+ width margin-left margin-right)}}
+    [:div.l-cell.l-cell--align-center.l-cell--height-100.c-masthead__primary-content {:style {:padding-left (+ margin-left gutter)
+                                                                                              :padding-right (+ margin-right gutter)}}
+     "Keigo's Superstore"]]
+   [:div.l-cell.l-cell--align-center.l-cell--width-100.c-masthead__secondary-content {:style {:padding-left (+ margin-left gutter)
+                                                                            :padding-right (+ margin-right gutter)}}
     "The Something Collection"]])
 
 
@@ -93,39 +95,42 @@
                               "images/hero-7.png" "images/hero-8.png" "images/hero-9.png"])]
            [image Φ {:+image (in [:home-page :hero-image])
                      :src src}])]
-        [triptych Φ {:center {:hidden #{}
-                              :c masthead}}]
-        [triptych Φ {:center {:hidden #{}
-                          :c (fn [Φ {:keys [width col-n col-width gutter margin-left margin-right]}]
-                               [:div.l-row.l-row--justify-space-between {:style {:width width
-                                                                                 :padding-left gutter
-                                                                                 :padding-right gutter
-                                                                                 :margin-left margin-left
-                                                                                 :margin-right margin-right}}
-                                (doall
-                                 (for [i (range col-n)]
-                                   ^{:key i}
+        [:div.c-masthead
+         [triptych Φ {:left {:hidden #{:xs :sm}
+                             :c masthead-left}
+                      :center {:hidden #{}
+                               :c masthead-center}}]]
+        [triptych Φ {:left {:hidden #{:xs :sm}
+                            :c (fn [Φ {:keys [width col-n col-width gutter margin-left]}]
+                                 [:div.l-col.l-col--align-start {:style {:width width
+                                                                         :padding-left gutter
+                                                                         :margin-left margin-left}}
+                                  [triptych-column Φ
+                                   {:width col-width
+                                    :gutter gutter
+                                    :cs [aux-pod aux-pod]}]])}
+                     :center {:hidden #{}
+                              :c (fn [Φ {:keys [width col-n col-width gutter margin-left margin-right]}]
+                                   [:div.l-row.l-row--justify-space-between {:style {:width width
+                                                                                     :padding-left gutter
+                                                                                     :padding-right gutter
+                                                                                     :margin-left margin-left
+                                                                                     :margin-right margin-right}}
+                                    (doall
+                                     (for [i (range col-n)]
+                                       ^{:key i}
+                                       [triptych-column Φ
+                                        {:width col-width
+                                         :gutter gutter
+                                         :cs (repeat 6 content-pod)}]))])}
+                     :right {:hidden #{:xs :sm :md}
+                             :c (fn [Φ {:keys [width col-n col-width gutter margin-right]}]
+                                  [:div.l-col.l-col--align-end {:style {:width width
+                                                                        :padding-right gutter
+                                                                        :margin-right margin-right}}
                                    [triptych-column Φ
                                     {:width col-width
                                      :gutter gutter
-                                     :cs (repeat 6 content-pod)}]))])}
-                 :left {:hidden #{:xs :sm}
-                        :c (fn [Φ {:keys [width col-n col-width gutter margin-left]}]
-                             [:div.l-col.l-col--align-start {:style {:width width
-                                                                     :padding-left gutter
-                                                                     :margin-left margin-left}}
-                              [triptych-column Φ
-                               {:width col-width
-                                :gutter gutter
-                                :cs [aux-pod aux-pod]}]])}
-                 :right {:hidden #{:xs :sm :md}
-                         :c (fn [Φ {:keys [width col-n col-width gutter margin-right]}]
-                              [:div.l-col.l-col--align-end {:style {:width width
-                                                                    :padding-right gutter
-                                                                    :margin-right margin-right}}
-                               [triptych-column Φ
-                                {:width col-width
-                                 :gutter gutter
                                  :cs [aux-pod]}]])}}]
 
         #_[:div.l-col.l-col--justify-center

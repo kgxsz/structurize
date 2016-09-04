@@ -168,7 +168,9 @@
     [:&--width-100 {:width (u/percent 100)}]
     [:&--justify
      [:&-center {:justify-content :center}]
-     [:&-space-between {:justify-content :space-between}]]
+     [:&-space-between {:justify-content :space-between}]
+     [:&-start {:justify-content :flex-start}]
+     [:&-end {:justify-content :flex-end}]]
     [:&__item
      [:&--grow {:flex-grow 1}]]]
 
@@ -179,7 +181,10 @@
     [:&--height-100 {:height (u/percent 100)}]
     [:&--width-100 {:width (u/percent 100)}]
     [:&--justify
-     [:&-center {:justify-content :center}]]
+     [:&-center {:justify-content :center}]
+     [:&-space-between {:justify-content :space-between}]
+     [:&-start {:justify-content :flex-start}]
+     [:&-end {:justify-content :flex-end}]] 
     [:&--align
      [:&-center {:align-items :center}]
      [:&-start {:align-items :flex-start}]
@@ -194,11 +199,23 @@
     [:&--width-100 {:width (u/percent 100)}]
     [:&--justify
      [:&-center {:display :flex
-                 :justify-content :center}]]
+                 :flex-direction :row
+                 :justify-content :center}]
+     [:&-space-between {:display :flex
+                        :flex-direction :row
+                        :justify-content :space-between}]
+     [:&-start {:display :flex
+                :flex-direction :row
+                :justify-content :flex-start}]
+     [:&-end {:display :flex
+              :flex-direction :row
+              :justify-content :flex-end}]] 
     [:&--align
      [:&-center {:display :flex
+                 :flex-direction :row
                  :align-items :center}]
      [:&-end {:display :flex
+              :flex-direction :row
               :align-items :flex-end}]]
     [:&--margin
      [:&-top

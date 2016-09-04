@@ -38,7 +38,7 @@
 
     (log-debug φ "render triptych")
 
-    [:div.l-row
+    [:div.l-row.l-row--height-100
      (when (visible? left viewport)
        [left-c φ (assoc triptych
                         :width (+ gutter col-width)
