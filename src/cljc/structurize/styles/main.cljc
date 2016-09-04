@@ -87,9 +87,9 @@
 
    :button-height-medium 50
 
-   :avatar-width-medium 100
+   :avatar-width-medium 130
 
-   :avatar-height-medium 100
+   :avatar-height-medium 130
 
    :masthead-height 35
 
@@ -97,7 +97,7 @@
    :hero-image-min-height 120
    :hero-image-max-height 480
 
-   :transition-duration 200
+   :transition-duration 400
 
    :proportion-x-small 25
    :proportion-small 30
@@ -165,6 +165,7 @@
     [:&--fill-parent {:width (u/percent 100)
                       :height (u/percent 100)}]
     [:&--height-100 {:height (u/percent 100)}]
+    [:&--width-100 {:width (u/percent 100)}]
     [:&--justify
      [:&-center {:justify-content :center}]
      [:&-space-between {:justify-content :space-between}]]
@@ -175,6 +176,8 @@
              :flex-direction :column}
     [:&--fill-parent {:width (u/percent 100)
                       :height (u/percent 100)}]
+    [:&--height-100 {:height (u/percent 100)}]
+    [:&--width-100 {:width (u/percent 100)}]
     [:&--justify
      [:&-center {:justify-content :center}]]
     [:&--align
@@ -187,6 +190,8 @@
    [:.l-cell
     [:&--fill-parent {:width (u/percent 100)
                       :height (u/percent 100)}]
+    [:&--height-100 {:height (u/percent 100)}]
+    [:&--width-100 {:width (u/percent 100)}]
     [:&--justify
      [:&-center {:display :flex
                  :justify-content :center}]]
@@ -359,7 +364,7 @@
                     :color (:light-blue colours)}]]
 
      [:&__value {:display :flex
-                :align-items :center}
+                 :align-items :center}
       [:&--clickable {:cursor :pointer}]
       [:&--written {:color (:light-green colours)}]
       [:&--focused {:background-color (:light-blue colours)
@@ -368,26 +373,44 @@
    [:.c-masthead {:height (-> v :masthead-height u/px)
                   :position :relative
                   :background-color (:white-a colours)}
-    [:.c]]
-
-   [:.c-hero {:height (-> v :hero-image-ratio u/vw)
-              :min-height (-> v :hero-image-min-height u/px)
-              :max-height (-> v :hero-image-max-height u/px)}
-    #_[:&__caption {:font-family "'Raleway', Arial"
-                  :font-size (-> v :h-size-x-small u/px)
-                  :margin-top (-> v :spacing-x-large u/px)}]
-    #_[:&__avatar {:width (-> v :avatar-width-medium u/px)
+    [:&__lip {:height (-> v :masthead-height u/px)
+              :position :absolute
+              :top (-> v :masthead-height - u/px)
+              :background-color (alpha (:black-b colours) (:alpha-low v))}]
+    [:&__avatar {:width (-> v :avatar-width-medium u/px)
                  :height (-> v :avatar-height-medium u/px)
+                 :position :absolute
+                 :top (-> v :avatar-height-medium - (* 0.8) u/px)
                  :z-index 0;
                  :background-color (alpha (:black-b colours) (:alpha-low v))
                  :border-style :solid
                  :overflow :hidden
                  :border-width (-> v :border-width-large u/px)
                  :border-radius (-> v :avatar-height-medium u/px)}]
+    [:&__primary-content {:font-family "'Raleway', Arial"
+                          :font-size (-> v :p-size-xx-large u/px)}]
+    [:&__secondary-content {:font-family "'Raleway', Arial"
+                            :color (:grey-a colours)
+                            :font-size (-> v :p-size-xx-large u/px)}]]
+
+   [:.c-hero {:height (-> v :hero-image-ratio u/vw)
+              :min-height (-> v :hero-image-min-height u/px)
+              :max-height (-> v :hero-image-max-height u/px)}
+    #_[:&__caption {:font-family "'Raleway', Arial"
+                    :font-size (-> v :h-size-x-small u/px)
+                    :margin-top (-> v :spacing-x-large u/px)}]
+    #_[:&__avatar {:width (-> v :avatar-width-medium u/px)
+                   :height (-> v :avatar-height-medium u/px)
+                   :z-index 0;
+                   :background-color (alpha (:black-b colours) (:alpha-low v))
+                   :border-style :solid
+                   :overflow :hidden
+                   :border-width (-> v :border-width-large u/px)
+                   :border-radius (-> v :avatar-height-medium u/px)}]
     #_[:&__inter-icon {:font-size (-> v :h-size-large u/px)
-                     :margin-top (-> v :spacing-large u/px)
-                     :margin-left (-> v :spacing-x-large u/px)
-                     :margin-right (-> v :spacing-x-large u/px)}]]])
+                       :margin-top (-> v :spacing-large u/px)
+                       :margin-left (-> v :spacing-x-large u/px)
+                       :margin-right (-> v :spacing-x-large u/px)}]]])
 
 
 (def main

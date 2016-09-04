@@ -57,15 +57,21 @@
 
 
 (defn masthead [Φ {:keys [width col-n col-width gutter margin-left margin-right]}]
-  [:div.c-masthead {:style {:width (+ width margin-left margin-right)
-                            :padding-left gutter
-                            :padding-right gutter}}
-
-   [:div.c-masthead__banana
-
+  [:div.l-row.c-masthead {:style {:width (+ width margin-left margin-right)}}
+   [:div.l-cell.l-cell--width-100.c-masthead__lip
+    [:div.l-cell.l-cell--align-center.l-cell--height-100.c-masthead__primary-content {:style {:margin-left (+ margin-left (* 2 gutter) col-width)}}
+     "Keigo's Superstore"]
     ]
-
-   ])
+   [:div.l-cell.l-cell--justify-center {:style {:width (+ col-width (* 2 gutter))
+                                                :margin-left margin-left
+                                                :padding-left gutter
+                                                :padding-right gutter}}
+    [:div.c-masthead__avatar
+     [image Φ {:+image (in [:home-page :masthead-avatar-image])
+               :src #_(:avatar-url me) "https://avatars.githubusercontent.com/u/5012793?v=3"}]]]
+   [:div.l-cell.l-cell--align-center.c-masthead__secondary-content
+    "The Something Collection"
+    ]])
 
 
 (defn home-page [Φ]
