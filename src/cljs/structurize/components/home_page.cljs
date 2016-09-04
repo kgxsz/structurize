@@ -40,7 +40,7 @@
 (defn hero [Φ]
   (r/create-class
    {:component-did-mount (fn [this]
-                           (let [sel (d3.select (r/dom-node this))
+                           #_(let [sel (d3.select (r/dom-node this))
                                  t (doto (textures.lines)
                                      (.size 5)
                                      (.strokeWidth 1)
@@ -57,7 +57,9 @@
                                      (.style "fill" (.url t)))]))
     :reagent-render
     (fn []
-      [:div {:style {:height 400}}])}))
+      [:div {:style {:height 400}}
+       [image Φ {:+image (in [:home-page :hero-image])
+                 :src "images/hero.png"}]])}))
 
 
 (defn masthead [Φ]
@@ -67,7 +69,7 @@
                                  t (doto (textures.lines)
                                      (.size 5)
                                      (.strokeWidth 1)
-                                     (.stroke "#AEC6CF"))
+                                     (.stroke "#495159"))
                                  svg (doto (.append sel "svg")
                                        (.style "height" "100%")
                                        (.style "width" "100%")
@@ -108,11 +110,13 @@
 
 
 (defn aux-pod [Φ]
-  [pod Φ {:orientation "2/8" :colour "#77DD77" :width 1 :size 5}])
+  [pod Φ {:orientation "2/8" :colour "#495159" :width 1 :size 5}])
 
 
 (defn content-pod [Φ]
-  (let [colour (rand-nth ["#B39EB5" "#F49AC2" "#FF6961" "#03C03C" "#AEC6CF" "#836953" "#FDFD96"])]
+  (let [colour (rand-nth ["#B39EB5" "#F49AC2" "#FF6961" "#03C03C" "#AEC6CF"
+                          "#836953" "#FDFD96" "#C23B22" "#DEA5A4" "#77DD77"
+                          "#FFB347" "#B19CD9" "#779ECB" "#966FD6" "#CFCFC4"])]
     [pod Φ {:orientation "6/8" :colour colour :width 1 :size 5}]))
 
 
@@ -153,7 +157,7 @@
                                    [triptych-column Φ
                                     {:width col-width
                                      :gutter gutter
-                                     :cs [content-pod content-pod content-pod]}]))])}
+                                     :cs (repeat 6 content-pod)}]))])}
                  :left {:hidden #{:xs :sm}
                         :c (fn [Φ {:keys [width col-n col-width gutter margin-left]}]
                              [:div.l-col.l-col--align-start {:style {:width width

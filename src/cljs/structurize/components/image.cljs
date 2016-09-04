@@ -22,7 +22,7 @@
 
 (defn image [φ {:keys [+image src]}]
   {:pre [(s/valid? ::t/lens +image)
-         (s/valid? ::t/url src)]}
+         (s/valid? str #_::t/url src)]}
   (log-debug φ "mount image")
   (r/create-class
    {:component-did-mount #(side-effect! φ :image/did-mount {:+image +image :src src})

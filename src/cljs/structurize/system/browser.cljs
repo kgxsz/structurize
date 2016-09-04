@@ -141,6 +141,6 @@
                                   :height (.-height (dom/getViewportSize))
                                   :breakpoint breakpoint
                                   :triptych {:col-n col-n
-                                         :col-width col-width
-                                         :margin margin
-                                         :gutter gutter}})))))
+                                             :col-width col-width
+                                             :margin margin
+                                             :gutter gutter}})))))
