@@ -7,10 +7,9 @@
             [structurize.components.utils :as u]
             [structurize.components.image :refer [image]]
             [structurize.components.with-page-load :refer [with-page-load]]
-            [structurize.components.grid :refer [grid]]
+            [structurize.components.grid :refer [grid grid-column]]
             [structurize.lens :refer [in]]
             [structurize.types :as t]
-            [medley.core :as m]
             [cljs.spec :as s]
             [bidi.bidi :as b]
             [traversy.lens :as l]
@@ -38,20 +37,29 @@
     "sign out"]])
 
 
-(defn grid-column [Φ {:keys [width gutter cs]}]
-  (log-debug Φ "render pod column")
-  [:div {:style {:width width}}
-   (doall
-    (for [[i c] (m/indexed cs)]
-      [:div {:key i
-             :style {:margin-top gutter}}
-       [c Φ]]))]
+(defn pod [Φ]
+  (r/create-class
+   {:component-did-mount (fn []
+                           (let [svg (.append (d3.select "#hi") "svg")
+                                 t (.thicker (textures.lines))
+                                 _ (.call svg t)
+                                 c (doto (.append svg "circle")
+                                     (.attr "cx" 100)
+                                     (.attr "cy" 100)
+                                     (.attr "r" 80)
+                                     (.style "fill" (.url t)))]))
+    :reagent-render
+    (fn []
+      [:div#hi {:style {:height (+ 200 (rand 200))
+                        :background-color :pink}}
 
-  #_[:button.c-button {:on-click (u/without-propagation
-                                #(side-effect! Φ :home-page/sign-out))}
-   [:div.l-row.l-row--justify-center
-    [:div.l-cell.l-cell--margin-right-small.c-icon.c-icon--exit]
-    "sign out"]])
+
+
+
+
+       ])})
+
+  )
 
 
 (defn home-page [Φ]
@@ -100,7 +108,8 @@
                        [grid-column Φ
                         {:width col-width
                          :gutter gutter
-                         :cs [(fn [Φ]
+                         :cs [pod
+                              (fn [Φ]
                                 [:div {:style {:height 240
                                                :background-color :green}}])
                               (fn [Φ]

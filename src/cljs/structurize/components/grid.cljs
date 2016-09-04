@@ -6,6 +6,7 @@
             [structurize.components.utils :as u]
             [structurize.lens :refer [in]]
             [structurize.types :as t]
+            [medley.core :as m]
             [cljs.spec :as s]
             [traversy.lens :as l]
             [reagent.core :as r])
@@ -17,6 +18,15 @@
        (not (nil? c))))
 
 ;; components ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(defn grid-column [Φ {:keys [width gutter cs]}]
+  (log-debug Φ "render grid column")
+  [:div {:style {:width width}}
+   (doall
+    (for [[i c] (m/indexed cs)]
+      [:div {:key i
+             :style {:margin-top gutter}}
+       [c Φ]]))])
 
 (defn grid [φ {:keys [center left right top bottom] :as props}]
   (let [{:keys [width grid] :as viewport} (track φ l/view-single
@@ -30,7 +40,7 @@
 
     (log-debug φ "render grid")
 
-    [:div.c-grid
+    [:div
      (when (visible? top viewport)
        [top-c φ (assoc grid
                        :width (- width margin)

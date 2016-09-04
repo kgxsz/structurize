@@ -1,7 +1,9 @@
 (ns ^:figwheel-no-load structurize.runner
   (:require [structurize.system :refer [system]]
             [structurize.system.renderer :as renderer]
-            [cljsjs.lodash]))
+            [cljsjs.lodash]
+            [cljsjs.d3]
+            [cljsjs.textures]))
 
 
 (defn reload []

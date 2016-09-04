@@ -17,6 +17,8 @@
                  [clj-time "0.11.0"]
                  [garden "1.3.2"]
                  [cljsjs/lodash "4.11.2-0"]
+                 [cljsjs/d3 "3.5.16-0"]
+                 [cljsjs/textures "1.0.3-0"]
                  [camel-snake-kebab "0.3.2"]
                  [com.andrewmcveigh/cljs-time "0.4.0"]
                  [reagent "0.6.0-alpha"]
