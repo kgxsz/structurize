@@ -410,7 +410,7 @@
     [:&__avatar {:width (-> v :avatar-width-medium u/px)
                  :height (-> v :avatar-height-medium u/px)
                  :position :absolute
-                 :top (-> v :avatar-height-medium - (* 0.8) u/px)
+                 :bottom (-> v :spacing-medium u/px)
                  :z-index 0;
                  :background-color (alpha (:black-b colours) (:alpha-low v))
                  :border-style :solid
