@@ -221,6 +221,9 @@
      [:&-top
       [:&-small {:margin-top (-> v :spacing-small u/px)}]
       [:&-medium {:margin-top (-> v :spacing-medium u/px)}]]
+     [:&-bottom
+      [:&-small {:margin-bottom (-> v :spacing-small u/px)}]
+      [:&-medium {:margin-bottom (-> v :spacing-medium u/px)}]]
      [:&-right
       [:&-small {:margin-right (-> v :spacing-small u/px)}]]
      [:&-bottom
@@ -394,7 +397,6 @@
               :position :absolute
               :top (-> v :masthead-height - u/px)
               :background-color (alpha (:black-b colours) (:alpha-medium v))}]
-
     [:&__avatar {:width (-> v :avatar-width-medium u/px)
                  :height (-> v :avatar-height-medium u/px)
                  :position :absolute

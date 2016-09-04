@@ -88,7 +88,7 @@
 
        (log-debug Φ "render home-page")
 
-       [:div
+       [:div.l-cell.l-cell--margin-bottom-medium
         [triptych Φ {:center {:hidden #{}
                               :c (fn [Φ {:keys [width col-n col-width gutter margin-left margin-right]}]
                                    (let [src (rand-nth ["images/hero-1.png" "images/hero-2.png" "images/hero-3.png"
