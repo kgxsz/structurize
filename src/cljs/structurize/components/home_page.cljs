@@ -91,9 +91,33 @@
        (log-debug Φ "render home-page")
 
        [:div.l-cell.l-cell--margin-bottom-medium.c-page
-        [triptych Φ {:center {:hidden #{}
+        [triptych Φ {:center {:hidden #{:lg :xl}
                               :c (fn [Φ {:keys [width col-n col-width gutter margin-left margin-right]}]
-                                   [:div.c-header {:style {:width (+ width margin-left margin-right)}}])}}]
+                                   [:div.c-header {:style {:width (+ width margin-left margin-right)}}
+                                    [:div.l-cell.l-cell--fill-parent {:style {:padding-left (+ margin-left gutter)
+                                                                              :padding-right (+ margin-right gutter)
+                                                                              :padding-top 6
+                                                                              :padding-bottom 6}}
+                                     [:div.l-cell.l-cell--fill-parent {:style {:background-color "#EEE"}}]]])}}]
+        [triptych Φ {:center {:hidden #{:xs :sm :md}
+                              :c (fn [Φ {:keys [width col-n col-width gutter margin-left margin-right]}]
+                                   [:div.l-row.c-header {:style {:width (+ width margin-left margin-right)}}
+                                    [:div {:style {:width (+ col-width margin-left gutter)
+                                                   :padding-left (+ gutter margin-left)
+                                                   :padding-top 6
+                                                   :padding-bottom 6}}
+                                     [:div.l-cell.l-cell--fill-parent {:style {:background-color "#F9F9F9"}}]]
+                                    [:div {:style {:width (- width (* 2 (+ gutter col-width)))
+                                                   :padding-left gutter
+                                                   :padding-right gutter
+                                                   :padding-top 6
+                                                   :padding-bottom 6}}
+                                     [:div.l-cell.l-cell--fill-parent {:style {:background-color "#EEE"}}]]
+                                    [:div {:style {:width (+ col-width margin-right gutter)
+                                                   :padding-right (+ gutter margin-right)
+                                                   :padding-top 6
+                                                   :padding-bottom 6}}
+                                     [:div.l-cell.l-cell--fill-parent {:style {:background-color "#F9F9F9"}}]]])}}]
         [triptych Φ {:center {:hidden #{}
                               :c (fn [Φ {:keys [width col-n col-width gutter margin-left margin-right]}]
                                    (let [src (rand-nth ["images/hero-1.png" "images/hero-2.png" "images/hero-3.png"
