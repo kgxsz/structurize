@@ -158,7 +158,8 @@
              :flex-direction :row}
     [:&--height-100 {:height (u/percent 100)}]
     [:&--justify
-     [:&-center {:justify-content :center}]]
+     [:&-center {:justify-content :center}]
+     [:&-space-between {:justify-content :space-between}]]
     [:&__item
      [:&--grow {:flex-grow 1}]]]
 
@@ -170,6 +171,7 @@
      [:&-center {:justify-content :center}]]
     [:&--align
      [:&-center {:align-items :center}]
+     [:&-start {:align-items :flex-start}]
      [:&-end {:align-items :flex-end}]]
     [:&__item
      [:&--grow {:flex-grow 1}]]]
