@@ -8,6 +8,7 @@
             [structurize.components.image :refer [image]]
             [structurize.components.with-page-load :refer [with-page-load]]
             [structurize.components.triptych :refer [triptych triptych-column]]
+            [structurize.components.masthead :refer [masthead]]
             [structurize.lens :refer [in]]
             [structurize.types :as t]
             [cljs.spec :as s]
@@ -57,26 +58,6 @@
     [pod Φ {:orientation "6/8" :colour colour :width 1 :size 5}]))
 
 
-(defn masthead-left [Φ {:keys [width col-n col-width gutter margin-left]}]
-  [:div.l-cell.l-cell--justify-end {:style {:width (+ width margin-left)}}
-   [:div.c-masthead__lip {:style {:width (+ width margin-left)}}]
-   [:div.l-cell.l-cell--justify-center {:style {:width col-width}}
-    [:div.c-masthead__avatar
-     [image Φ {:+image (in [:home-page :masthead-avatar-image])
-               :src #_(:avatar-url me) "https://avatars.githubusercontent.com/u/5012793?v=3"}]]]])
-
-
-(defn masthead-center [Φ {:keys [width col-n col-width gutter margin-left margin-right]}]
-  [:div.l-cell.l-cell--justify-start {:style {:width (+ width margin-left margin-right)}}
-   [:div.c-masthead__lip {:style {:width (+ width margin-left margin-right)}}
-    [:div.l-cell.l-cell--align-center.l-cell--height-100.c-masthead__primary-content {:style {:padding-left (+ margin-left gutter)
-                                                                                              :padding-right (+ margin-right gutter)}}
-     "Keigo's Superstore"]]
-   [:div.l-cell.l-cell--align-center.l-cell--width-100.c-masthead__secondary-content {:style {:padding-left (+ margin-left gutter)
-                                                                            :padding-right (+ margin-right gutter)}}
-    "The Something Collection"]])
-
-
 (defn home-page [Φ]
   [with-page-load Φ
    (fn [Φ]
@@ -123,11 +104,9 @@
                                       [:div {:style {:width (+ width margin-left margin-right)}}
                                        [image Φ {:+image (in [:home-page :hero-image])
                                                  :src src}]]))}}]]
-        [:div.c-masthead
-         [triptych Φ {:left {:hidden #{:xs :sm}
-                             :c masthead-left}
-                      :center {:hidden #{}
-                               :c masthead-center}}]]
+
+        [masthead Φ]
+
         [:div.c-page-content
          [triptych Φ {:left {:hidden #{:xs :sm}
                              :c (fn [Φ {:keys [width col-n col-width gutter margin-left]}]
