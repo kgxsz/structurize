@@ -41,6 +41,41 @@
     "sign out"]])
 
 
+(defn home-page-left [Φ {:keys [width col-n col-width gutter margin-left]}]
+  [:div.l-col.l-col--align-start {:style {:width width
+                                          :padding-left gutter
+                                          :margin-left margin-left}}
+   [triptych-column Φ
+    {:width col-width
+     :gutter gutter
+     :cs [pod pod]}]])
+
+
+(defn home-page-center [Φ {:keys [width col-n col-width gutter margin-left margin-right]}]
+  [:div.l-row.l-row--justify-space-between {:style {:width width
+                                                    :padding-left gutter
+                                                    :padding-right gutter
+                                                    :margin-left margin-left
+                                                    :margin-right margin-right}}
+   (doall
+    (for [i (range col-n)]
+      ^{:key i}
+      [triptych-column Φ
+       {:width col-width
+        :gutter gutter
+        :cs (repeat 6 pod)}]))])
+
+
+(defn home-page-right [Φ {:keys [width col-n col-width gutter margin-right]}]
+  [:div.l-col.l-col--align-end {:style {:width width
+                                        :padding-right gutter
+                                        :margin-right margin-right}}
+   [triptych-column Φ
+    {:width col-width
+     :gutter gutter
+     :cs [pod]}]])
+
+
 (defn home-page [Φ]
   [with-page-load Φ
    (fn [Φ]
@@ -50,37 +85,11 @@
       [hero Φ]
       [masthead Φ]
       [triptych Φ {:left {:hidden #{:xs :sm}
-                          :c (fn [Φ {:keys [width col-n col-width gutter margin-left]}]
-                               [:div.l-col.l-col--align-start {:style {:width width
-                                                                       :padding-left gutter
-                                                                       :margin-left margin-left}}
-                                [triptych-column Φ
-                                 {:width col-width
-                                  :gutter gutter
-                                  :cs [pod pod]}]])}
+                          :c home-page-left}
                    :center {:hidden #{}
-                            :c (fn [Φ {:keys [width col-n col-width gutter margin-left margin-right]}]
-                                 [:div.l-row.l-row--justify-space-between {:style {:width width
-                                                                                   :padding-left gutter
-                                                                                   :padding-right gutter
-                                                                                   :margin-left margin-left
-                                                                                   :margin-right margin-right}}
-                                  (doall
-                                   (for [i (range col-n)]
-                                     ^{:key i}
-                                     [triptych-column Φ
-                                      {:width col-width
-                                       :gutter gutter
-                                       :cs (repeat 6 pod)}]))])}
+                            :c home-page-center}
                    :right {:hidden #{:xs :sm :md}
-                           :c (fn [Φ {:keys [width col-n col-width gutter margin-right]}]
-                                [:div.l-col.l-col--align-end {:style {:width width
-                                                                      :padding-right gutter
-                                                                      :margin-right margin-right}}
-                                 [triptych-column Φ
-                                  {:width col-width
-                                   :gutter gutter
-                                   :cs [pod]}]])}}]])])
+                           :c home-page-right}}]])])
 
 
 ;; side-effects ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
