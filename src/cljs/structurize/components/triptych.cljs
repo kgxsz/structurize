@@ -17,6 +17,7 @@
   (and (not (contains? hidden breakpoint))
        (not (nil? c))))
 
+
 ;; components ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defn triptych-column [Φ {:keys [width gutter cs]}]
@@ -28,6 +29,7 @@
              :style {:margin-top gutter}}
        [c Φ]]))])
 
+
 (defn triptych [φ {:keys [center left right] :as props}]
   (let [{:keys [width triptych] :as viewport} (track φ l/view-single
                                             (in [:viewport]))
@@ -37,7 +39,6 @@
         {right-c :c right-hidden :hidden} right]
 
     (log-debug φ "render triptych")
-
     [:div.l-row.l-row--height-100
      (when (visible? left viewport)
        [left-c φ (assoc triptych
