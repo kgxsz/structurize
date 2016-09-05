@@ -9,6 +9,7 @@
             [structurize.components.with-page-load :refer [with-page-load]]
             [structurize.components.triptych :refer [triptych triptych-column]]
             [structurize.components.masthead :refer [masthead]]
+            [structurize.components.pod :refer [pod]]
             [structurize.lens :refer [in]]
             [structurize.types :as t]
             [cljs.spec :as s]
@@ -20,7 +21,7 @@
 
 ;; components ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defn sign-in-with-github [φ]
+#_(defn sign-in-with-github [φ]
   (log-debug φ "render sign-in-with-github")
   [:button.c-button {:on-click (u/without-propagation
                                 #(side-effect! φ :home-page/initialise-sign-in-with-github))}
@@ -29,7 +30,7 @@
     "sign in with GitHub"]])
 
 
-(defn sign-out [Φ]
+#_(defn sign-out [Φ]
   (log-debug Φ "render sign-out")
   [:button.c-button {:on-click (u/without-propagation
                                 #(side-effect! Φ :home-page/sign-out))}
@@ -37,25 +38,6 @@
     [:div.l-cell.l-cell--margin-right-small.c-icon.c-icon--exit]
     "sign out"]])
 
-
-(defn pod [Φ {:keys [orientation colour size width] :as props}]
-  (log-debug Φ "mount pod")
-  (r/create-class
-   {:component-did-mount #(side-effect! Φ :home-page/pod-did-mount (merge props {:node (r/dom-node %)}))
-    :reagent-render (fn []
-                      (log-debug Φ "render pod")
-                      [:div {:style {:height (+ 200 (rand 200))}}])}))
-
-
-(defn aux-pod [Φ]
-  [pod Φ {:orientation "2/8" :colour "#495159" :width 1 :size 5}])
-
-
-(defn content-pod [Φ]
-  (let [colour (rand-nth ["#B39EB5" "#F49AC2" "#FF6961" "#03C03C" "#AEC6CF"
-                          "#836953" "#FDFD96" "#C23B22" "#DEA5A4" "#77DD77"
-                          "#FFB347" "#B19CD9" "#779ECB" "#966FD6" "#CFCFC4"])]
-    [pod Φ {:orientation "6/8" :colour colour :width 1 :size 5}]))
 
 
 (defn home-page [Φ]
@@ -116,7 +98,7 @@
                                    [triptych-column Φ
                                     {:width col-width
                                      :gutter gutter
-                                     :cs [aux-pod aux-pod]}]])}
+                                     :cs [pod pod]}]])}
                       :center {:hidden #{}
                                :c (fn [Φ {:keys [width col-n col-width gutter margin-left margin-right]}]
                                     [:div.l-row.l-row--justify-space-between {:style {:width width
@@ -130,7 +112,7 @@
                                         [triptych-column Φ
                                          {:width col-width
                                           :gutter gutter
-                                          :cs (repeat 6 content-pod)}]))])}
+                                          :cs (repeat 6 pod)}]))])}
                       :right {:hidden #{:xs :sm :md}
                               :c (fn [Φ {:keys [width col-n col-width gutter margin-right]}]
                                    [:div.l-col.l-col--align-end {:style {:width width
@@ -139,12 +121,12 @@
                                     [triptych-column Φ
                                      {:width col-width
                                       :gutter gutter
-                                      :cs [aux-pod]}]])}}]]]))])
+                                      :cs [pod]}]])}}]]]))])
 
 
 ;; side-effects ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defmethod process-side-effect :home-page/initialise-sign-in-with-github
+#_(defmethod process-side-effect :home-page/initialise-sign-in-with-github
   [{:keys [config-opts] :as Φ} id props]
   (send! Φ :auth/initialise-sign-in-with-github
          {}
@@ -160,35 +142,3 @@
                         (write! Φ :auth/sign-in-with-github-failed
                                 (fn [x]
                                   (assoc-in x [:auth :sign-in-with-github-failed?] true))))}))
-
-
-(defmethod process-side-effect :home-page/sign-out
-  [Φ id props]
-  (post! Φ "/sign-out"
-         {}
-         {:on-success (fn [response]
-                        (write! Φ :auth/sign-out
-                                (fn [x]
-                                  (assoc x :auth {}))))
-          :on-failure (fn [response]
-                        (write! Φ :auth/sign-out-failed
-                                (fn [x]
-                                  (assoc-in x [:auth :sign-out-status] :failed))))}))
-
-(defmethod process-side-effect :home-page/pod-did-mount [Φ id {:keys [node size width orientation colour] :as props}]
-  (let [sel (d3.select node)
-        t (doto (textures.lines)
-            (.size size)
-            (.strokeWidth width)
-            (.orientation orientation)
-            (.stroke colour))
-        svg (doto (.append sel "svg")
-              (.style "height" "100%")
-              (.style "width" "100%")
-              (.call t))
-        r (doto (.append svg "rect")
-            (.attr "x" 0)
-            (.attr "y" 0)
-            (.attr "width" "100%")
-            (.attr "height" "100%")
-            (.style "fill" (.url t)))]))
