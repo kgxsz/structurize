@@ -15,32 +15,28 @@
 
 ;; components ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+(defn header-left [Φ {:keys [width col-n col-width gutter margin-left]}]
+  [:div.c-header__item {:style {:width (- width gutter)
+                                :margin-left (+ margin-left gutter)}}])
+
+
+(defn header-center [Φ {:keys [width col-n col-width gutter margin-left margin-right]}]
+  [:div.c-header__item  {:style {:width (- width gutter gutter)
+                                 :margin-left (+ margin-left gutter)
+                                 :margin-right (+ margin-right gutter)}}])
+
+
+(defn header-right [Φ {:keys [width col-n col-width gutter margin-right]}]
+  [:div.c-header__item  {:style {:width (- width gutter)
+                                 :margin-right (+ margin-right gutter)}}])
+
+
 (defn header [Φ]
   (log-debug Φ "render masthead")
   [:div.c-header
    [triptych Φ {:left {:hidden #{:xs :sm :md}
-                       :c (fn [Φ {:keys [width col-n col-width gutter margin-left]}]
-                            [:div {:style {:width width
-                                           :margin-left margin-left
-                                           :padding-left gutter
-                                           :padding-top 6
-                                           :padding-bottom 6}}
-                             [:div.l-cell.l-cell--fill-parent {:style {:background-color "#F9F9F9"}}]])}
-                :center {:c (fn [Φ {:keys [width col-n col-width gutter margin-left margin-right]}]
-                              [:div {:style {:width width
-                                             :margin-left margin-left
-                                             :margin-right margin-right
-                                             :padding-left gutter
-                                             :padding-right gutter
-                                             :padding-top 6
-                                             :padding-bottom 6}}
-                               [:div.l-cell.l-cell--fill-parent {:style {:background-color "#EEE"}}]])}
+                       :c header-left}
+                :center {:c header-center}
                 :right {:hidden #{:xs :sm :md}
-                        :c (fn [Φ {:keys [width col-n col-width gutter margin-right]}]
-                             [:div {:style {:width width
-                                            :margin-right margin-right
-                                            :padding-right gutter
-                                            :padding-top 6
-                                            :padding-bottom 6}}
-                              [:div.l-cell.l-cell--fill-parent {:style {:background-color "#F9F9F9"}}]])}}]])
+                        :c header-right}}]])
 

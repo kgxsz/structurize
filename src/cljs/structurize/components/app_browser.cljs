@@ -143,8 +143,6 @@
 
 ;; side-effects ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-
-
 (defmethod process-side-effect :app-browser/toggle-node-collapsed
   [Φ id {:keys [path] :as props}]
   (write! Φ :app-browser/toggle-node-collapsed

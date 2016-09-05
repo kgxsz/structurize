@@ -397,9 +397,12 @@
 
    [:.c-header {:height (-> v :header-height u/px)
                 :position :fixed
+                :padding-top (-> v :spacing-x-small u/px)
+                :padding-bottom (-> v :spacing-x-small u/px)
                 :top 0
                 :z-index 1
-                :background-color (:white-a colours)}]
+                :background-color (:white-a colours)}
+    [:&__item {:background-color (:white-b colours)}]]
 
    [:.c-masthead {:height (-> v :masthead-height u/px)
                   :position :relative
