@@ -80,38 +80,32 @@
 (defn home-page [Φ]
   [with-page-load Φ
    (fn [Φ]
-     (let [#_#_me (track Φ l/view-single
-                         (in [:auth :me]))
-           #_#_star (track Φ l/view-single
-                           (in [:playground :star]))
-           #_#_heart (track Φ l/view-single
-                            (in [:playground :heart]))
-           #_#_pong (track Φ l/view-single
-                           (in [:playground :pong]))]
+     (let [me (track Φ l/view-single
+                     (in [:auth :me]))]
 
        (log-debug Φ "render home-page")
 
        [:div.l-cell.l-cell--margin-bottom-medium.c-page
 
         [:div.c-header
-         [triptych Φ {:left {:hidden #{:xs :sm}
-                              :c (fn [Φ {:keys [width col-n col-width gutter margin-left]}]
-                                   [:div {:style {:width width
-                                                  :margin-left margin-left
-                                                  :padding-left gutter
-                                                  :padding-top 6
-                                                  :padding-bottom 6}}
-                                    [:div.l-cell.l-cell--fill-parent {:style {:background-color "#F9F9F9"}}]])}
+         [triptych Φ {:left {:hidden #{:xs :sm :md}
+                             :c (fn [Φ {:keys [width col-n col-width gutter margin-left]}]
+                                  [:div {:style {:width width
+                                                 :margin-left margin-left
+                                                 :padding-left gutter
+                                                 :padding-top 6
+                                                 :padding-bottom 6}}
+                                   [:div.l-cell.l-cell--fill-parent {:style {:background-color "#F9F9F9"}}]])}
                       :center {:c (fn [Φ {:keys [width col-n col-width gutter margin-left margin-right]}]
-                                   [:div {:style {:width width
-                                                  :margin-left margin-left
-                                                  :margin-right margin-right
-                                                  :padding-left gutter
-                                                  :padding-right gutter
-                                                  :padding-top 6
-                                                  :padding-bottom 6}}
-                                    [:div.l-cell.l-cell--fill-parent {:style {:background-color "#EEE"}}]])}
-                      :right {:hidden #{:xs :sm}
+                                    [:div {:style {:width width
+                                                   :margin-left margin-left
+                                                   :margin-right margin-right
+                                                   :padding-left gutter
+                                                   :padding-right gutter
+                                                   :padding-top 6
+                                                   :padding-bottom 6}}
+                                     [:div.l-cell.l-cell--fill-parent {:style {:background-color "#EEE"}}]])}
+                      :right {:hidden #{:xs :sm :md}
                               :c (fn [Φ {:keys [width col-n col-width gutter margin-right]}]
                                    [:div {:style {:width width
                                                   :margin-right margin-right
@@ -166,50 +160,7 @@
                                     [triptych-column Φ
                                      {:width col-width
                                       :gutter gutter
-                                      :cs [aux-pod]}]])}}]]
-
-        #_[:div.l-col.l-col--justify-center
-           (if me
-             [:div.l-col.l-col--align-center.c-hero
-              [:div.c-hero__avatar
-               [image Φ {:+image (in [:home-page :hero-avatar-image])
-                         :src (:avatar-url me) #_"https://avatars.githubusercontent.com/u/5012793?v=3"}]]
-              [:div.c-hero__caption "Hello @" (:login me)]]
-
-             [:div.c-hero
-              [:div.c-icon.c-icon--mustache.c-icon--h-size-xx-large]
-              [:div.c-hero__caption "Hello there"]])
-
-           [:div.l-col.l-col--align-center
-            (if me
-              [sign-out Φ]
-              [sign-in-with-github Φ])
-
-            [:div.l-cell.l-cell--margin-top-medium
-             [:button.c-button {:on-click (u/without-propagation
-                                           #(side-effect! Φ :home-page/inc-item
-                                                          {:path [:playground :star]
-                                                           :item-name "star"}))}
-              [:div.l-row.l-row--justify-center
-               [:div.l-cell.l-cell--margin-right-small.c-icon.c-icon--star]
-               star]]]
-
-            [:div.l-cell.l-cell--margin-top-medium
-             [:button.c-button {:on-click (u/without-propagation
-                                           #(side-effect! Φ :home-page/inc-item
-                                                          {:path [:playground :heart]
-                                                           :item-name "heart"}))}
-              [:div.l-row.l-row--justify-center
-               [:div.l-cell.l-cell--margin-right-small.c-icon.c-icon--heart]
-               heart]]]
-
-            [:div.l-cell.l-cell--margin-top-medium
-             [:button.c-button {:on-click (u/without-propagation
-                                           #(side-effect! Φ :home-page/ping {}))}
-              [:div.l-row.l-row--justify-center
-               [:div.l-cell.l-cell--margin-right-small.c-icon.c-icon--heart-pulse]
-               pong]]]]]]
-       ))])
+                                      :cs [aux-pod]}]])}}]]]))])
 
 
 ;; side-effects ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -244,34 +195,6 @@
                         (write! Φ :auth/sign-out-failed
                                 (fn [x]
                                   (assoc-in x [:auth :sign-out-status] :failed))))}))
-
-
-(defmethod process-side-effect :home-page/inc-item
-  [Φ id {:keys [path item-name] :as props}]
-  (let [mutation-id (keyword (str "playground/inc-" item-name))]
-    (write! Φ mutation-id
-            (fn [x]
-              (update-in x path inc)))))
-
-
-(defmethod process-side-effect :home-page/ping
-  [Φ id props]
-  (let [ping (read Φ l/view-single
-                   (in [:playground :ping]))]
-
-    (write! Φ :playground/ping
-            (fn [x]
-              (update-in x [:playground :ping] inc)))
-
-    (send! Φ :playground/ping
-           {:ping (inc ping)}
-           {:on-success (fn [[id payload]]
-                          (write! Φ :playground/pong
-                                  (fn [x]
-                                    (assoc-in x [:playground :pong] (:pong payload)))))
-            :on-failure (fn [reply] (write! Φ :playground/ping-failed
-                                           (fn [x]
-                                             (assoc-in x [:playground :ping-status] :failed))))})))
 
 (defmethod process-side-effect :home-page/pod-did-mount [Φ id {:keys [node size width orientation colour] :as props}]
   (let [sel (d3.select node)

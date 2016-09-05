@@ -79,11 +79,7 @@
 ;; helper functions ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defn make-!state [config-opts]
-  (r/atom {:app-history {0 {:playground {:heart 0
-                                         :star 3
-                                         :ping 0
-                                         :pong 0}
-                            :location {:path nil
+  (r/atom {:app-history {0 {:location {:path nil
                                        :handler :unknown
                                        :query nil}
                             :viewport {}

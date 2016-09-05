@@ -31,13 +31,6 @@
     (?reply-fn [id {:me user}])))
 
 
-(defmethod process-receive-message :playground/ping
-  [{:keys [config-opts db]} {:keys [uid ?reply-fn] [id ?data] :event}]
-  (let [{:keys [ping]} ?data]
-    (go (<! (timeout 2000))
-        (?reply-fn [id {:pong ping}]))))
-
-
 (defmethod process-receive-message :chsk/ws-ping
   [φ event-message])
 
