@@ -7,7 +7,7 @@
             [structurize.components.utils :as u]
             [structurize.components.image :refer [image]]
             [structurize.components.with-page-load :refer [with-page-load]]
-            [structurize.components.triptych :refer [triptych triptych-column]]
+            [structurize.components.triptych :refer [triptych]]
             [structurize.components.header :refer [header]]
             [structurize.components.hero :refer [hero]]
             [structurize.components.masthead :refer [masthead]]
@@ -45,10 +45,12 @@
   [:div.l-col.l-col--align-start {:style {:width width
                                           :padding-left gutter
                                           :margin-left margin-left}}
-   [triptych-column Φ
-    {:width col-width
-     :gutter gutter
-     :cs [pod pod]}]])
+   [:div {:style {:width col-width}}
+    (doall
+     (for [i (range 2)]
+       [:div {:key i
+              :style {:margin-top gutter}}
+        [pod Φ {:+pod (in [:aux-pod i])}]]))]])
 
 
 (defn home-page-center [Φ {:keys [width col-n col-width gutter margin-left margin-right]}]
@@ -58,22 +60,26 @@
                                                     :margin-left margin-left
                                                     :margin-right margin-right}}
    (doall
-    (for [i (range col-n)]
-      ^{:key i}
-      [triptych-column Φ
-       {:width col-width
-        :gutter gutter
-        :cs (repeat 6 pod)}]))])
+    (for [col-i (range col-n)]
+      [:div {:key col-i
+             :style {:width col-width}}
+       (doall
+        (for [pod-i (range 2)]
+          [:div {:key pod-i
+                 :style {:margin-top gutter}}
+           [pod Φ {:+pod (in [:pods col-i pod-i])}]]))]))])
 
 
 (defn home-page-right [Φ {:keys [width col-n col-width gutter margin-right]}]
   [:div.l-col.l-col--align-end {:style {:width width
                                         :padding-right gutter
                                         :margin-right margin-right}}
-   [triptych-column Φ
-    {:width col-width
-     :gutter gutter
-     :cs [pod]}]])
+   [:div {:style {:width col-width}}
+    (doall
+     (for [i (range 1)]
+       [:div {:key i
+              :style {:margin-top gutter}}
+        [pod Φ {:+pod (in [:aux-pod 3])}]]))]])
 
 
 (defn home-page [Φ]

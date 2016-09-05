@@ -14,10 +14,10 @@
 
 ;; components ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defn pod [Φ]
+(defn pod [Φ {:keys [+pod]}]
   (log-debug Φ "mount pod")
   (r/create-class
-   {:component-did-mount #(side-effect! Φ :pod/did-mount {:node (r/dom-node %)})
+   {:component-did-mount #(side-effect! Φ :pod/did-mount {:node (r/dom-node %) :+pod +pod})
     :reagent-render (fn []
                       (log-debug Φ "render pod")
                       [:div {:style {:height (+ 200 (rand 200))}}])}))
@@ -25,7 +25,7 @@
 
 ;; side-effects ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defmethod process-side-effect :pod/did-mount [Φ id {:keys [node]}]
+(defmethod process-side-effect :pod/did-mount [Φ id {:keys [node +pod]}]
   (let [colour (rand-nth ["#B39EB5" "#F49AC2" "#FF6961" "#03C03C" "#AEC6CF"
                           "#836953" "#FDFD96" "#C23B22" "#DEA5A4" "#77DD77"
                           "#FFB347" "#B19CD9" "#779ECB" "#966FD6" "#CFCFC4"])
@@ -47,4 +47,8 @@
             (.attr "y" 0)
             (.attr "width" "100%")
             (.attr "height" "100%")
-            (.style "fill" (.url t)))])) 
+            (.style "fill" (.url t)))]
+
+    (write! Φ :pod/did-mount
+            (fn [x]
+              (l/update x +pod #(assoc % :node node))))))

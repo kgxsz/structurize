@@ -6,7 +6,6 @@
             [structurize.components.utils :as u]
             [structurize.lens :refer [in]]
             [structurize.types :as t]
-            [medley.core :as m]
             [cljs.spec :as s]
             [traversy.lens :as l]
             [reagent.core :as r])
@@ -19,16 +18,6 @@
 
 
 ;; components ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-(defn triptych-column [Φ {:keys [width gutter cs]}]
-  (log-debug Φ "render triptych column")
-  [:div {:style {:width width}}
-   (doall
-    (for [[i c] (m/indexed cs)]
-      [:div {:key i
-             :style {:margin-top gutter}}
-       [c Φ]]))])
-
 
 (defn triptych [φ {:keys [center left right] :as props}]
   (let [{:keys [width triptych] :as viewport} (track φ l/view-single
