@@ -26,11 +26,13 @@
 
     (fn []
       (let [handler (track φ l/view-single
-                           (in [:location :handler]))]
+                           (in [:location :handler]))
+            width (track φ l/view-single
+                         (in [:viewport :width]))]
 
         (log-debug φ "render root")
 
-        [:div
+        [:div {:style {:width width}}
          (case handler
            :home [home-page φ]
            :sign-in-with-github [sign-in-with-github-page φ]
