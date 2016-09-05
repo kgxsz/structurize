@@ -236,7 +236,8 @@
 
 (def components
   [:html
-   [:.c-page {:padding-top (-> v :header-height u/px)}]
+   [:.c-page {:padding-top (-> v :header-height u/px)
+              :padding-bottom (-> v :spacing-xx-large u/px)}]
 
    [:.c-icon
     [:&--h-size-xx-large {:font-size (-> v :h-size-xx-large u/px)}]

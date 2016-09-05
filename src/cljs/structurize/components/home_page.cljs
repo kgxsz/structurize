@@ -45,45 +45,42 @@
   [with-page-load Φ
    (fn [Φ]
      (log-debug Φ "render home-page")
-
-     [:div.l-cell.l-cell--margin-bottom-medium.c-page
+     [:div.c-page
       [header Φ]
       [hero Φ]
       [masthead Φ]
-
-      [:div.c-page-content
-       [triptych Φ {:left {:hidden #{:xs :sm}
-                           :c (fn [Φ {:keys [width col-n col-width gutter margin-left]}]
-                                [:div.l-col.l-col--align-start {:style {:width width
-                                                                        :padding-left gutter
-                                                                        :margin-left margin-left}}
+      [triptych Φ {:left {:hidden #{:xs :sm}
+                          :c (fn [Φ {:keys [width col-n col-width gutter margin-left]}]
+                               [:div.l-col.l-col--align-start {:style {:width width
+                                                                       :padding-left gutter
+                                                                       :margin-left margin-left}}
+                                [triptych-column Φ
+                                 {:width col-width
+                                  :gutter gutter
+                                  :cs [pod pod]}]])}
+                   :center {:hidden #{}
+                            :c (fn [Φ {:keys [width col-n col-width gutter margin-left margin-right]}]
+                                 [:div.l-row.l-row--justify-space-between {:style {:width width
+                                                                                   :padding-left gutter
+                                                                                   :padding-right gutter
+                                                                                   :margin-left margin-left
+                                                                                   :margin-right margin-right}}
+                                  (doall
+                                   (for [i (range col-n)]
+                                     ^{:key i}
+                                     [triptych-column Φ
+                                      {:width col-width
+                                       :gutter gutter
+                                       :cs (repeat 6 pod)}]))])}
+                   :right {:hidden #{:xs :sm :md}
+                           :c (fn [Φ {:keys [width col-n col-width gutter margin-right]}]
+                                [:div.l-col.l-col--align-end {:style {:width width
+                                                                      :padding-right gutter
+                                                                      :margin-right margin-right}}
                                  [triptych-column Φ
                                   {:width col-width
                                    :gutter gutter
-                                   :cs [pod pod]}]])}
-                    :center {:hidden #{}
-                             :c (fn [Φ {:keys [width col-n col-width gutter margin-left margin-right]}]
-                                  [:div.l-row.l-row--justify-space-between {:style {:width width
-                                                                                    :padding-left gutter
-                                                                                    :padding-right gutter
-                                                                                    :margin-left margin-left
-                                                                                    :margin-right margin-right}}
-                                   (doall
-                                    (for [i (range col-n)]
-                                      ^{:key i}
-                                      [triptych-column Φ
-                                       {:width col-width
-                                        :gutter gutter
-                                        :cs (repeat 6 pod)}]))])}
-                    :right {:hidden #{:xs :sm :md}
-                            :c (fn [Φ {:keys [width col-n col-width gutter margin-right]}]
-                                 [:div.l-col.l-col--align-end {:style {:width width
-                                                                       :padding-right gutter
-                                                                       :margin-right margin-right}}
-                                  [triptych-column Φ
-                                   {:width col-width
-                                    :gutter gutter
-                                    :cs [pod]}]])}}]]])])
+                                   :cs [pod]}]])}}]])])
 
 
 ;; side-effects ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
