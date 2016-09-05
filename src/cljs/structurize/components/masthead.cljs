@@ -42,6 +42,7 @@
 
 
 (defn masthead [Φ]
+  (log-debug Φ "render masthead")
   [:div.c-masthead
    [triptych Φ {:left {:hidden #{:xs :sm}
                        :c masthead-left}

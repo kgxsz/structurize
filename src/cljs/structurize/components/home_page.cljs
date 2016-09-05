@@ -8,6 +8,8 @@
             [structurize.components.image :refer [image]]
             [structurize.components.with-page-load :refer [with-page-load]]
             [structurize.components.triptych :refer [triptych triptych-column]]
+            [structurize.components.header :refer [header]]
+            [structurize.components.hero :refer [hero]]
             [structurize.components.masthead :refer [masthead]]
             [structurize.components.pod :refer [pod]]
             [structurize.lens :refer [in]]
@@ -39,89 +41,49 @@
     "sign out"]])
 
 
-
 (defn home-page [Φ]
   [with-page-load Φ
    (fn [Φ]
-     (let [me (track Φ l/view-single
-                     (in [:auth :me]))]
+     (log-debug Φ "render home-page")
 
-       (log-debug Φ "render home-page")
+     [:div.l-cell.l-cell--margin-bottom-medium.c-page
+      [header Φ]
+      [hero Φ]
+      [masthead Φ]
 
-       [:div.l-cell.l-cell--margin-bottom-medium.c-page
-
-        [:div.c-header
-         [triptych Φ {:left {:hidden #{:xs :sm :md}
-                             :c (fn [Φ {:keys [width col-n col-width gutter margin-left]}]
-                                  [:div {:style {:width width
-                                                 :margin-left margin-left
-                                                 :padding-left gutter
-                                                 :padding-top 6
-                                                 :padding-bottom 6}}
-                                   [:div.l-cell.l-cell--fill-parent {:style {:background-color "#F9F9F9"}}]])}
-                      :center {:c (fn [Φ {:keys [width col-n col-width gutter margin-left margin-right]}]
-                                    [:div {:style {:width width
-                                                   :margin-left margin-left
-                                                   :margin-right margin-right
-                                                   :padding-left gutter
-                                                   :padding-right gutter
-                                                   :padding-top 6
-                                                   :padding-bottom 6}}
-                                     [:div.l-cell.l-cell--fill-parent {:style {:background-color "#EEE"}}]])}
-                      :right {:hidden #{:xs :sm :md}
-                              :c (fn [Φ {:keys [width col-n col-width gutter margin-right]}]
-                                   [:div {:style {:width width
-                                                  :margin-right margin-right
-                                                  :padding-right gutter
-                                                  :padding-top 6
-                                                  :padding-bottom 6}}
-                                    [:div.l-cell.l-cell--fill-parent {:style {:background-color "#F9F9F9"}}]])}}]]
-
-        [:div.c-hero
-         [triptych Φ {:center {:hidden #{}
-                               :c (fn [Φ {:keys [width col-n col-width gutter margin-left margin-right]}]
-                                    (let [src (rand-nth ["images/hero-1.png" "images/hero-2.png" "images/hero-3.png"
-                                                         "images/hero-4.png" "images/hero-5.png" "images/hero-6.png"
-                                                         "images/hero-7.png" "images/hero-8.png" "images/hero-9.png"])]
-                                      [:div {:style {:width (+ width margin-left margin-right)}}
-                                       [image Φ {:+image (in [:home-page :hero-image])
-                                                 :src src}]]))}}]]
-
-        [masthead Φ]
-
-        [:div.c-page-content
-         [triptych Φ {:left {:hidden #{:xs :sm}
-                             :c (fn [Φ {:keys [width col-n col-width gutter margin-left]}]
-                                  [:div.l-col.l-col--align-start {:style {:width width
-                                                                          :padding-left gutter
-                                                                          :margin-left margin-left}}
-                                   [triptych-column Φ
-                                    {:width col-width
-                                     :gutter gutter
-                                     :cs [pod pod]}]])}
-                      :center {:hidden #{}
-                               :c (fn [Φ {:keys [width col-n col-width gutter margin-left margin-right]}]
-                                    [:div.l-row.l-row--justify-space-between {:style {:width width
-                                                                                      :padding-left gutter
-                                                                                      :padding-right gutter
-                                                                                      :margin-left margin-left
-                                                                                      :margin-right margin-right}}
-                                     (doall
-                                      (for [i (range col-n)]
-                                        ^{:key i}
-                                        [triptych-column Φ
-                                         {:width col-width
-                                          :gutter gutter
-                                          :cs (repeat 6 pod)}]))])}
-                      :right {:hidden #{:xs :sm :md}
-                              :c (fn [Φ {:keys [width col-n col-width gutter margin-right]}]
-                                   [:div.l-col.l-col--align-end {:style {:width width
-                                                                         :padding-right gutter
-                                                                         :margin-right margin-right}}
-                                    [triptych-column Φ
-                                     {:width col-width
-                                      :gutter gutter
-                                      :cs [pod]}]])}}]]]))])
+      [:div.c-page-content
+       [triptych Φ {:left {:hidden #{:xs :sm}
+                           :c (fn [Φ {:keys [width col-n col-width gutter margin-left]}]
+                                [:div.l-col.l-col--align-start {:style {:width width
+                                                                        :padding-left gutter
+                                                                        :margin-left margin-left}}
+                                 [triptych-column Φ
+                                  {:width col-width
+                                   :gutter gutter
+                                   :cs [pod pod]}]])}
+                    :center {:hidden #{}
+                             :c (fn [Φ {:keys [width col-n col-width gutter margin-left margin-right]}]
+                                  [:div.l-row.l-row--justify-space-between {:style {:width width
+                                                                                    :padding-left gutter
+                                                                                    :padding-right gutter
+                                                                                    :margin-left margin-left
+                                                                                    :margin-right margin-right}}
+                                   (doall
+                                    (for [i (range col-n)]
+                                      ^{:key i}
+                                      [triptych-column Φ
+                                       {:width col-width
+                                        :gutter gutter
+                                        :cs (repeat 6 pod)}]))])}
+                    :right {:hidden #{:xs :sm :md}
+                            :c (fn [Φ {:keys [width col-n col-width gutter margin-right]}]
+                                 [:div.l-col.l-col--align-end {:style {:width width
+                                                                       :padding-right gutter
+                                                                       :margin-right margin-right}}
+                                  [triptych-column Φ
+                                   {:width col-width
+                                    :gutter gutter
+                                    :cs [pod]}]])}}]]])])
 
 
 ;; side-effects ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;

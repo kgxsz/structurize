@@ -21,7 +21,7 @@
     :reagent-render (fn []
                       (log-debug Φ "render pod")
                       [:div {:style {:height (+ 200 (rand 200))}}])}))
- 
+
 
 ;; side-effects ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
