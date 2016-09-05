@@ -61,5 +61,5 @@
        [right-c φ (assoc triptych
                          :width (+ gutter col-width)
                          :col-n 1
-                         :margin-left (/ margin 2)
-                         :margin-right 0)])]))
+                         :margin-left 0
+                         :margin-right (/ margin 2))])]))
