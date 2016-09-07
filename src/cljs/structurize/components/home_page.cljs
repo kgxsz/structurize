@@ -50,7 +50,7 @@
      (for [i (range 2)]
        [:div {:key i
               :style {:margin-top gutter}}
-        [pod Φ {:+pod (in [:aux-pod i])}]]))]])
+        [pod Φ]]))]])
 
 
 (defn home-page-center [Φ {:keys [width col-n col-width gutter margin-left margin-right]}]
@@ -60,14 +60,14 @@
                                                     :margin-left margin-left
                                                     :margin-right margin-right}}
    (doall
-    (for [col-i (range col-n)]
-      [:div {:key col-i
+    (for [i (range col-n)]
+      [:div {:key i
              :style {:width col-width}}
        (doall
-        (for [pod-i (range 2)]
-          [:div {:key pod-i
+        (for [j (range 6)]
+          [:div {:key j
                  :style {:margin-top gutter}}
-           [pod Φ {:+pod (in [:pods col-i pod-i])}]]))]))])
+           [pod Φ]]))]))])
 
 
 (defn home-page-right [Φ {:keys [width col-n col-width gutter margin-right]}]
@@ -79,7 +79,7 @@
      (for [i (range 1)]
        [:div {:key i
               :style {:margin-top gutter}}
-        [pod Φ {:+pod (in [:aux-pod 3])}]]))]])
+        [pod Φ]]))]])
 
 
 (defn home-page [Φ]
