@@ -32,7 +32,7 @@
 
 
 (defn header [Φ]
-  (log-debug Φ "render masthead")
+  (log-debug Φ "render header")
   [:div.c-header
    [triptych Φ {:left {:hidden #{:xs :sm :md}
                        :c header-left}
