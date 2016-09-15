@@ -94,7 +94,6 @@
    :header-height 50
    :masthead-height 35
 
-   :hero-image-ratio 20
    :hero-image-min-height 120
    :hero-image-max-height 480
 
@@ -427,9 +426,9 @@
                             :color (:grey-a colours)
                             :font-size (-> v :p-size-large u/px)}]]
 
-   [:.c-hero {:height (-> v :hero-image-ratio u/vw)
-              :min-height (-> v :hero-image-min-height u/px)
-              :max-height (-> v :hero-image-max-height u/px)}
+   [:.c-hero
+    [:&__image {:min-height (-> v :hero-image-min-height u/px)
+                :max-height (-> v :hero-image-max-height u/px)}]
     #_[:&__caption {:font-family "'Raleway', Arial"
                     :font-size (-> v :h-size-x-small u/px)
                     :margin-top (-> v :spacing-x-large u/px)}]

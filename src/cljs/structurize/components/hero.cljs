@@ -27,8 +27,11 @@
 ;; components ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defn hero-center [Φ {:keys [width col-n col-width gutter margin-left margin-right]}]
-  (let [src (rand-nth images)]
-    [:div {:style {:width (+ width margin-left margin-right)}}
+  (let [src (rand-nth images)
+        width (+ width margin-left margin-right)
+        aspect-ratio 0.2]
+    [:div.c-hero__image {:style {:width width
+                                 :height (* aspect-ratio width)}}
      [image Φ {:+image +image
                :src src}]]))
 
