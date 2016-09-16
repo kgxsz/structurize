@@ -131,9 +131,9 @@
 
 (def general
   [:html
-   [:body {:font-family "sans-serif"
+   [:body {:font-family "'Raleway', Arial"
            :font-size (-> v :p-size-medium u/px)
-           :color (:white-a colours)
+           :color (:grey-a colours)
            :background-color (:white-b colours)}]
 
    [:#js-root {:width (u/vw 100)
@@ -257,9 +257,7 @@
    [:.c-page {:padding-top (-> v :header-height u/px)
               :padding-bottom (-> v :spacing-xx-large u/px)}]
 
-   [:.c-text {:font-family "'Raleway', Arial"
-              :font-size (-> v :p-size-medium u/px)
-              :color (:grey-a colours)}
+   [:.c-text
     [:&--p-size
      [:&-small {:font-size (-> v :p-size-small u/px)}]
      [:&-large {:font-size (-> v :p-size-large u/px)}]
@@ -271,7 +269,6 @@
     [:&--color-white-a {:color (:white-a colours)}]]
 
    [:.c-icon
-    [:&--color-grey-a {:color (:grey-a colours)}]
     [:&--h-size-xx-large {:font-size (-> v :h-size-xx-large u/px)}]
     [:&--h-size-large {:font-size (-> v :h-size-large u/px)}]]
 
@@ -302,7 +299,10 @@
     [:&:hover {:background-color (alpha (:black-b colours) (:alpha-medium v))}]]
 
 
-   [:.c-tooling {:width (u/percent 100)
+   [:.c-tooling {:color (:white-b colours)
+                 :font-family "'Fira Mono', monospace"
+                 :font-size (-> v :p-size-small u/px)
+                 :width (u/percent 100)
                  :height (u/percent 100)
                  :padding (-> v :spacing-medium u/px)
                  :background-color (alpha (:black-b colours) (:alpha-high v))}
@@ -333,8 +333,7 @@
      [:&:last-child {:margin-bottom 0}]]]
 
 
-   [:.c-writes-browser {:font-family "'Fira Mono', monospace"}
-
+   [:.c-writes-browser
     [:&__controls {:background-color (alpha (:grey-a colours) (:alpha-low v))
                    :border-radius (-> v :border-radius-medium u/px)
                    :padding (-> v :spacing-medium u/px)}
@@ -392,8 +391,7 @@
                    :color (:dark-green colours)}]]]
 
 
-   [:.c-app-browser {:font-family "'Fira Mono', monospace"
-                     :font-size (-> v :p-size-small u/px)}
+   [:.c-app-browser
 
     [:&__brace {:padding-top (-> v :nudge-xx-large u/px)}]
 
@@ -449,29 +447,15 @@
                  :bottom (-> v :spacing-medium u/px)
                  :z-index 0;
                  :background-color (alpha (:black-b colours) (:alpha-low v))
-                 :border-style :solid
                  :overflow :hidden
+                 :border-style :solid
+                 :border-color (:white-a colours)
                  :border-width (-> v :border-width-large u/px)
                  :border-radius (-> v :avatar-height-medium u/px)}]]
 
    [:.c-hero
     [:&__image {:min-height (-> v :hero-image-min-height u/px)
-                :max-height (-> v :hero-image-max-height u/px)}]
-    #_[:&__caption {:font-family "'Raleway', Arial"
-                    :font-size (-> v :h-size-x-small u/px)
-                    :margin-top (-> v :spacing-x-large u/px)}]
-    #_[:&__avatar {:width (-> v :avatar-width-medium u/px)
-                   :height (-> v :avatar-height-medium u/px)
-                   :z-index 0;
-                   :background-color (alpha (:black-b colours) (:alpha-low v))
-                   :border-style :solid
-                   :overflow :hidden
-                   :border-width (-> v :border-width-large u/px)
-                   :border-radius (-> v :avatar-height-medium u/px)}]
-    #_[:&__inter-icon {:font-size (-> v :h-size-large u/px)
-                       :margin-top (-> v :spacing-large u/px)
-                       :margin-left (-> v :spacing-x-large u/px)
-                       :margin-right (-> v :spacing-x-large u/px)}]]])
+                :max-height (-> v :hero-image-max-height u/px)}]]])
 
 
 (def main

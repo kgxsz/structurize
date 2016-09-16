@@ -23,7 +23,7 @@
      (log-debug Φ "render unkown-page")
      [:div.c-page
       [:div.l-col.l-col--align-center.l-col--margin-top-xxx-large
-       [:div.c-icon.c-icon--poop.c-icon--h-size-large.c-icon--color-grey-a]
+       [:div.c-icon.c-icon--poop.c-icon--h-size-large]
        [:div.l-cell.l-cell--margin-top-medium
         [:span.c-text.c-text--p-size-xx-large "Looks like you're lost!"]]
        [:div.l-cell.l-cell--margin-top-small

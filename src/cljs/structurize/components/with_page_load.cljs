@@ -29,7 +29,7 @@
             chsk-status-initialising?)
       [:div.c-page
        [:div.l-col.l-col--align-center.l-col--margin-top-xxx-large
-        [:div.c-icon.c-icon--coffee-cup.c-icon--h-size-large.c-icon--color-grey-a]
+        [:div.c-icon.c-icon--coffee-cup.c-icon--h-size-large]
         [:div.l-cell.l-cell--margin-top-medium
          [:span.c-text.c-text--p-size-xx-large "Loading"]]]]
       [page φ])))

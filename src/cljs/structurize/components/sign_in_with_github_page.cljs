@@ -36,10 +36,10 @@
                           (if (or internal-error external-error)
                             [:div.l-col.l-col--align-center.l-col--margin-top-xxx-large
                              [:div.l-row.l-row--justify-center.l-row--align-center
-                              [:div.c-icon.c-icon--github.c-icon--h-size-large.c-icon--color-grey-a]
+                              [:div.c-icon.c-icon--github.c-icon--h-size-large]
                               [:div.l-cell.l-cell--margin-left-medium.l-cell--margin-right-medium
                                [:span.c-text.c-text--h-size-large "+"]]
-                              [:div.c-icon.c-icon--poop.c-icon--h-size-large.c-icon--color-grey-a]]
+                              [:div.c-icon.c-icon--poop.c-icon--h-size-large]]
                              [:div.l-cell.l-cell--margin-top-medium
                               [:span.c-text.c-text--p-size-xx-large "Something went wrong!"]]
                              [:div.l-cell.l-cell--margin-top-small
@@ -47,21 +47,15 @@
 
                             [:div.l-col.l-col--align-center.l-col--margin-top-xxx-large
                              [:div.l-row.l-row--justify-center.l-row--align-center
-                              [:div.c-icon.c-icon--github.c-icon--h-size-large.c-icon--color-grey-a]
+                              [:div.c-icon.c-icon--github.c-icon--h-size-large]
                               [:div.l-cell.l-cell--margin-left-medium.l-cell--margin-right-medium
                                [:span.c-text.c-text--h-size-large "+"]]
-                              [:div.c-icon.c-icon--clock.c-icon--h-size-large.c-icon--color-grey-a]]
+                              [:div.c-icon.c-icon--clock.c-icon--h-size-large]]
                              [:div.l-cell.l-cell--margin-top-medium
                               [:span.c-text.c-text--p-size-xx-large "Signing you in with GitHub"]]])]))})])
 
 
-
 ;; side-effects ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-(defmethod process-side-effect :sign-in-with-github-page/go-home
-  [{:keys [config-opts] :as Φ} id props]
-  (change-location! Φ {:path (b/path-for (:routes config-opts) :home)}))
-
 
 (defmethod process-side-effect :sign-in-with-github-page/did-mount
   [{:keys [config-opts] :as Φ} id props]
