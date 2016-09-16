@@ -21,24 +21,10 @@
   [with-page-load Φ
    (fn [Φ]
      (log-debug Φ "render unkown-page")
-
      [:div.c-page
-      [:div.l-col.l-col--justify-center
-       [:div.c-hero
-        [:div.c-icon.c-icon--poop.c-icon--h-size-xx-large]
-        [:div.c-hero__caption "Looks like you're lost!"]]
-
-       [:div.l-col.l-col--align-center
-        [:button.c-button {:on-click (u/without-propagation
-                                      #(side-effect! Φ :unknown-page/go-home))}
-         [:div.l-row.l-row--justify-center
-          [:div.l-cell.l-cell--margin-right-small.c-icon.c-icon--home]
-          "go home"]]]]])])
-
-
-;; side-effects ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-
-(defmethod process-side-effect :unknown-page/go-home
-  [{:keys [config-opts] :as Φ} id props]
-  (change-location! Φ {:path (b/path-for (:routes config-opts) :home)}))
+      [:div.l-col.l-col--align-center.l-col--margin-top-xxx-large
+       [:div.c-icon.c-icon--poop.c-icon--h-size-large.c-icon--color-grey-a]
+       [:div.l-cell.l-cell--margin-top-medium
+        [:span.c-text.c-text--p-size-xx-large "Looks like you're lost!"]]
+       [:div.l-cell.l-cell--margin-top-small
+        [:span.c-text.c-text--p-size-small "This page doesn't exist, or it has been removed"]]]])])
