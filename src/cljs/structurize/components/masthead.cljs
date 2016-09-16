@@ -40,8 +40,7 @@
    [:div.l-cell.l-cell--align-center.l-cell--width-100 {:style {:padding-left (+ margin-left gutter)
                                                                                      :padding-right (+ margin-right gutter)}}
     [:span.c-text.c-text--p-size-large
-     "Keigo's Superstore"]
-    "The Something Collection"]])
+     "The Something Collection"]]])
 
 
 (defn masthead [Φ]
