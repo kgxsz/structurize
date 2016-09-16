@@ -33,11 +33,14 @@
 (defn masthead-center [Φ {:keys [width col-n col-width gutter margin-left margin-right]}]
   [:div.l-cell.l-cell--justify-start {:style {:width (+ width margin-left margin-right)}}
    [:div.c-masthead__lip {:style {:width (+ width margin-left margin-right)}}
-    [:div.l-cell.l-cell--align-center.l-cell--height-100.c-masthead__primary-content {:style {:padding-left (+ margin-left gutter)
-                                                                                              :padding-right (+ margin-right gutter)}}
-     "Keigo's Superstore"]]
-   [:div.l-cell.l-cell--align-center.l-cell--width-100.c-masthead__secondary-content {:style {:padding-left (+ margin-left gutter)
-                                                                            :padding-right (+ margin-right gutter)}}
+    [:div.l-cell.l-cell--align-center.l-cell--height-100 {:style {:padding-left (+ margin-left gutter)
+                                                                  :padding-right (+ margin-right gutter)}}
+     [:span.c-text.c-text--p-size-xx-large.c-text--color-white-a
+      "Keigo's Superstore"]]]
+   [:div.l-cell.l-cell--align-center.l-cell--width-100 {:style {:padding-left (+ margin-left gutter)
+                                                                                     :padding-right (+ margin-right gutter)}}
+    [:span.c-text.c-text--p-size-large
+     "Keigo's Superstore"]
     "The Something Collection"]])
 
 
