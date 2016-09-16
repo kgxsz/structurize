@@ -28,8 +28,8 @@
     (if (or (not app-initialised?)
             chsk-status-initialising?)
       [:div.c-page
-       #_[:div.l-col.l-col--justify-center
-        [:div.c-hero
-         [:div.c-icon.c-icon--coffee-cup.c-icon--h-size-large]
-         [:div.c-hero__caption "loading"]]]]
+       [:div.l-col.l-col--align-center.l-col--margin-top-xxx-large
+        [:div.c-icon.c-icon--coffee-cup.c-icon--h-size-large.c-icon--color-grey-a]
+        [:div.l-cell.l-cell--margin-top-medium
+         [:span.c-text.c-text--p-size-xx-large "Loading"]]]]
       [page φ])))
