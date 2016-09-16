@@ -61,6 +61,7 @@
    :spacing-large 15
    :spacing-x-large 20
    :spacing-xx-large 30
+   :spacing-xxx-large 50
 
    :nudge-small 1
    :nudge-medium 2
@@ -190,6 +191,20 @@
      [:&-center {:align-items :center}]
      [:&-start {:align-items :flex-start}]
      [:&-end {:align-items :flex-end}]]
+    [:&--margin
+     [:&-top
+      [:&-small {:margin-top (-> v :spacing-small u/px)}]
+      [:&-medium {:margin-top (-> v :spacing-medium u/px)}]
+      [:&-xxx-large {:margin-top (-> v :spacing-xxx-large u/px)}]]
+     [:&-bottom
+      [:&-small {:margin-bottom (-> v :spacing-small u/px)}]
+      [:&-medium {:margin-bottom (-> v :spacing-medium u/px)}]]
+     [:&-right
+      [:&-small {:margin-right (-> v :spacing-small u/px)}]]
+     [:&-bottom
+      [:&-small {:margin-bottom (-> v :spacing-small u/px)}]]
+     [:&-left
+      [:&-small {:margin-left (-> v :spacing-small u/px)}]]]
     [:&__item
      [:&--grow {:flex-grow 1}]]]
 
@@ -210,7 +225,7 @@
                 :justify-content :flex-start}]
      [:&-end {:display :flex
               :flex-direction :row
-              :justify-content :flex-end}]] 
+              :justify-content :flex-end}]]
     [:&--align
      [:&-center {:display :flex
                  :flex-direction :row
@@ -238,7 +253,16 @@
    [:.c-page {:padding-top (-> v :header-height u/px)
               :padding-bottom (-> v :spacing-xx-large u/px)}]
 
+   [:.c-text {:font-family "'Raleway', Arial"
+              :font-size (-> v :p-size-medium u/px)
+              :color (:grey-a colours)}
+    [:&--p-size
+     [:&-large {:font-size (-> v :p-size-large u/px)}]
+     [:&-xx-large {:font-size (-> v :p-size-xx-large u/px)}]]
+    [:&--color-white-a {:color (:white-a colours)}]]
+
    [:.c-icon
+    [:&--color-grey-a {:color (:grey-a colours)}]
     [:&--h-size-xx-large {:font-size (-> v :h-size-xx-large u/px)}]
     [:&--h-size-large {:font-size (-> v :h-size-large u/px)}]]
 
@@ -419,12 +443,7 @@
                  :border-style :solid
                  :overflow :hidden
                  :border-width (-> v :border-width-large u/px)
-                 :border-radius (-> v :avatar-height-medium u/px)}]
-    [:&__primary-content {:font-family "'Raleway', Arial"
-                          :font-size (-> v :p-size-xx-large u/px)}]
-    [:&__secondary-content {:font-family "'Raleway', Arial"
-                            :color (:grey-a colours)
-                            :font-size (-> v :p-size-large u/px)}]]
+                 :border-radius (-> v :avatar-height-medium u/px)}]]
 
    [:.c-hero
     [:&__image {:min-height (-> v :hero-image-min-height u/px)
