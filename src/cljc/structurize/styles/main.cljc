@@ -241,11 +241,15 @@
       [:&-small {:margin-bottom (-> v :spacing-small u/px)}]
       [:&-medium {:margin-bottom (-> v :spacing-medium u/px)}]]
      [:&-right
-      [:&-small {:margin-right (-> v :spacing-small u/px)}]]
+      [:&-small {:margin-right (-> v :spacing-small u/px)}]
+      [:&-medium {:margin-right (-> v :spacing-medium u/px)}]
+      [:&-large {:margin-right (-> v :spacing-large u/px)}]]
      [:&-bottom
       [:&-small {:margin-bottom (-> v :spacing-small u/px)}]]
      [:&-left
-      [:&-small {:margin-left (-> v :spacing-small u/px)}]]]]])
+      [:&-small {:margin-left (-> v :spacing-small u/px)}]
+      [:&-medium {:margin-left (-> v :spacing-medium u/px)}]
+      [:&-large {:margin-left (-> v :spacing-large u/px)}]]]]])
 
 
 (def components
@@ -260,6 +264,10 @@
      [:&-small {:font-size (-> v :p-size-small u/px)}]
      [:&-large {:font-size (-> v :p-size-large u/px)}]
      [:&-xx-large {:font-size (-> v :p-size-xx-large u/px)}]]
+    [:&--h-size
+     [:&-small {:font-size (-> v :h-size-small u/px)}]
+     [:&-large {:font-size (-> v :h-size-large u/px)}]
+     [:&-xx-large {:font-size (-> v :h-size-xx-large u/px)}]]
     [:&--color-white-a {:color (:white-a colours)}]]
 
    [:.c-icon
