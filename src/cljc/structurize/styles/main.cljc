@@ -257,6 +257,7 @@
               :font-size (-> v :p-size-medium u/px)
               :color (:grey-a colours)}
     [:&--p-size
+     [:&-small {:font-size (-> v :p-size-small u/px)}]
      [:&-large {:font-size (-> v :p-size-large u/px)}]
      [:&-xx-large {:font-size (-> v :p-size-xx-large u/px)}]]
     [:&--color-white-a {:color (:white-a colours)}]]
