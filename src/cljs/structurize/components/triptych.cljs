@@ -11,6 +11,10 @@
             [reagent.core :as r])
   (:require-macros [structurize.components.macros :refer [log-info log-debug log-error]]))
 
+;; TODO - don't pass anon fns
+;; TODO - co-locate CSS
+;; TODO - use BEM utility
+;; TODO - spec everywhere
 
 (defn visible? [{:keys [c hidden]} {:keys [width breakpoint]}]
   (and (not (contains? hidden breakpoint))

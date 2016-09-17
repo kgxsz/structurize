@@ -13,6 +13,10 @@
             [reagent.core :as r])
   (:require-macros [structurize.components.macros :refer [log-info log-debug log-error]]))
 
+;; TODO - don't pass anon fns
+;; TODO - co-locate CSS
+;; TODO - use BEM utility
+;; TODO - spec everywhere
 
 (def images ["images/hero-1.png" "images/hero-2.png" "images/hero-3.png"
              "images/hero-4.png" "images/hero-5.png" "images/hero-6.png"

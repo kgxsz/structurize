@@ -11,6 +11,10 @@
             [reagent.core :as r])
   (:require-macros [structurize.components.macros :refer [log-info log-debug log-error]]))
 
+;; TODO - don't pass anon fns
+;; TODO - co-locate CSS
+;; TODO - use BEM utility
+;; TODO - spec everywhere
 
 (def pastel-colours ["#B39EB5" "#F49AC2" "#FF6961" "#03C03C" "#AEC6CF"
                      "#836953" "#FDFD96" "#C23B22" "#DEA5A4" "#77DD77"
