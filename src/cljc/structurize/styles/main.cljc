@@ -12,6 +12,11 @@
             [structurize.styles.components.page :refer [page]]
             [structurize.styles.components.text :refer [text]]
             [structurize.styles.components.icon :refer [icon]]
+            [structurize.styles.layouts.cell :refer [cell]]
+            [structurize.styles.layouts.row :refer [row]]
+            [structurize.styles.layouts.col :refer [col]]
+            [structurize.styles.layouts.underlay :refer [underlay]]
+            [structurize.styles.layouts.overlay :refer [overlay]]
             [garden.color :as c]
             [garden.units :refer [px percent ms vh vw]]))
 
@@ -53,109 +58,11 @@
 
 (def layouts
   [:html
-   [:.l-underlay {:position :relative}]
-
-   [:.l-overlay {:width (percent 100)
-                 :height (percent 100)
-                 :pointer-events :none
-                 :position :absolute
-                 :background-color (:tranparent colours)
-                 :z-index 1
-                 :top 0
-                 :left 0}
-    [:&--fill-viewport {:width (vw 100)
-                        :height (vh 100)
-                        :position :fixed}]
-    [:&__content {:pointer-events :auto}]]
-
-   [:.l-row {:display :flex
-             :flex-direction :row}
-    [:&--fill-parent {:width (percent 100)
-                      :height (percent 100)}]
-    [:&--height-100 {:height (percent 100)}]
-    [:&--width-100 {:width (percent 100)}]
-    [:&--justify
-     [:&-center {:justify-content :center}]
-     [:&-space-between {:justify-content :space-between}]
-     [:&-start {:justify-content :flex-start}]
-     [:&-end {:justify-content :flex-end}]]
-    [:&__item
-     [:&--grow {:flex-grow 1}]]]
-
-   [:.l-col {:display :flex
-             :flex-direction :column}
-    [:&--fill-parent {:width (percent 100)
-                      :height (percent 100)}]
-    [:&--height-100 {:height (percent 100)}]
-    [:&--width-100 {:width (percent 100)}]
-    [:&--justify
-     [:&-center {:justify-content :center}]
-     [:&-space-between {:justify-content :space-between}]
-     [:&-start {:justify-content :flex-start}]
-     [:&-end {:justify-content :flex-end}]]
-    [:&--align
-     [:&-center {:align-items :center}]
-     [:&-start {:align-items :flex-start}]
-     [:&-end {:align-items :flex-end}]]
-    [:&--margin
-     [:&-top
-      [:&-small {:margin-top (-> v :spacing-small px)}]
-      [:&-medium {:margin-top (-> v :spacing-medium px)}]
-      [:&-xxx-large {:margin-top (-> v :spacing-xxx-large px)}]]
-     [:&-bottom
-      [:&-small {:margin-bottom (-> v :spacing-small px)}]
-      [:&-medium {:margin-bottom (-> v :spacing-medium px)}]]
-     [:&-right
-      [:&-small {:margin-right (-> v :spacing-small px)}]]
-     [:&-bottom
-      [:&-small {:margin-bottom (-> v :spacing-small px)}]]
-     [:&-left
-      [:&-small {:margin-left (-> v :spacing-small px)}]]]
-    [:&__item
-     [:&--grow {:flex-grow 1}]]]
-
-   [:.l-cell
-    [:&--fill-parent {:width (percent 100)
-                      :height (percent 100)}]
-    [:&--height-100 {:height (percent 100)}]
-    [:&--width-100 {:width (percent 100)}]
-    [:&--justify
-     [:&-center {:display :flex
-                 :flex-direction :row
-                 :justify-content :center}]
-     [:&-space-between {:display :flex
-                        :flex-direction :row
-                        :justify-content :space-between}]
-     [:&-start {:display :flex
-                :flex-direction :row
-                :justify-content :flex-start}]
-     [:&-end {:display :flex
-              :flex-direction :row
-              :justify-content :flex-end}]]
-    [:&--align
-     [:&-center {:display :flex
-                 :flex-direction :row
-                 :align-items :center}]
-     [:&-end {:display :flex
-              :flex-direction :row
-              :align-items :flex-end}]]
-    [:&--margin
-     [:&-top
-      [:&-small {:margin-top (-> v :spacing-small px)}]
-      [:&-medium {:margin-top (-> v :spacing-medium px)}]]
-     [:&-bottom
-      [:&-small {:margin-bottom (-> v :spacing-small px)}]
-      [:&-medium {:margin-bottom (-> v :spacing-medium px)}]]
-     [:&-right
-      [:&-small {:margin-right (-> v :spacing-small px)}]
-      [:&-medium {:margin-right (-> v :spacing-medium px)}]
-      [:&-large {:margin-right (-> v :spacing-large px)}]]
-     [:&-bottom
-      [:&-small {:margin-bottom (-> v :spacing-small px)}]]
-     [:&-left
-      [:&-small {:margin-left (-> v :spacing-small px)}]
-      [:&-medium {:margin-left (-> v :spacing-medium px)}]
-      [:&-large {:margin-left (-> v :spacing-large px)}]]]]])
+   cell
+   row
+   col
+   underlay
+   overlay])
 
 
 (def components
@@ -171,6 +78,7 @@
    tooling
    writes-browser
    app-browser])
+
 
 (def main
   [meyer-reset
