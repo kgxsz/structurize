@@ -9,6 +9,9 @@
             [structurize.styles.components.writes-browser :refer [writes-browser]]
             [structurize.styles.components.app-browser :refer [app-browser]]
             [structurize.styles.components.tooling :refer [tooling]]
+            [structurize.styles.components.page :refer [page]]
+            [structurize.styles.components.text :refer [text]]
+            [structurize.styles.components.icon :refer [icon]]
             [garden.color :as c]
             [garden.units :refer [px percent ms vh vw]]))
 
@@ -153,29 +156,6 @@
       [:&-small {:margin-left (-> v :spacing-small px)}]
       [:&-medium {:margin-left (-> v :spacing-medium px)}]
       [:&-large {:margin-left (-> v :spacing-large px)}]]]]])
-
-
-(def page
-  [:.c-page {:padding-top (-> v :header-height px)
-             :padding-bottom (-> v :spacing-xx-large px)}])
-
-(def text
-  [:.c-text
-   [:&--p-size
-    [:&-small {:font-size (-> v :p-size-small px)}]
-    [:&-large {:font-size (-> v :p-size-large px)}]
-    [:&-xx-large {:font-size (-> v :p-size-xx-large px)}]]
-   [:&--h-size
-    [:&-small {:font-size (-> v :h-size-small px)}]
-    [:&-large {:font-size (-> v :h-size-large px)}]
-    [:&-xx-large {:font-size (-> v :h-size-xx-large px)}]]
-   [:&--color-white-a {:color (:white-a colours)}]])
-
-
-(def icon
-  [:.c-icon
-   [:&--h-size-xx-large {:font-size (-> v :h-size-xx-large px)}]
-   [:&--h-size-large {:font-size (-> v :h-size-large px)}]])
 
 
 (def components
