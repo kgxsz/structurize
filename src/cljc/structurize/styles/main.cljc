@@ -44,7 +44,8 @@
 
 (def states
   [:html
-   [:.is-hidden {:display :none}]])
+   [:.is-hidden {:display :none}]
+   [:.is-transparent {:opacity 0}]])
 
 
 (def layouts

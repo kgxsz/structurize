@@ -5,5 +5,4 @@
 
 (def image
   [:.c-image {:transition-property :opacity
-              :transition-duration (-> v :transition-duration ms)}
-   [:&--transparent {:opacity 0}]])
+              :transition-duration (-> v :transition-duration ms)}])

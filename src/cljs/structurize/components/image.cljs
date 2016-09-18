@@ -27,7 +27,7 @@
     :reagent-render (fn []
                       (let [{:keys [loaded?]} (track φ l/view-single +image)]
                         (log-debug φ "render image")
-                        [:div.l-cell.l-cell--fill-parent.c-image {:class (u/->class {:c-image--transparent (not loaded?)})
+                        [:div.l-cell.l-cell--fill-parent.c-image {:class (u/->class {:is-transparent (not loaded?)})
                                                                   :style {:background (str "url(" src ")")
                                                                           :background-size size
                                                                           :background-position [pos-x pos-y]
