@@ -1,9 +1,9 @@
 (ns structurize.styles.components.page
-  (:require [structurize.styles.variables :refer [v colours]]
+  (:require [structurize.styles.vars :refer [vars]]
             [structurize.styles.utils :as u]
             [garden.units :refer [px percent ms vh vw]]))
 
 (def page
-  [:.c-page {:padding-top (-> v :header-height px)
-             :padding-bottom (-> v :spacing-xx-large px)}])
+  [:.c-page {:padding-top (-> vars :header-height :medium px)
+             :padding-bottom (-> vars :spacing :xx-large px)}])
 

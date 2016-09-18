@@ -1,5 +1,5 @@
 (ns structurize.styles.main
-  (:require [structurize.styles.variables :refer [v colours]]
+  (:require [structurize.styles.vars :refer [vars]]
             [structurize.styles.utils :as u]
             [structurize.styles.components.header :refer [header]]
             [structurize.styles.components.hero :refer [hero]]
@@ -42,9 +42,9 @@
 (def general
   [:html
    [:body {:font-family "'Raleway', Arial"
-           :font-size (-> v :p-size-medium px)
-           :color (:grey-a colours)
-           :background-color (:white-b colours)}]
+           :font-size (-> vars :p-size :medium px)
+           :color (-> :color :grey-a)
+           :background-color (-> :color :white-b)}]
 
    [:#js-root {:width (vw 100)
                :height (vh 100)}]])

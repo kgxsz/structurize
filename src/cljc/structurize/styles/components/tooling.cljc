@@ -1,36 +1,36 @@
 (ns structurize.styles.components.tooling
-  (:require [structurize.styles.variables :refer [v colours]]
+  (:require [structurize.styles.vars :refer [vars]]
             [structurize.styles.utils :as u]
             [garden.units :refer [px percent ms vh vw]]))
 
 (def tooling
-  [:.c-tooling {:color (:white-b colours)
+  [:.c-tooling {:color (-> vars :color :white-b)
                 :font-family "'Fira Mono', monospace"
-                :font-size (-> v :p-size-small px)
+                :font-size (-> vars :p-size :small px)
                 :width (percent 100)
                 :height (percent 100)
-                :padding (-> v :spacing-medium px)
-                :background-color (u/alpha (:black-b colours) (:alpha-high v))}
+                :padding (-> vars :spacing :medium px)
+                :background-color (u/alpha (-> vars :color :black-b) (-> vars :alpha :high))}
 
    [:&__handle {:display :flex
                 :justify-content :center
                 :align-items :center
                 :cursor :pointer
-                :background-color (u/alpha (:black-b colours) (:alpha-high v))
-                :width (-> v :filling-medium px)
-                :height (-> v :filling-medium px)
-                :border-top-left-radius (-> v :border-radius-medium px)
-                :border-bottom-left-radius (-> v :border-radius-medium px)
+                :background-color (u/alpha (-> vars :color :black-b) (-> vars :alpha :high))
+                :width (-> vars :filling :medium px)
+                :height (-> vars :filling :medium px)
+                :border-top-left-radius (-> vars :border-radius :medium px)
+                :border-bottom-left-radius (-> vars :border-radius :medium px)
                 :position :absolute
-                :bottom (-> v :spacing-medium px)
-                :left (-> v :filling-medium - px)}]
+                :bottom (-> vars :spacing :medium px)
+                :left (-> vars :filling :medium - px)}]
 
 
    [:&__item {:width (percent 100)
-              :padding (-> v :spacing-medium px)
-              :background-color (u/alpha (:grey-a colours) (:alpha-low v))
-              :border-radius (-> v :border-radius-medium px)
-              :margin-bottom (-> v :spacing-medium px)
+              :padding (-> vars :spacing :medium px)
+              :background-color (u/alpha (-> vars :color :grey-a) (-> vars :alpha :low))
+              :border-radius (-> vars :border-radius :medium px)
+              :margin-bottom (-> vars :spacing :medium px)
               :overflow :auto}
 
     ["&::-webkit-scrollbar" {:display :none}]
