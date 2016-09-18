@@ -43,4 +43,3 @@
                 :center {:c header-center}
                 :right {:hidden #{:xs :sm :md}
                         :c header-right}}]])
-
