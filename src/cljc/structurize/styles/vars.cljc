@@ -38,10 +38,65 @@
             :x-large 18
             :xx-large 20}
 
-   :h-size {:h-size-xx-small 25
-            :h-size-x-small 30
-            :h-size-small 35
-            :h-size-medium 40
-            :h-size-large 60
-            :h-size-x-large 80
-            :h-size-xx-large 100}})
+   :h-size {:xx-small 25
+            :x-small 30
+            :small 35
+            :medium 40
+            :large 60
+            :x-large 80
+            :xx-large 100}
+
+   :spacing {:xx-small 2
+             :x-small 6
+             :small 8
+             :medium 10
+             :large 15
+             :x-large 20
+             :xx-large 30
+             :xxx-large 50}
+
+   :nudge {:small 1
+           :medium 2
+           :large 3
+           :x-large 4
+           :xx-large 6}
+
+   :filling {:small 22
+             :medium 26
+             :large 32}
+
+   :border-width {:small 1
+                  :medium 2
+                  :large 3}
+
+   :border-radius {:x-small 2
+                   :small 3
+                   :medium 4
+                   :large 5
+                   :x-large 6
+                   :xx-large 7}
+
+   :button-width {:medium 220}
+
+   :button-height {:medium 50}
+
+   :avatar-width {:medium 130}
+
+   :avatar-height {:medium 130}
+
+   :header-height {:medium 50}
+   :masthead-height {:medium 35}
+
+   :hero-image-min-height {:medium 120}
+   :hero-image-max-height {:medium 480}
+
+   :transition-duration {:medium 400}
+
+   :proportion {:x-small 25
+                :small 30
+                :medium 50
+                :large 70}
+
+   :alpha {:low 0.3
+           :medium 0.5
+           :high 0.7}})

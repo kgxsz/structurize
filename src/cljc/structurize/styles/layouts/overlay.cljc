@@ -1,5 +1,5 @@
 (ns structurize.styles.layouts.overlay
-  (:require [structurize.styles.variables :refer [v colours]]
+  (:require [structurize.styles.vars :refer [vars]]
             [structurize.styles.utils :as u]
             [garden.units :refer [px percent ms vh vw]]))
 
@@ -8,7 +8,7 @@
                 :height (percent 100)
                 :pointer-events :none
                 :position :absolute
-                :background-color (:tranparent colours)
+                :background-color (-> vars :color :tranparent)
                 :z-index 1
                 :top 0
                 :left 0}
