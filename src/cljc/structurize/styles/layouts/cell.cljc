@@ -1,49 +1,52 @@
 (ns structurize.styles.layouts.cell
-  (:require [structurize.styles.variables :refer [v colours]]
+  (:require [structurize.styles.vars :refer [vars]]
             [structurize.styles.utils :as u]
             [garden.units :refer [px percent ms vh vw]]))
 
 (def cell
   [:.l-cell
+
     [:&--fill-parent {:width (percent 100)
                       :height (percent 100)}]
     [:&--height-100 {:height (percent 100)}]
     [:&--width-100 {:width (percent 100)}]
+
     [:&--justify
      [:&-center {:display :flex
                  :flex-direction :row
                  :justify-content :center}]
-     [:&-space-between {:display :flex
-                        :flex-direction :row
-                        :justify-content :space-between}]
      [:&-start {:display :flex
                 :flex-direction :row
                 :justify-content :flex-start}]
      [:&-end {:display :flex
               :flex-direction :row
               :justify-content :flex-end}]]
+
     [:&--align
      [:&-center {:display :flex
                  :flex-direction :row
                  :align-items :center}]
+     [:&-start {:display :flex
+                :flex-direction :row
+                :align-items :flex-start}]
      [:&-end {:display :flex
               :flex-direction :row
               :align-items :flex-end}]]
-    [:&--margin
-     [:&-top
-      [:&-small {:margin-top (-> v :spacing-small px)}]
-      [:&-medium {:margin-top (-> v :spacing-medium px)}]]
-     [:&-bottom
-      [:&-small {:margin-bottom (-> v :spacing-small px)}]
-      [:&-medium {:margin-bottom (-> v :spacing-medium px)}]]
-     [:&-right
-      [:&-small {:margin-right (-> v :spacing-small px)}]
-      [:&-medium {:margin-right (-> v :spacing-medium px)}]
-      [:&-large {:margin-right (-> v :spacing-large px)}]]
-     [:&-bottom
-      [:&-small {:margin-bottom (-> v :spacing-small px)}]]
-     [:&-left
-      [:&-small {:margin-left (-> v :spacing-small px)}]
-      [:&-medium {:margin-left (-> v :spacing-medium px)}]
-      [:&-large {:margin-left (-> v :spacing-large px)}]]]])
 
+   [:&--margin-top
+    (u/make-modifiers {:var :spacing :prop :margin-top :unit px})]
+   [:&--margin-right
+    (u/make-modifiers {:var :spacing :prop :margin-right :unit px})]
+   [:&--margin-bottom
+    (u/make-modifiers {:var :spacing :prop :margin-bottom :unit px})]
+   [:&--margin-left
+    (u/make-modifiers {:var :spacing :prop :margin-left :unit px})]
+
+   [:&--padding-top
+    (u/make-modifiers {:var :spacing :prop :padding-top :unit px})]
+   [:&--padding-right
+    (u/make-modifiers {:var :spacing :prop :padding-right :unit px})]
+   [:&--padding-bottom
+    (u/make-modifiers {:var :spacing :prop :padding-bottom :unit px})]
+   [:&--padding-left
+    (u/make-modifiers {:var :spacing :prop :padding-left :unit px})]])

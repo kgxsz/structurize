@@ -38,7 +38,6 @@
    :p-size-large 16
    :p-size-x-large 18
    :p-size-xx-large 20
-
    :h-size-xx-small 25
    :h-size-x-small 30
    :h-size-small 35
