@@ -16,30 +16,28 @@
 ;; TODO - use BEM utility
 ;; TODO - spec everywhere
 
-(defn visible? [{:keys [c hidden]} {:keys [width breakpoint]}]
-  (and (not (contains? hidden breakpoint))
-       (not (nil? c))))
-
-
 ;; components ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defn triptych [φ {:keys [center left right] :as props}]
-  (let [{:keys [width triptych] :as viewport} (track φ l/view-single
-                                            (in [:viewport]))
+  (let [{:keys [width breakpoint triptych] :as viewport} (track φ l/view-single
+                                                                (in [:viewport]))
         {:keys [col-n col-width gutter margin]} triptych
         {center-c :c center-hidden :hidden} center
         {left-c :c left-hidden :hidden} left
-        {right-c :c right-hidden :hidden} right]
+        {right-c :c right-hidden :hidden} right
+        visible? (fn [{:keys [c hidden]}]
+                   (and (not (contains? hidden breakpoint))
+                        (not (nil? c))))]
 
     (log-debug φ "render triptych")
     [:div.l-row.l-row--height-100
-     (when (visible? left viewport)
+     (when (visible? left)
        [left-c φ (assoc triptych
                         :width (+ gutter col-width)
                         :col-n 1
                         :margin-left (/ margin 2)
                         :margin-right 0)])
-     (when (visible? center viewport)
+     (when (visible? center)
        (let [left-visible? (visible? left viewport)
              right-visible? (visible? right viewport)]
          [center-c φ (assoc triptych
@@ -51,7 +49,7 @@
                                      right-visible? dec)
                             :margin-left (if left-visible? 0 (/ margin 2))
                             :margin-right (if right-visible? 0 (/ margin 2)))]))
-     (when (visible? right viewport)
+     (when (visible? right)
        [right-c φ (assoc triptych
                          :width (+ gutter col-width)
                          :col-n 1
