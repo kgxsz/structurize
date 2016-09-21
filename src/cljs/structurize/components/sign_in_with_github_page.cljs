@@ -23,40 +23,39 @@
 
 (defn sign-in-with-github-page [{:keys [config-opts] :as Φ}]
   (log-debug Φ "mount sign-in-with-github-page")
-  [with-page-load Φ
-   (r/create-class
-    {:component-did-mount #(side-effect! Φ :sign-in-with-github-page/did-mount)
-     :reagent-render (fn [Φ]
-                       (let [internal-error (track Φ l/view-single
-                                                   (in [:location :query])
-                                                   (partial = :error))
-                             external-error (track Φ l/view-single
-                                                   (in [:auth :sign-in-with-github-status])
-                                                   (partial = :failed))]
+  (r/create-class
+   {:component-did-mount #(side-effect! Φ :sign-in-with-github-page/did-mount)
+    :reagent-render (fn [Φ]
+                      (let [internal-error (track Φ l/view-single
+                                                  (in [:location :query])
+                                                  (partial = :error))
+                            external-error (track Φ l/view-single
+                                                  (in [:auth :sign-in-with-github-status])
+                                                  (partial = :failed))]
 
-                         (log-debug Φ "render sign-in-with-github-page")
+                        (log-debug Φ "render sign-in-with-github-page")
 
-                         [:div.c-page
-                          (if (or internal-error external-error)
-                            [:div.l-col.l-col--align-center.l-col--margin-top-xxx-large
-                             [:div.l-row.l-row--justify-center.l-row--align-center
-                              [:div.c-icon.c-icon--github.c-icon--h-size-large]
-                              [:div.l-cell.l-cell--margin-left-medium.l-cell--margin-right-medium
-                               [:span.c-text.c-text--h-size-large "+"]]
-                              [:div.c-icon.c-icon--poop.c-icon--h-size-large]]
-                             [:div.l-cell.l-cell--margin-top-medium
-                              [:span.c-text.c-text--p-size-xx-large "Something went wrong!"]]
-                             [:div.l-cell.l-cell--margin-top-small
-                              [:span.c-text.c-text--p-size-small "We couldn't sign you in with GitHub"]]]
+                        [:div.c-page
+                         (if (or internal-error external-error)
+                           [:div.l-col.l-col--align-center.l-col--margin-top-xxx-large
+                            [:div.l-row.l-row--justify-center.l-row--align-center
+                             [:div.c-icon.c-icon--github.c-icon--h-size-large]
+                             [:div.l-cell.l-cell--margin-left-medium.l-cell--margin-right-medium
+                              [:span.c-text.c-text--h-size-large "+"]]
+                             [:div.c-icon.c-icon--poop.c-icon--h-size-large]]
+                            [:div.l-cell.l-cell--margin-top-medium
+                             [:span.c-text.c-text--p-size-xx-large "Something went wrong!"]]
+                            [:div.l-cell.l-cell--margin-top-small
+                             [:span.c-text.c-text--p-size-small "We couldn't sign you in with GitHub"]]]
 
-                            [:div.l-col.l-col--align-center.l-col--margin-top-xxx-large
-                             [:div.l-row.l-row--justify-center.l-row--align-center
-                              [:div.c-icon.c-icon--github.c-icon--h-size-large]
-                              [:div.l-cell.l-cell--margin-left-medium.l-cell--margin-right-medium
-                               [:span.c-text.c-text--h-size-large "+"]]
-                              [:div.c-icon.c-icon--clock.c-icon--h-size-large]]
-                             [:div.l-cell.l-cell--margin-top-medium
-                              [:span.c-text.c-text--p-size-xx-large "Signing you in with GitHub"]]])]))})])
+                           [:div.l-col.l-col--align-center.l-col--margin-top-xxx-large
+                            [:div.l-row.l-row--justify-center.l-row--align-center
+                             [:div.c-icon.c-icon--github.c-icon--h-size-large]
+                             [:div.l-cell.l-cell--margin-left-medium.l-cell--margin-right-medium
+                              [:span.c-text.c-text--h-size-large "+"]]
+                             [:div.c-icon.c-icon--clock.c-icon--h-size-large]]
+                            [:div.l-cell.l-cell--margin-top-medium
+                             [:span.c-text.c-text--p-size-xx-large "Signing you in with GitHub"]]])]))}))
 
 
 ;; side-effects ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;

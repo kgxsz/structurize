@@ -38,9 +38,9 @@
 
         [:div {:style {:width width}}
          (case handler
-           :home [home-page φ]
-           :sign-in-with-github [sign-in-with-github-page φ]
-           :unknown [unknown-page φ])
+           :home [with-page-load φ {:content [home-page]}]
+           :sign-in-with-github [with-page-load φ {:content [sign-in-with-github-page]}]
+           :unknown [with-page-load φ {:content [unknown-page]}])
 
          (when tooling-enabled?
            [tooling (assoc φ :context {:tooling? true})])]))))

@@ -19,7 +19,7 @@
 
 ;; components ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defn with-page-load [φ page]
+(defn with-page-load [φ {[c p] :content}]
   (let [app-initialised? (track φ l/view-single
                                 (in [:app-status])
                                 (partial = :initialised))
@@ -36,4 +36,4 @@
         [:div.c-icon.c-icon--coffee-cup.c-icon--h-size-large]
         [:div.l-cell.l-cell--margin-top-medium
          [:span.c-text.c-text--p-size-xx-large "Loading"]]]]
-      [page φ])))
+      (into [c φ] p))))
