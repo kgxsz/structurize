@@ -5,7 +5,6 @@
             [structurize.system.comms :refer [send! post!]]
             [structurize.system.utils :as su]
             [structurize.components.utils :as u]
-            [structurize.components.with-page-load :refer [with-page-load]]
             [structurize.lens :refer [in]]
             [structurize.types :as t]
             [cljs.spec :as s]
