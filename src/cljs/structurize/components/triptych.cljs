@@ -38,8 +38,8 @@
                         :margin-left (/ margin 2)
                         :margin-right 0)])
      (when (visible? center)
-       (let [left-visible? (visible? left viewport)
-             right-visible? (visible? right viewport)]
+       (let [left-visible? (visible? left)
+             right-visible? (visible? right)]
          [center-c φ (assoc triptych
                             :width (cond-> (+ (* col-n col-width) (* (inc col-n) gutter))
                                      left-visible? (- (+ gutter col-width))
