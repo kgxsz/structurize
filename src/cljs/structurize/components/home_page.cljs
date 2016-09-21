@@ -19,9 +19,6 @@
             [reagent.core :as r])
   (:require-macros [structurize.components.macros :refer [log-info log-debug log-error]]))
 
-;; TODO - don't pass anon fns
-;; TODO - co-locate CSS
-;; TODO - use BEM utility
 ;; TODO - spec everywhere
 
 ;; components ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -81,11 +78,11 @@
        [hero Φ]
        [masthead Φ]
        [triptych Φ {:left {:hidden #{:xs :sm}
-                           :c home-page-left}
+                           :c [home-page-left]}
                     :center {:hidden #{}
-                             :c home-page-center}
+                             :c [home-page-center]}
                     :right {:hidden #{:xs :sm :md}
-                            :c home-page-right}}]]
+                            :c [home-page-right]}}]]
       [:div.c-page
        [:div.l-col.l-col--align-center.l-col--margin-top-xxx-large
         [:div.c-icon.c-icon--mustache.c-icon--h-size-large]

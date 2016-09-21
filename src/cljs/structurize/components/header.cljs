@@ -12,9 +12,6 @@
             [reagent.core :as r])
   (:require-macros [structurize.components.macros :refer [log-info log-debug log-error]]))
 
-;; TODO - don't pass anon fns
-;; TODO - co-locate CSS
-;; TODO - use BEM utility
 ;; TODO - spec everywhere
 
 ;; components ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -39,7 +36,7 @@
   (log-debug Φ "render header")
   [:div.c-header
    [triptych Φ {:left {:hidden #{:xs :sm :md}
-                       :c header-left}
-                :center {:c header-center}
+                       :c [header-left]}
+                :center {:c [header-center]}
                 :right {:hidden #{:xs :sm :md}
-                        :c header-right}}]])
+                        :c [header-right]}}]])

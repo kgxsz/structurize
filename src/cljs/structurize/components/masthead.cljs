@@ -50,6 +50,6 @@
   (log-debug Φ "render masthead")
   [:div.c-masthead
    [triptych Φ {:left {:hidden #{:xs :sm}
-                       :c masthead-left}
+                       :c [masthead-left]}
                 :center {:hidden #{}
-                         :c masthead-center}}]])
+                         :c [masthead-center]}}]])

@@ -13,9 +13,6 @@
             [reagent.core :as r])
   (:require-macros [structurize.components.macros :refer [log-info log-debug log-error]]))
 
-;; TODO - don't pass anon fns
-;; TODO - co-locate CSS
-;; TODO - use BEM utility
 ;; TODO - spec everywhere
 
 (def images ["images/hero-1.png" "images/hero-2.png" "images/hero-3.png"
@@ -43,4 +40,4 @@
 (defn hero [Φ]
   (log-debug Φ "render hero")
   [:div.c-hero
-   [triptych Φ {:center {:c hero-center}}]])
+   [triptych Φ {:center {:c [hero-center]}}]])
