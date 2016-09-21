@@ -5,5 +5,9 @@
 
 (def icon
   [:.c-icon
-   [:&--h-size-xx-large {:font-size (-> vars :h-size :xx-large px)}]
-   [:&--h-size-large {:font-size (-> vars :h-size :large px)}]])
+   [:&--p-size
+    (u/make-modifiers {:var :p-size :prop :font-size :unit px})]
+   [:&--h-size
+    (u/make-modifiers {:var :h-size :prop :font-size :unit px})]
+   [:&--color
+    (u/make-modifiers {:var :color})]])
