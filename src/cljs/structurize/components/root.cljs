@@ -8,6 +8,7 @@
             [structurize.components.with-page-load :refer [with-page-load]]
             [structurize.components.home-page :refer [home-page]]
             [structurize.components.unknown-page :refer [unknown-page]]
+            [structurize.components.loading-page :refer [loading-page]]
             [structurize.components.sign-in-with-github-page :refer [sign-in-with-github-page]]
             [structurize.lens :refer [in]]
             [traversy.lens :as l]
@@ -32,15 +33,28 @@
       (let [handler (track φ l/view-single
                            (in [:location :handler]))
             width (track φ l/view-single
-                         (in [:viewport :width]))]
+                         (in [:viewport :width]))
+            app-loading? true
+            app-initialised? (track φ l/view-single
+                                    (in [:app-status])
+                                    (partial = :initialised))
+            chsk-status-initialising? (track φ l/view-single
+                                             (in [:comms :chsk-status])
+                                             (partial = :initialising))]
 
         (log-debug φ "render root")
 
         [:div {:style {:width width}}
-         (case handler
-           :home [with-page-load φ {:content [home-page]}]
-           :sign-in-with-github [with-page-load φ {:content [sign-in-with-github-page]}]
-           :unknown [with-page-load φ {:content [unknown-page]}])
+
+         (if (or (not app-initialised?)
+                 chsk-status-initialising?)
+
+           [loading-page φ]
+
+           (case handler
+             :home [home-page φ]
+             :sign-in-with-github [sign-in-with-github-page φ]
+             :unknown [unknown-page φ]))
 
          (when tooling-enabled?
            [tooling (assoc φ :context {:tooling? true})])]))))
