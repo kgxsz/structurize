@@ -27,24 +27,6 @@
 
 ;; components ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-#_(defn sign-in-with-github [φ]
-  (log-debug φ "render sign-in-with-github")
-  [:button.c-button {:on-click (u/without-propagation
-                                #(side-effect! φ :home-page/initialise-sign-in-with-github))}
-   [:div.l-row.l-row--justify-center
-    [:div.l-cell.l-cell--margin-right-small.c-icon.c-icon--github]
-    "sign in with GitHub"]])
-
-
-#_(defn sign-out [Φ]
-  (log-debug Φ "render sign-out")
-  [:button.c-button {:on-click (u/without-propagation
-                                #(side-effect! Φ :home-page/sign-out))}
-   [:div.l-row.l-row--justify-center
-    [:div.l-cell.l-cell--margin-right-small.c-icon.c-icon--exit]
-    "sign out"]])
-
-
 (defn home-page-left [Φ {:keys [width col-n col-width gutter margin-left]}]
   [:div.l-col.l-col--align-start {:style {:width width
                                           :padding-left gutter
@@ -54,7 +36,11 @@
      (for [i (range 2)]
        [:div {:key i
               :style {:margin-top gutter}}
-        [pod Φ]]))]])
+        [pod Φ]]))
+    [:div.l-cell.l-cell--margin-top-medium
+     [:button {:on-click (u/without-propagation
+                          #(side-effect! Φ :home-page/sign-out))}
+      "Sign out"]]]])
 
 
 (defn home-page-center [Φ {:keys [width col-n col-width gutter margin-left margin-right]}]
@@ -87,24 +73,40 @@
 
 
 (defn home-page [Φ]
-  [with-page-load Φ
-   (fn [Φ]
-     (log-debug Φ "render home-page")
-     [:div.c-page
-      [header Φ]
-      [hero Φ]
-      [masthead Φ]
-      [triptych Φ {:left {:hidden #{:xs :sm}
-                          :c home-page-left}
-                   :center {:hidden #{}
-                            :c home-page-center}
-                   :right {:hidden #{:xs :sm :md}
-                           :c home-page-right}}]])])
+  (log-debug Φ "render home-page")
+  (let [me (track Φ l/view-single
+                  (in [:auth :me]))]
+    (if me
+      [:div.c-page
+       [header Φ]
+       [hero Φ]
+       [masthead Φ]
+       [triptych Φ {:left {:hidden #{:xs :sm}
+                           :c home-page-left}
+                    :center {:hidden #{}
+                             :c home-page-center}
+                    :right {:hidden #{:xs :sm :md}
+                            :c home-page-right}}]]
+      [:div.c-page
+       [:div.l-col.l-col--align-center.l-col--margin-top-xxx-large
+        [:div.c-icon.c-icon--mustache.c-icon--h-size-large]
+        [:div.l-cell.l-cell--margin-top-medium
+         [:span.c-text.c-text--p-size-xx-large "Hello There!"]]
+        [:div.l-cell.l-cell--margin-top-medium
+         [:button {:on-click (u/without-propagation
+                              #(side-effect! Φ :home-page/initialise-sign-in-with-github))}
+          "Log in with GitHub"]]
+        [:div.l-cell.l-cell--margin-top-medium
+         [:button {:on-click (u/without-propagation
+                              #(side-effect! Φ :home-page/get-lost))}
+          "Get lost!"]]]])))
+
+
 
 
 ;; side-effects ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-#_(defmethod process-side-effect :home-page/initialise-sign-in-with-github
+(defmethod process-side-effect :home-page/initialise-sign-in-with-github
   [{:keys [config-opts] :as Φ} id props]
   (send! Φ :auth/initialise-sign-in-with-github
          {}
@@ -120,3 +122,22 @@
                         (write! Φ :auth/sign-in-with-github-failed
                                 (fn [x]
                                   (assoc-in x [:auth :sign-in-with-github-failed?] true))))}))
+
+
+(defmethod process-side-effect :home-page/sign-out
+  [Φ id props]
+  (post! Φ "/sign-out"
+         {}
+         {:on-success (fn [response]
+                        (write! Φ :auth/sign-out
+                                (fn [x]
+                                  (assoc x :auth {}))))
+          :on-failure (fn [response]
+                        (write! Φ :auth/sign-out-failed
+                                (fn [x]
+                                  (assoc-in x [:auth :sign-out-status] :failed))))}))
+
+
+(defmethod process-side-effect :home-page/get-lost
+  [Φ id props]
+  (change-location! Φ {:path "/dkjf"}))
