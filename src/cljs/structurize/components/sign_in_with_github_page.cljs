@@ -5,7 +5,6 @@
             [structurize.system.comms :refer [send! post!]]
             [structurize.system.utils :as su]
             [structurize.components.utils :as u]
-            [structurize.components.with-page-load :refer [with-page-load]]
             [structurize.lens :refer [in]]
             [structurize.types :as t]
             [cljs.spec :as s]
@@ -21,19 +20,19 @@
 
 ;; components ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defn sign-in-with-github-page [{:keys [config-opts] :as Φ}]
-  (log-debug Φ "mount sign-in-with-github-page")
+(defn sign-in-with-github-page [φ ]
+  (log-debug φ "mount sign-in-with-github-page")
   (r/create-class
-   {:component-did-mount #(side-effect! Φ :sign-in-with-github-page/did-mount)
-    :reagent-render (fn [Φ]
-                      (let [internal-error (track Φ l/view-single
+   {:component-did-mount #(side-effect! φ :sign-in-with-github-page/did-mount)
+    :reagent-render (fn [φ]
+                      (let [internal-error (track φ l/view-single
                                                   (in [:location :query])
                                                   (partial = :error))
-                            external-error (track Φ l/view-single
+                            external-error (track φ l/view-single
                                                   (in [:auth :sign-in-with-github-status])
                                                   (partial = :failed))]
 
-                        (log-debug Φ "render sign-in-with-github-page")
+                        (log-debug φ "render sign-in-with-github-page")
 
                         [:div.c-page
                          (if (or internal-error external-error)

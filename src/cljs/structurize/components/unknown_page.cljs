@@ -5,7 +5,6 @@
             [structurize.system.comms :refer [send! post!]]
             [structurize.system.utils :as su]
             [structurize.components.utils :as u]
-            [structurize.components.with-page-load :refer [with-page-load]]
             [structurize.lens :refer [in]]
             [structurize.types :as t]
             [cljs.spec :as s]
@@ -14,15 +13,12 @@
             [reagent.core :as r])
   (:require-macros [structurize.components.macros :refer [log-info log-debug log-error]]))
 
-;; TODO - don't pass anon fns
-;; TODO - co-locate CSS
-;; TODO - use BEM utility
 ;; TODO - spec everywhere
 
 ;; components ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defn unknown-page [{:keys [config-opts] :as Φ}]
-  (log-debug Φ "render unkown-page")
+(defn unknown-page [φ]
+  (log-debug φ "render unkown-page")
   [:div.c-page
    [:div.l-col.l-col--align-center.l-col--margin-top-xxx-large
     [:div.c-icon.c-icon--poop.c-icon--h-size-large]

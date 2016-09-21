@@ -5,7 +5,6 @@
             [structurize.system.comms :refer [send! post!]]
             [structurize.components.utils :as u]
             [structurize.components.tooling :refer [tooling]]
-            [structurize.components.with-page-load :refer [with-page-load]]
             [structurize.components.home-page :refer [home-page]]
             [structurize.components.unknown-page :refer [unknown-page]]
             [structurize.components.loading-page :refer [loading-page]]

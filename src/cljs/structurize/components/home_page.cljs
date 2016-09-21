@@ -6,7 +6,6 @@
             [structurize.system.utils :as su]
             [structurize.components.utils :as u]
             [structurize.components.image :refer [image]]
-            [structurize.components.with-page-load :refer [with-page-load]]
             [structurize.components.triptych :refer [triptych]]
             [structurize.components.header :refer [header]]
             [structurize.components.hero :refer [hero]]
