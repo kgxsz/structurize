@@ -13,9 +13,6 @@
             [reagent.core :as r])
   (:require-macros [structurize.components.macros :refer [log-info log-debug log-error]]))
 
-;; TODO - don't pass anon fns
-;; TODO - co-locate CSS
-;; TODO - use BEM utility
 ;; TODO - spec everywhere
 
 ;; model ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -44,7 +41,7 @@
      [:span.c-text.c-text--p-size-xx-large.c-text--color-white-a
       "Keigo's Superstore"]]]
    [:div.l-cell.l-cell--align-center.l-cell--width-100 {:style {:padding-left (+ margin-left gutter)
-                                                                                     :padding-right (+ margin-right gutter)}}
+                                                                :padding-right (+ margin-right gutter)}}
     [:span.c-text.c-text--p-size-large
      "The Something Collection"]]])
 
