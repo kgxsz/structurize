@@ -26,12 +26,14 @@
 ;; components ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defn masthead-left [Φ {:keys [width col-n col-width gutter margin-left]}]
-  [:div.l-cell.l-cell--justify-end {:style {:width (+ width margin-left)}}
-   [:div.c-masthead__lip {:style {:width (+ width margin-left)}}]
-   [:div.l-cell.l-cell--justify-center {:style {:width col-width}}
-    [:div.c-masthead__avatar
-     [image Φ {:+image +image
-               :src #_(:avatar-url me) "https://avatars.githubusercontent.com/u/5012793?v=3"}]]]])
+  (let [avatar-url (track Φ l/view-single
+                          (in [:auth :me :avatar-url]))]
+    [:div.l-cell.l-cell--justify-end {:style {:width (+ width margin-left)}}
+     [:div.c-masthead__lip {:style {:width (+ width margin-left)}}]
+     [:div.l-cell.l-cell--justify-center {:style {:width col-width}}
+      [:div.c-masthead__avatar
+       [image Φ {:+image +image
+                 :src avatar-url}]]]]))
 
 
 (defn masthead-center [Φ {:keys [width col-n col-width gutter margin-left margin-right]}]
