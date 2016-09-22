@@ -6,32 +6,38 @@
 (def cell
   [:.l-cell
 
-    [:&--fill-parent {:width (percent 100)
-                      :height (percent 100)}]
-    [:&--height-100 {:height (percent 100)}]
-    [:&--width-100 {:width (percent 100)}]
+   [:&--fill-parent {:width (percent 100)
+                     :height (percent 100)}]
 
-    [:&--justify
-     [:&-center {:display :flex
-                 :flex-direction :row
-                 :justify-content :center}]
-     [:&-start {:display :flex
-                :flex-direction :row
-                :justify-content :flex-start}]
-     [:&-end {:display :flex
-              :flex-direction :row
-              :justify-content :flex-end}]]
+   [:&--height-100 {:height (percent 100)}]
+   [:&--height
+    (u/make-modifiers {:var :filling :prop :height :unit px})]
 
-    [:&--align
-     [:&-center {:display :flex
-                 :flex-direction :row
-                 :align-items :center}]
-     [:&-start {:display :flex
+   [:&--width-100 {:width (percent 100)}]
+   [:&--width
+    (u/make-modifiers {:var :filling :prop :width :unit px})]
+
+   [:&--justify
+    [:&-center {:display :flex
                 :flex-direction :row
-                :align-items :flex-start}]
-     [:&-end {:display :flex
-              :flex-direction :row
-              :align-items :flex-end}]]
+                :justify-content :center}]
+    [:&-start {:display :flex
+               :flex-direction :row
+               :justify-content :flex-start}]
+    [:&-end {:display :flex
+             :flex-direction :row
+             :justify-content :flex-end}]]
+
+   [:&--align
+    [:&-center {:display :flex
+                :flex-direction :row
+                :align-items :center}]
+    [:&-start {:display :flex
+               :flex-direction :row
+               :align-items :flex-start}]
+    [:&-end {:display :flex
+             :flex-direction :row
+             :align-items :flex-end}]]
 
    [:&--margin-top
     (u/make-modifiers {:var :spacing :prop :margin-top :unit px})]

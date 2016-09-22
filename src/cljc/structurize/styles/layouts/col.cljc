@@ -6,22 +6,28 @@
 (def col
   [:.l-col {:display :flex
             :flex-direction :column}
-    [:&--fill-parent {:width (percent 100)
-                      :height (percent 100)}]
-    [:&--height-100 {:height (percent 100)}]
-    [:&--width-100 {:width (percent 100)}]
+   [:&--fill-parent {:width (percent 100)
+                     :height (percent 100)}]
 
-    [:&--justify
-     [:&-center {:justify-content :center}]
-     [:&-space-between {:justify-content :space-between}]
-     [:&-space-around {:justify-content :space-around}]
-     [:&-start {:justify-content :flex-start}]
-     [:&-end {:justify-content :flex-end}]]
+   [:&--height-100 {:height (percent 100)}]
+   [:&--height
+    (u/make-modifiers {:var :filling :prop :height :unit px})]
 
-    [:&--align
-     [:&-center {:align-items :center}]
-     [:&-start {:align-items :flex-start}]
-     [:&-end {:align-items :flex-end}]]
+   [:&--width-100 {:width (percent 100)}]
+   [:&--width
+    (u/make-modifiers {:var :filling :prop :width :unit px})]
+
+   [:&--justify
+    [:&-center {:justify-content :center}]
+    [:&-space-between {:justify-content :space-between}]
+    [:&-space-around {:justify-content :space-around}]
+    [:&-start {:justify-content :flex-start}]
+    [:&-end {:justify-content :flex-end}]]
+
+   [:&--align
+    [:&-center {:align-items :center}]
+    [:&-start {:align-items :flex-start}]
+    [:&-end {:align-items :flex-end}]]
 
    [:&__item
     [:&--grow {:flex-grow 1}]]

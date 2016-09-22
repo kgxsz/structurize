@@ -8,8 +8,14 @@
             :flex-direction :row}
    [:&--fill-parent {:width (percent 100)
                      :height (percent 100)}]
+
    [:&--height-100 {:height (percent 100)}]
+   [:&--height
+    (u/make-modifiers {:var :filling :prop :height :unit px})]
+
    [:&--width-100 {:width (percent 100)}]
+   [:&--width
+    (u/make-modifiers {:var :filling :prop :width :unit px})]
 
    [:&--justify
     [:&-center {:justify-content :center}]
