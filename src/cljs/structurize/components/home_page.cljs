@@ -85,17 +85,14 @@
                             :c [home-page-right]}}]]
       [:div.c-page
        [:div.l-col.l-col--align-center.l-col--margin-top-xxx-large
-        [:div.c-icon.c-icon--mustache.c-icon--h-size-large]
+        [:div.l-cell.l-cell--justify-center.l-cell--align-center.l-cell--height-xxx-large
+         [:div.c-icon.c-icon--mustache.c-icon--h-size-x-large]]
         [:div.l-cell.l-cell--margin-top-medium
-         [:span.c-text.c-text--p-size-xx-large "Hello There!"]]
+         [:span.c-text.c-text--h-size-x-small "Hello There!"]]
         [:div.l-cell.l-cell--margin-top-medium
          [:button {:on-click (u/without-propagation
                               #(side-effect! Φ :home-page/initialise-sign-in-with-github))}
-          "Log in with GitHub"]]
-        [:div.l-cell.l-cell--margin-top-medium
-         [:button {:on-click (u/without-propagation
-                              #(side-effect! Φ :home-page/get-lost))}
-          "Get lost!"]]]])))
+          "Log in with GitHub"]]]])))
 
 
 
@@ -132,8 +129,3 @@
                         (write! Φ :auth/sign-out-failed
                                 (fn [x]
                                   (assoc-in x [:auth :sign-out-status] :failed))))}))
-
-
-(defmethod process-side-effect :home-page/get-lost
-  [Φ id props]
-  (change-location! Φ {:path "/dkjf"}))

@@ -21,6 +21,7 @@
   (log-debug φ "render loading-page")
   [:div.c-page
    [:div.l-col.l-col--align-center.l-col--margin-top-xxx-large
-    [:div.c-icon.c-icon--coffee-cup.c-icon--h-size-large]
+    [:div.l-cell.l-cell--justify-center.l-cell--align-center.l-cell--height-xxx-large
+     [:div.c-icon.c-icon--clock.c-icon--h-size-x-large]]
     [:div.l-cell.l-cell--margin-top-medium
-     [:span.c-text.c-text--p-size-xx-large "Loading"]]]])
+     [:span.c-text.c-text--h-size-x-small "Loading"]]]])
