@@ -6,23 +6,24 @@
             [structurize.system.utils :as su]
             [structurize.components.app-browser :refer [app-browser]]
             [structurize.components.writes-browser :refer [writes-browser]]
-            [structurize.components.slide-over :refer [toggle-slide-over]]
+            [structurize.components.slide-over :refer [slide-over toggle-slide-over]]
             [structurize.components.utils :as u]
             [structurize.lens :refer [in]]
             [traversy.lens :as l]
             [reagent.core :as r])
   (:require-macros [structurize.components.macros :refer [log-info log-debug log-error]]))
 
-;; TODO - don't pass anon fns
-;; TODO - co-locate CSS
-;; TODO - use BEM utility
 ;; TODO - spec everywhere
+
+(def +slide-over
+  (in [:tooling :tooling-slide-over]))
+
 
 ;; components ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defn tooling [φ {:keys [+slide-over]}]
-  (log-debug φ "render tooling")
-  [:div.l-overlay__content.c-tooling
+(defn tooling-body [φ]
+  (log-debug φ "render tooling-body")
+  [:div.l-overlay__content.c-tooling__body
    [:div.c-tooling__handle
     {:on-click (u/without-propagation
                 #(side-effect! φ :tooling/toggle-tooling-slide-over
@@ -33,6 +34,17 @@
      [writes-browser φ]]
     [:div.l-col__item.l-col__item--grow.c-tooling__item
      [app-browser φ]]]])
+
+
+(defn tooling [{:keys [config-opts] :as φ}]
+  (let [tooling-enabled? (get-in config-opts [:tooling :enabled?])]
+    (log-debug φ "render tooling")
+    (when tooling-enabled?
+      [:div.l-overlay.l-overlay--fill-viewport.c-tooling
+       [slide-over φ {:+slide-over +slide-over
+                      :absolute-width 800
+                      :direction :right
+                      :c [tooling-body]}]])))
 
 
 ;; side-effects ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;

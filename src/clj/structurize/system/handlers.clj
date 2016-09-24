@@ -20,7 +20,8 @@
                     (include-css "/css/icomoon.css")
                     (include-css "/css/structurize.css")]
                    [:body
-                    [:div#js-root]
+                    [:div#js-app]
+                    [:div#js-tooling]
                     (include-js "/js/structurize.js")
                     [:script {:type "text/javascript"} "structurize.runner.start();"]])]
     (-> root-page response (content-type "text/html"))))

@@ -46,7 +46,7 @@
 
    [:body {:height (percent 100)}]
 
-   [:#js-root {:height (percent 100)}]])
+   [:#js-app {:height (percent 100)}]])
 
 
 (def states
