@@ -21,4 +21,4 @@
   (log-debug φ "render unkown-page")
   [:div.l-cell.l-cell--fill-parent.l-cell--justify-center.l-cell--align-center
    [:div.l-col.l-col--align-center
-    [:div.c-icon.c-icon--poop.c-icon--h-size-medium.c-icon--color-white-d]]])
+    [:div.c-icon.c-icon--poop.c-icon--h-size-medium]]])

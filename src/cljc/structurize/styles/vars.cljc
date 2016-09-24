@@ -62,15 +62,13 @@
            :x-large 4
            :xx-large 6}
 
-   :filling {:xxx-small 4
-             :xx-small 10
+   :filling {:xx-small 10
              :x-small 16
              :small 22
              :medium 26
              :large 32
              :x-large 40
-             :xx-large 60
-             :xxx-large 90}
+             :xx-large 60}
 
    :border-width {:small 1
                   :medium 2

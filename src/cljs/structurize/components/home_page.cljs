@@ -23,64 +23,28 @@
 
 ;; components ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defn home-page-left [Φ {:keys [width col-n col-width gutter margin-left]}]
-  [:div.l-col.l-col--align-start {:style {:width width
-                                          :padding-left gutter
-                                          :margin-left margin-left}}
-   [:div {:style {:width col-width}}
-    (doall
-     (for [i (range 2)]
-       [:div {:key i
-              :style {:margin-top gutter}}
-        [pod Φ]]))]])
-
-
-(defn home-page-center [Φ {:keys [width col-n col-width gutter margin-left margin-right]}]
-  [:div.l-row.l-row--justify-space-between {:style {:width width
-                                                    :padding-left gutter
-                                                    :padding-right gutter
-                                                    :margin-left margin-left
-                                                    :margin-right margin-right}}
-   (doall
-    (for [i (range col-n)]
-      [:div {:key i
-             :style {:width col-width}}
-       (doall
-        (for [j (range 6)]
-          [:div {:key j
-                 :style {:margin-top gutter}}
-           [pod Φ]]))]))])
-
-
-(defn home-page-right [Φ {:keys [width col-n col-width gutter margin-right]}]
-  [:div.l-col.l-col--align-end {:style {:width width
-                                        :padding-right gutter
-                                        :margin-right margin-right}}
-   [:div {:style {:width col-width}}
-    (doall
-     (for [i (range 1)]
-       [:div {:key i
-              :style {:margin-top gutter}}
-        [pod Φ]]))]])
-
-
 (defn home-page [Φ]
   (log-debug Φ "render home-page")
   (let [me (track Φ l/view-single
                   (in [:auth :me]))]
-    [:div.l-col.l-col--align-center
-     [:div.l-cell.l-cell--justify-center.l-cell--align-center.l-cell--height-xxx-large
-      [:div.c-icon.c-icon--mustache.c-icon--h-size-x-large]]
-     [:div.l-cell.l-cell--margin-top-medium
-      [:span.c-text.c-text--h-size-x-small "Hello There!"]]
-     [:div.l-cell.l-cell--margin-top-medium
-      (if me
-        [:button {:on-click (u/without-propagation
-                             #(side-effect! Φ :home-page/sign-out))}
-         "Sign out"]
-        [:button {:on-click (u/without-propagation
-                             #(side-effect! Φ :home-page/initialise-sign-in-with-github))}
-         "Log in with GitHub"])]]))
+    [:div.l-col.l-col--fill-parent.l-col--justify-center.l-col--align-center
+     [:span.c-text.c-text--h-size-large "Structurize"]
+
+     [:div.l-row.l-row--margin-top-x-large
+      [:a.c-link.c-link--margin-right-medium {:href "/components"}
+       [:span.c-icon.c-icon--layers]
+       [:span.c-text.c-text--margin-left-x-small "Component Guide"]]
+
+      [:a.c-link..c-link--margin-left-medium.c-link--margin-right-medium {:href "/concepts/store"}
+       [:span.c-icon.c-icon--crop]
+       [:span.c-text.c-text--margin-left-x-small "Design Concepts"]]
+
+      [:a.c-link.c-link--margin-left-medium {:on-click (u/without-propagation
+                                                        #(side-effect! Φ (if me
+                                                                           :home-page/sign-out
+                                                                           :home-page/initialise-sign-in-with-github)))}
+       [:span.c-icon.c-icon--github]
+       [:span.c-text.c-text--margin-left-x-small (if me "Sign out" "Sign in")]]]]))
 
 
 ;; side-effects ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;

@@ -11,6 +11,7 @@
             [structurize.styles.components.tooling :refer [tooling]]
             [structurize.styles.components.text :refer [text]]
             [structurize.styles.components.icon :refer [icon]]
+            [structurize.styles.components.link :refer [link]]
             [structurize.styles.layouts.cell :refer [cell]]
             [structurize.styles.layouts.row :refer [row]]
             [structurize.styles.layouts.col :refer [col]]
@@ -74,6 +75,7 @@
    slide-over
    text
    icon
+   link
    tooling
    writes-browser
    app-browser])

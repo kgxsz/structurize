@@ -35,17 +35,12 @@
 
                         [:div.l-cell.l-cell--fill-parent.l-cell--justify-center.l-cell--align-center
                          (if error?
-                           [:div.l-row.l-row--justify-center.l-row--align-center
-                            [:div.c-icon.c-icon--github.c-icon--h-size-medium.c-icon--color-white-d]
-                            [:div.l-cell.l-cell--margin-left-small.l-cell--margin-right-small
-                             [:span.c-text.c-text--h-size-medium.c-text--color-white-d"+"]]
-                            [:div.c-icon.c-icon--poop.c-icon--h-size-medium.c-icon--color-white-d]]
+                           [:div.l-cell.l-cell--fill-parent.l-cell--justify-center.l-cell--align-center
+                            [:div.l-col.l-col--align-center
+                             [:div.c-icon.c-icon--poop.c-icon--h-size-medium]]]
 
                            [:div.l-row.l-row--justify-center.l-row--align-center
-                            [:div.c-icon.c-icon--github.c-icon--h-size-medium.c-icon--color-white-d]
-                            [:div.l-cell.l-cell--margin-left-small.l-cell--margin-right-small
-                             [:span.c-text.c-text--h-size-medium.c-text--color-white-d"+"]]
-                            [:div.c-icon.c-icon--clock.c-icon--h-size-medium.c-icon--color-white-d]])]))}))
+                            [:div.c-icon.c-icon--clock.c-icon--h-size-medium]])]))}))
 
 
 ;; side-effects ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
