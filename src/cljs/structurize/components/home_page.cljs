@@ -68,7 +68,7 @@
   (log-debug Φ "render home-page")
   (let [me (track Φ l/view-single
                   (in [:auth :me]))]
-    [:div.l-col.l-col--align-center.l-col--margin-top-xxx-large
+    [:div.l-col.l-col--align-center
      [:div.l-cell.l-cell--justify-center.l-cell--align-center.l-cell--height-xxx-large
       [:div.c-icon.c-icon--mustache.c-icon--h-size-x-large]]
      [:div.l-cell.l-cell--margin-top-medium

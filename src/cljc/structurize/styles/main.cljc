@@ -9,7 +9,6 @@
             [structurize.styles.components.writes-browser :refer [writes-browser]]
             [structurize.styles.components.app-browser :refer [app-browser]]
             [structurize.styles.components.tooling :refer [tooling]]
-            [structurize.styles.components.page :refer [page]]
             [structurize.styles.components.text :refer [text]]
             [structurize.styles.components.icon :refer [icon]]
             [structurize.styles.layouts.cell :refer [cell]]
@@ -73,7 +72,6 @@
    masthead
    image
    slide-over
-   page
    text
    icon
    tooling
