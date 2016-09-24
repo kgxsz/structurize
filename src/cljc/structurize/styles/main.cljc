@@ -47,7 +47,8 @@
            :background-color (-> vars :color :white-b)}]
 
    [:#js-root {:width (vw 100)
-               :height (vh 100)}]])
+               :height (vh 100)
+               :overflow-x :hidden}]])
 
 
 (def states
