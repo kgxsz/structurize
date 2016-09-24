@@ -60,9 +60,8 @@
    comms side effects. Otherwise ignore side effects when time travelling."
 
   ([Φ id] (side-effect! Φ id {}))
-  ([{:keys [config-opts !state context] :as Φ} id props]
-   (let [log? (get-in config-opts [:tooling :log?])
-         time-travelling? (l/view-single @!state (in [:tooling :time-travelling?]))
+  ([{:keys [!state context] :as Φ} id props]
+   (let [time-travelling? (l/view-single @!state (in [:tooling :time-travelling?]))
          tooling? (:tooling? context)]
 
      (cond
