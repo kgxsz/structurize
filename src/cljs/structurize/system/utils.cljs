@@ -3,8 +3,11 @@
             [cemerick.url :refer [map->query query->map]]
             [bidi.bidi :as b]
             [structurize.lens :refer [in]]
-            [traversy.lens :as l])
+            [traversy.lens :as l]
+            [taoensso.timbre :as log])
   (:require-macros [structurize.components.macros :refer [log-info log-debug log-error]]))
+
+;; general utils ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defn make-upstream-paths
   "This function takes paths and returns a set of all sub-paths within them."
