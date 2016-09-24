@@ -83,7 +83,7 @@
     (.setUseFragment false)))
 
 
-(defn listen-for-navigation [{:keys [config-opts history] :as Φ}]
+(defn listen-for-change-of-location [{:keys [config-opts history] :as Φ}]
   (let [handler (fn [g-event]
                   (let [routes (:routes config-opts)
                         token (.getToken history)
@@ -91,7 +91,7 @@
                         location (merge {:path path
                                          :query (->> query query->map (m/map-keys keyword))}
                                         (b/match-route routes path))]
-                    (log/debug "receiving navigation from browser:" token)
+                    (log/debug "receiving change of location from browser:" token)
                     (when-not (.-isNavigation g-event)
                       (js/window.scrollTo 0 0))
                     (write! Φ :browser/change-location
@@ -126,8 +126,8 @@
              :config-opts config-opts
              :!state (:!state state)
              :history history}]
-      (log/info "begin listening for navigation from the browser")
-      (listen-for-navigation φ)
+      (log/info "begin listening for change of location from the browser")
+      (listen-for-change-of-location φ)
       (log/info "begin listening for resize from the browser")
       (listen-for-resize φ)
       (assoc component :history history)))
