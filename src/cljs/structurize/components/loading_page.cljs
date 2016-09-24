@@ -19,6 +19,5 @@
 
 (defn loading-page [φ]
   (log-debug φ "render loading-page")
-  [:div.l-cell.l-cell--fill-parent.l-cell--justify-center.l-cell--align-center
-   [:div.l-col.l-col--align-center
-    [:div.c-icon.c-icon--clock.c-icon--h-size-medium]]])
+  [:div.l-cell.l-cell--justify-center.l-col--padding-top-25
+   [:div.c-icon.c-icon--clock.c-icon--h-size-medium]])

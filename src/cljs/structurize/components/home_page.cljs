@@ -27,26 +27,29 @@
   (log-debug Φ "render home-page")
   (let [me (track Φ l/view-single
                   (in [:auth :me]))]
-    [:div.l-col.l-col--fill-parent.l-col--justify-center.l-col--align-center
-     [:div.l-row
-      [:span.c-icon.c-icon--diamond.c-icon--h-size-large]
-      [:span.c-text.c-text--h-size-large.c-text--margin-left-medium "Structurize"]]
+    [:div.l-cell.l-cell--fill-parent
+     [:div.l-col.l-col--align-center.l-col--padding-top-25
+      [:div.l-row
+       [:span.c-icon.c-icon--diamond.c-icon--h-size-medium]
+       [:span.c-text.c-text--h-size-medium.c-text--margin-left-medium "Structurize"]]
 
-     [:div.l-row.l-row--margin-top-x-large
-      [:a.c-link.c-link--margin-right-medium {:href "/components"}
-       [:span.c-icon.c-icon--layers]
-       [:span.c-text.c-text--margin-left-x-small "Component Guide"]]
+      [:div.l-col.l-col--align-center.l-col--margin-top-xx-large
+       [:a.c-link {:on-click (u/without-propagation
+                              #(side-effect! Φ :home-page/go-to-component-guide))}
+        [:span.c-icon.c-icon--layers]
+        [:span.c-text.c-text--margin-left-x-small "Component Guide"]]
 
-      [:a.c-link.c-link--margin-left-medium.c-link--margin-right-medium {:href "/concepts/store"}
-       [:span.c-icon.c-icon--crop]
-       [:span.c-text.c-text--margin-left-x-small "Design Concepts"]]
+       [:a.c-link.c-link--margin-top-large {:on-click (u/without-propagation
+                                                       #(side-effect! Φ :home-page/go-to-store-concept))}
+        [:span.c-icon.c-icon--crop]
+        [:span.c-text.c-text--margin-left-x-small "Design Concepts"]]
 
-      [:a.c-link.c-link--margin-left-medium {:on-click (u/without-propagation
+       [:a.c-link.c-link--margin-top-large {:on-click (u/without-propagation
                                                         #(side-effect! Φ (if me
                                                                            :home-page/sign-out
                                                                            :home-page/initialise-sign-in-with-github)))}
-       [:span.c-icon.c-icon--github]
-       [:span.c-text.c-text--margin-left-x-small (if me "Sign out" "Sign in")]]]]))
+        [:span.c-icon.c-icon--github]
+        [:span.c-text.c-text--margin-left-x-small (if me "Sign out" "Sign in")]]]]]))
 
 
 ;; side-effects ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -70,7 +73,7 @@
 
 
 (defmethod process-side-effect :home-page/sign-out
-  [Φ id props]
+  [{:keys [config-opts] :as Φ} id props]
   (post! Φ "/sign-out"
          {}
          {:on-success (fn [response]
@@ -81,3 +84,13 @@
                         (write! Φ :auth/sign-out-failed
                                 (fn [x]
                                   (assoc-in x [:auth :sign-out-status] :failed))))}))
+
+
+(defmethod process-side-effect :home-page/go-to-store-concept
+  [{:keys [config-opts] :as Φ} id props]
+  (change-location! Φ {:path (b/path-for (:routes config-opts) :store-concept)}))
+
+
+(defmethod process-side-effect :home-page/go-to-component-guide
+  [{:keys [config-opts] :as Φ} id props]
+  (change-location! Φ {:path (b/path-for (:routes config-opts) :component-guide)}))

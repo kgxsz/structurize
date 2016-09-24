@@ -33,14 +33,13 @@
 
                         (log-debug φ "render sign-in-with-github-page")
 
-                        [:div.l-cell.l-cell--fill-parent.l-cell--justify-center.l-cell--align-center
+                        [:div.l-cell.l-cell--justify-center.l-cell--padding-top-25
                          (if error?
-                           [:div.l-cell.l-cell--fill-parent.l-cell--justify-center.l-cell--align-center
-                            [:div.l-col.l-col--align-center
-                             [:div.c-icon.c-icon--poop.c-icon--h-size-medium]]]
+                           [:div.l-col.l-col--align-center
+                            [:div.c-icon.c-icon--poop.c-icon--h-size-medium]
+                            [:div.c-text.c-text--margin-top-medium "We couldn't sign you in with GitHub."]]
 
-                           [:div.l-row.l-row--justify-center.l-row--align-center
-                            [:div.c-icon.c-icon--clock.c-icon--h-size-medium]])]))}))
+                           [:div.c-icon.c-icon--clock.c-icon--h-size-medium])]))}))
 
 
 ;; side-effects ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;

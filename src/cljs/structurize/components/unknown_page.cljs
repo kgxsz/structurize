@@ -17,8 +17,8 @@
 
 ;; components ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defn unknown-page [φ]
+(defn unknown-page [φ ]
   (log-debug φ "render unkown-page")
-  [:div.l-cell.l-cell--fill-parent.l-cell--justify-center.l-cell--align-center
-   [:div.l-col.l-col--align-center
-    [:div.c-icon.c-icon--poop.c-icon--h-size-medium]]])
+  [:div.l-col.l-col--align-center.l-col--padding-top-25
+   [:div.c-icon.c-icon--poop.c-icon--h-size-medium]
+   [:div.c-text.c-text--margin-top-medium "This page doesn't exist."]])
