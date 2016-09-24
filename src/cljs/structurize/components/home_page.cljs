@@ -35,7 +35,7 @@
        [:span.c-icon.c-icon--layers]
        [:span.c-text.c-text--margin-left-x-small "Component Guide"]]
 
-      [:a.c-link..c-link--margin-left-medium.c-link--margin-right-medium {:href "/concepts/store"}
+      [:a.c-link.c-link--margin-left-medium.c-link--margin-right-medium {:href "/concepts/store"}
        [:span.c-icon.c-icon--crop]
        [:span.c-text.c-text--margin-left-x-small "Design Concepts"]]
 
