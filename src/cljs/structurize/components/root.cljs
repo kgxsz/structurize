@@ -10,6 +10,7 @@
             [structurize.components.unknown-page :refer [unknown-page]]
             [structurize.components.loading-page :refer [loading-page]]
             [structurize.components.sign-in-with-github-page :refer [sign-in-with-github-page]]
+            [structurize.components.slide-over :refer [slide-over]]
             [structurize.lens :refer [in]]
             [cljs.core.match :refer-macros [match]]
             [traversy.lens :as l]
@@ -19,6 +20,9 @@
                    [structurize.components.macros :refer [log-info log-debug log-error]]))
 
 ;; TODO - spec everywhere
+
+(def +slide-over
+  (in [:tooling :tooling-slide-over]))
 
 (defn root [{:keys [config-opts] :as φ}]
   (let [tooling-enabled? (get-in config-opts [:tooling :enabled?])]
@@ -48,4 +52,9 @@
            [_ :unknown] [unknown-page φ])
 
          (when tooling-enabled?
-           [tooling (assoc φ :context {:tooling? true})])]))))
+           [:div.l-overlay.l-overlay--fill-viewport
+            [slide-over (assoc φ :context {:tooling? true})
+             {:+slide-over +slide-over
+              :absolute-width 800
+              :direction :right
+              :c [tooling {:+slide-over +slide-over}]}]])]))))

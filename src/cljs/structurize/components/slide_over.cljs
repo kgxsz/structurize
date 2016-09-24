@@ -30,7 +30,7 @@
 
 ;; components ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defn slide-over [φ {:keys [+slide-over absolute-width direction]} content]
+(defn slide-over [φ {:keys [+slide-over absolute-width direction], [f props] :c}]
   {:pre [(s/valid? ::t/lens +slide-over)
          (s/valid? ::absolute-width absolute-width)
          (s/valid? ::direction direction)]}
@@ -38,4 +38,4 @@
     (log-debug φ "render slide-over")
     [:div.c-slide-over {:style {:width (str absolute-width "px")
                                 direction (if open? 0 (str (- absolute-width) "px"))}}
-     content]))
+     [f φ props]]))
