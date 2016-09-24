@@ -1,5 +1,5 @@
 (ns structurize.components.image
-  (:require [structurize.system.side-effector :refer [process-side-effect side-effect!]]
+  (:require [structurize.system.utils :refer [process-side-effect side-effect!]]
             [structurize.system.state :refer [track read write!]]
             [structurize.system.browser :refer [change-location!]]
             [structurize.system.comms :refer [send! post!]]

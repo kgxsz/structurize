@@ -1,6 +1,5 @@
 (ns structurize.system
-  (:require [structurize.system.side-effector :refer [map->SideEffector]]
-            [structurize.system.config-opts :refer [map->ConfigOpts]]
+  (:require [structurize.system.config-opts :refer [map->ConfigOpts]]
             [structurize.system.browser :refer [map->Browser]]
             [structurize.system.comms :refer [map->Comms]]
             [structurize.system.app-renderer :refer [map->AppRenderer]]
@@ -15,12 +14,10 @@
        :state (map->State {})
        :browser (map->Browser {})
        :comms (map->Comms {})
-       :side-effector (map->SideEffector {})
        :app-renderer (map->AppRenderer {})
        :tooling-renderer (map->ToolingRenderer {}))
       (component/system-using
        {:state [:config-opts]
-        :side-effector [:config-opts]
         :browser [:config-opts :state]
         :comms [:config-opts :state]
         :app-renderer [:config-opts :state :browser :comms]

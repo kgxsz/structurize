@@ -1,9 +1,8 @@
 (ns structurize.components.tooling
-  (:require [structurize.system.side-effector :refer [process-side-effect side-effect!]]
+  (:require [structurize.system.utils :refer [process-side-effect side-effect!]]
             [structurize.system.state :refer [track read write!]]
             [structurize.system.browser :refer [change-location!]]
             [structurize.system.comms :refer [send! post!]]
-            [structurize.system.utils :as su]
             [structurize.components.app-browser :refer [app-browser]]
             [structurize.components.writes-browser :refer [writes-browser]]
             [structurize.components.slide-over :refer [slide-over toggle-slide-over]]

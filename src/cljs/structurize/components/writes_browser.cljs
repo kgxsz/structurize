@@ -1,9 +1,8 @@
 (ns structurize.components.writes-browser
-  (:require [structurize.system.side-effector :refer [process-side-effect side-effect!]]
+  (:require [structurize.system.utils :refer [process-side-effect side-effect!]]
             [structurize.system.state :refer [track read write!]]
             [structurize.system.browser :refer [change-location!]]
             [structurize.system.comms :refer [send! post!]]
-            [structurize.system.utils :as su]
             [structurize.components.utils :as u]
             [structurize.lens :refer [in]]
             [structurize.types :as t]

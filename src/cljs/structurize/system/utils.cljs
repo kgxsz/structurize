@@ -1,6 +1,10 @@
 (ns structurize.system.utils
   (:require [clojure.data :as data]
-            [cemerick.url :refer [map->query query->map]]))
+            [cemerick.url :refer [map->query query->map]]
+            [bidi.bidi :as b]
+            [structurize.lens :refer [in]]
+            [traversy.lens :as l])
+  (:require-macros [structurize.components.macros :refer [log-info log-debug log-error]]))
 
 (defn make-upstream-paths
   "This function takes paths and returns a set of all sub-paths within them."
@@ -35,3 +39,36 @@
         removed-paths (if removed (make-all-paths removed) [])
         added-paths (if added (make-all-paths added) [])]
     (into #{} (concat removed-paths added-paths))))
+
+
+;; side-effects ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(defmulti process-side-effect (fn [_ id _] id))
+
+
+(defmethod process-side-effect :default
+  [_ id _]
+  (log/warn "failed to process side-effect:" id))
+
+
+(defn side-effect!
+
+  "Dispatches a side-effect depending on the situation. Always allow tooling, browser and
+   comms side effects. Otherwise ignore side effects when time travelling."
+
+  ([Φ id] (side-effect! Φ id {}))
+  ([{:keys [config-opts !state context] :as Φ} id props]
+   (let [log? (get-in config-opts [:tooling :log?])
+         time-travelling? (l/view-single @!state (in [:tooling :time-travelling?]))
+         tooling? (:tooling? context)]
+
+     (cond
+       tooling? (do
+                  (log-debug Φ "side-effect:" id)
+                  (process-side-effect Φ id props))
+
+       (not time-travelling?) (do
+                                (log-debug Φ "side-effect:" id)
+                                (process-side-effect Φ id props))
+
+       :else (log-debug Φ "during time travel, ignoring side-effect:" id)))))
