@@ -23,6 +23,15 @@
 
 ;; components ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+(defn counter [Φ]
+  (log-debug Φ "render counter")
+  (let [count (track Φ l/view-single
+                     (in [:count]))]
+    [:a.c-link.c-link--margin-top-large {:on-click (u/without-propagation
+                                                    #(side-effect! Φ :home-page/inc-count))}
+     [:span.c-icon.c-icon--heart]
+     [:span.c-text.c-text--margin-left-x-small count]]))
+
 (defn home-page [Φ]
   (log-debug Φ "render home-page")
   (let [me (track Φ l/view-single
@@ -49,7 +58,9 @@
                                                                            :home-page/sign-out
                                                                            :home-page/initialise-sign-in-with-github)))}
         [:span.c-icon.c-icon--github]
-        [:span.c-text.c-text--margin-left-x-small (if me "Sign out" "Sign in")]]]]]))
+        [:span.c-text.c-text--margin-left-x-small (if me "Sign out" "Sign in")]]
+
+       [counter Φ]]]]))
 
 
 ;; side-effects ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -94,3 +105,10 @@
 (defmethod process-side-effect :home-page/go-to-component-guide
   [{:keys [config-opts] :as Φ} id props]
   (change-location! Φ {:path (b/path-for (:routes config-opts) :component-guide)}))
+
+
+(defmethod process-side-effect :home-page/inc-count
+  [{:keys [config-opts] :as Φ} id props]
+  (write! Φ :home-page/inc-count
+          (fn [x]
+            (l/update x (in [:count]) inc))))

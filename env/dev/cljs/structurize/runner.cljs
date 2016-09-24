@@ -9,7 +9,6 @@
 (defn reload []
   (let [φ {:config-opts (:config-opts system)
            :!state (get-in system [:state :!state])
-           :<side-effects (get-in system [:side-effector :<side-effects])
            :history (get-in system [:browser :history])
            :chsk (get-in system [:comms :chsk])
            :chsk-state (get-in system [:comms :chsk-state])

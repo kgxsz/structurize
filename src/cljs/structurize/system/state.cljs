@@ -82,6 +82,7 @@
   (r/atom {:app-history {0 {:location {:path nil
                                        :handler :unknown
                                        :query nil}
+                            :count 0
                             :viewport {}
                             :app-status :uninitialised
                             :comms {:chsk-status :initialising

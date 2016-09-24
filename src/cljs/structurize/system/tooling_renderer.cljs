@@ -16,7 +16,6 @@
     (render-tooling {:context {:tooling? true}
                      :config-opts config-opts
                      :!state (:!state state)
-                     :<side-effects (:<side-effects side-effector)
                      :history (:history browser)
                      :chsk (:chsk comms)
                      :chsk-state (:chsk-state comms)

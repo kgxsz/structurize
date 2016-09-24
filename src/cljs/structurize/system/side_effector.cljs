@@ -5,8 +5,7 @@
             [com.stuartsierra.component :as component]
             [cljs.core.async :as a]
             [taoensso.timbre :as log])
-  (:require-macros [cljs.core.async.macros :refer [go go-loop]]
-                   [structurize.components.macros :refer [log-info log-debug log-error]]))
+  (:require-macros [structurize.components.macros :refer [log-info log-debug log-error]]))
 
 
 ;; side-effect handling ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -22,45 +21,28 @@
 ;; exposed functions ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defn side-effect!
-  "Dispatches a side-effect into the channel, to be picked
-   up by the appropriate listnener and processed."
+
+  "Dispatches a side-effect depending on the situation. Always allow tooling, browser and
+   comms side effects. Otherwise ignore side effects when time travelling."
 
   ([Φ id] (side-effect! Φ id {}))
-  ([{:keys [<side-effects] :as Φ} id props]
-   (go (a/>! <side-effects [Φ id props]))))
+  ([{:keys [config-opts !state context] :as Φ} id props]
+   (let [log? (get-in config-opts [:tooling :log?])
+         time-travelling? (l/view-single @!state (in [:tooling :time-travelling?]))
+         tooling? (:tooling? context)
+         browser? (:browser? context)
+         comms? (:comms? context)]
 
+     (cond
+       (or browser? comms? tooling?) (do
+                                       (log-debug Φ "side-effect:" id)
+                                       (process-side-effect Φ id props))
 
-;; helper functions ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+       (not time-travelling?) (do
+                                (log-debug Φ "side-effect:" id)
+                                (process-side-effect Φ id props))
 
-(defn listen-for-side-effects
-  [<side-effects]
-
-  (go-loop []
-    (let [[{:keys [config-opts !state context] :as Φ} id props] (a/<! <side-effects)
-          log? (get-in config-opts [:tooling :log?])
-          time-travelling? (l/view-single @!state (in [:tooling :time-travelling?]))
-          tooling? (:tooling? context)
-          browser? (:browser? context)
-          comms? (:comms? context)]
-
-      (cond
-        (or browser? comms?) (do
-                               (log/debug "side-effect:" id)
-                               (process-side-effect Φ id props))
-
-        tooling? (do
-                   (when log? (log/debug "side-effect:" id))
-                   (process-side-effect Φ id props))
-
-        (not time-travelling?) (do
-                                 (log/debug "side-effect:" id)
-                                 (process-side-effect Φ id props))
-
-        :else (log/debug "during time travel, ignoring side-effect:" id)))
-
-    (recur)))
-
-
+       :else (log-debug Φ "during time travel, ignoring side-effect:" id)))))
 
 ;; component setup ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -69,9 +51,6 @@
 
   (start [component]
     (log/info "initialising side-effector")
-    (let [<side-effects (a/chan)]
-      (log/info "begin listening for side effects")
-      (listen-for-side-effects <side-effects)
-      (assoc component :<side-effects <side-effects)))
+    component)
 
   (stop [component] component))
