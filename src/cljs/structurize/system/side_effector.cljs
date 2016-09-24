@@ -46,11 +46,7 @@
 
 ;; component setup ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defrecord SideEffector [config-opts]
+(defrecord SideEffector []
   component/Lifecycle
-
-  (start [component]
-    (log/info "initialising side-effector")
-    component)
-
+  (start [component] component)
   (stop [component] component))

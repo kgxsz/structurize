@@ -8,7 +8,7 @@
   (r/render [tooling Φ] (js/document.getElementById "js-tooling")))
 
 
-(defrecord ToolingRenderer [config-opts state side-effector browser comms]
+(defrecord ToolingRenderer [config-opts state browser comms]
   component/Lifecycle
 
   (start [component]

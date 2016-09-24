@@ -1,6 +1,5 @@
 (ns structurize.system.browser
-  (:require [structurize.system.side-effector :refer [process-side-effect side-effect!]]
-            [structurize.system.state :refer [write!]]
+  (:require [structurize.system.state :refer [write!]]
             [bidi.bidi :as b]
             [cemerick.url :refer [map->query query->map]]
             [clojure.string :as str]
@@ -38,6 +37,33 @@
 
 ;; helper functions ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+(defn resize [{:keys [config-opts] :as Φ}]
+  (let [{:keys [xs sm md lg]} (get-in config-opts [:viewport :breakpoints])
+        width (.-width (dom/getViewportSize))
+        breakpoint (cond
+                     (< width xs) :xs
+                     (< width sm) :sm
+                     (< width md) :md
+                     (< width lg) :lg
+                     :else :xl)
+        {:keys [max-col-width min-col-width min-col-n]} (get-in config-opts [:viewport :triptych])
+        gutter (get-in config-opts [:viewport :triptych :gutter breakpoint])
+        col-n (max min-col-n (quot (- width gutter) (+ min-col-width gutter)))
+        col-width (min max-col-width (int (/ (- width (* (inc col-n) gutter)) col-n)))
+        margin (- width (* col-n (+ col-width gutter)) gutter)]
+
+    (log/debug "receiving resize from browser")
+
+    (write! Φ :browser/resize
+            (fn [x]
+              (assoc x :viewport {:width width
+                                  :height (.-height (dom/getViewportSize))
+                                  :breakpoint breakpoint
+                                  :triptych {:col-n col-n
+                                             :col-width col-width
+                                             :margin margin
+                                             :gutter gutter}})))))
+
 (defn make-transformer
   "Custom transformer required to manage query parameters."
   []
@@ -68,21 +94,21 @@
                     (log/debug "receiving navigation from browser:" token)
                     (when-not (.-isNavigation g-event)
                       (js/window.scrollTo 0 0))
-                    (side-effect! Φ :browser/change-location
-                                  {:location location})))]
+                    (write! Φ :browser/change-location
+                            (fn [x]
+                              (assoc x :location location)))))]
     (doto history
       (events/listen EventType.NAVIGATE #(handler %))
       (.setEnabled true))))
 
 
 (defn listen-for-resize [{:keys [config-opts] :as Φ}]
-  (let [handler (js/window._.debounce (fn []
-                                        (side-effect! Φ :browser/resize))
+  (let [handler (js/window._.debounce #(resize Φ)
                                       100
                                       #js {:trailing true})]
 
     ;; trigger an initial resize
-    (side-effect! Φ :browser/resize)
+    (resize Φ)
 
     (doto (ViewportSizeMonitor.)
       (events/listen events/EventType.RESIZE handler))))
@@ -90,7 +116,7 @@
 
 ;; component setup ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defrecord Browser [config-opts state side-effector]
+(defrecord Browser [config-opts state]
   component/Lifecycle
 
   (start [component]
@@ -99,7 +125,6 @@
           φ {:context {:browser? true}
              :config-opts config-opts
              :!state (:!state state)
-             :<side-effects (:<side-effects side-effector)
              :history history}]
       (log/info "begin listening for navigation from the browser")
       (listen-for-navigation φ)
@@ -108,39 +133,3 @@
       (assoc component :history history)))
 
   (stop [component] component))
-
-
-;; side-effects ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-(defmethod process-side-effect :browser/change-location
-  [Φ id {:keys [location] :as props}]
-  (write! Φ :browser/change-location
-          (fn [x]
-            (assoc x :location location))))
-
-
-(defmethod process-side-effect :browser/resize
-  [{:keys [config-opts] :as Φ} id props]
-  (let [{:keys [xs sm md lg]} (get-in config-opts [:viewport :breakpoints])
-        width (.-width (dom/getViewportSize))
-        breakpoint (cond
-                     (< width xs) :xs
-                     (< width sm) :sm
-                     (< width md) :md
-                     (< width lg) :lg
-                     :else :xl)
-        {:keys [max-col-width min-col-width min-col-n]} (get-in config-opts [:viewport :triptych])
-        gutter (get-in config-opts [:viewport :triptych :gutter breakpoint])
-        col-n (max min-col-n (quot (- width gutter) (+ min-col-width gutter)))
-        col-width (min max-col-width (int (/ (- width (* (inc col-n) gutter)) col-n)))
-        margin (- width (* col-n (+ col-width gutter)) gutter)]
-
-    (write! Φ :browser/resize
-            (fn [x]
-              (assoc x :viewport {:width width
-                                  :height (.-height (dom/getViewportSize))
-                                  :breakpoint breakpoint
-                                  :triptych {:col-n col-n
-                                             :col-width col-width
-                                             :margin margin
-                                             :gutter gutter}})))))

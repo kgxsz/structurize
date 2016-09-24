@@ -9,7 +9,7 @@
   (r/render [app Φ] (js/document.getElementById "js-app")))
 
 
-(defrecord AppRenderer [config-opts state side-effector browser comms]
+(defrecord AppRenderer [config-opts state browser comms]
   component/Lifecycle
 
   (start [component]
@@ -19,7 +19,7 @@
                  :history (:history browser)
                  :chsk (:chsk comms)
                  :chsk-state (:chsk-state comms)
-                 :chsk-send (:chsk-send comms)}) 
+                 :chsk-send (:chsk-send comms)})
     component)
 
   (stop [component] component))

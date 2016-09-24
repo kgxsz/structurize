@@ -21,10 +21,10 @@
       (component/system-using
        {:state [:config-opts]
         :side-effector [:config-opts]
-        :browser [:config-opts :state :side-effector]
-        :comms [:config-opts :state :side-effector]
-        :app-renderer [:config-opts :state :side-effector :browser :comms]
-        :tooling-renderer [:config-opts :state :side-effector :browser :comms]})))
+        :browser [:config-opts :state]
+        :comms [:config-opts :state]
+        :app-renderer [:config-opts :state :browser :comms]
+        :tooling-renderer [:config-opts :state :browser :comms]})))
 
 
 (defonce system (component/start (make-system)))

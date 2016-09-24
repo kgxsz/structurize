@@ -41,8 +41,7 @@
 
 (def general
   [:html {:background-color (-> vars :color :white-b)
-          :height (percent 100)
-          :overflow-x :hidden}
+          :height (percent 100)}
 
    [:body {:height (percent 100)}]
 
