@@ -9,12 +9,14 @@
                  :background-color (-> vars :color :white-a)}
    [:&__lip {:height (-> vars :masthead-height :medium px)
              :position :absolute
-             :top (-> vars :masthead-height :medium - px)
+             :left 0
+             :right 0
+             :bottom (-> vars :masthead-height :medium px)
              :background-color (u/alpha (-> vars :color :black-b) (-> vars :alpha :medium))}]
    [:&__avatar {:width (-> vars :avatar-width :medium px)
                 :height (-> vars :avatar-height :medium px)
-                :position :absolute
-                :bottom (-> vars :spacing :medium px)
+                :position :relative
+                :bottom (px (- (-> vars :avatar-height :medium) (-> vars :spacing :xx-large)))
                 :z-index 0;
                 :background-color (u/alpha (-> vars :color :black-b) (-> vars :alpha :low))
                 :overflow :hidden

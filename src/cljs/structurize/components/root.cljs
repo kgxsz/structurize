@@ -17,7 +17,6 @@
   (:require-macros [cljs.core.async.macros :refer [go]]
                    [structurize.components.macros :refer [log-info log-debug log-error]]))
 
-;; TODO - don't pass anon fns
 ;; TODO - spec everywhere
 
 (defn root [{:keys [config-opts] :as φ}]

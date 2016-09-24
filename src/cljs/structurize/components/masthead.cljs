@@ -22,34 +22,42 @@
 
 ;; components ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defn masthead-left [Φ {:keys [width col-n col-width gutter margin-left]}]
+(defn masthead-body-left [Φ {:keys [width col-n col-width gutter margin-left]}]
   (let [avatar-url (track Φ l/view-single
                           (in [:auth :me :avatar-url]))]
     [:div.l-cell.l-cell--justify-end {:style {:width (+ width margin-left)}}
-     [:div.c-masthead__lip {:style {:width (+ width margin-left)}}]
      [:div.l-cell.l-cell--justify-center {:style {:width col-width}}
       [:div.c-masthead__avatar
        [image Φ {:+image +image
                  :src avatar-url}]]]]))
 
 
-(defn masthead-center [Φ {:keys [width col-n col-width gutter margin-left margin-right]}]
-  [:div.l-cell.l-cell--justify-start {:style {:width (+ width margin-left margin-right)}}
-   [:div.c-masthead__lip {:style {:width (+ width margin-left margin-right)}}
-    [:div.l-cell.l-cell--align-center.l-cell--height-100 {:style {:padding-left (+ margin-left gutter)
-                                                                  :padding-right (+ margin-right gutter)}}
-     [:span.c-text.c-text--p-size-xx-large.c-text--color-white-a
-      "Keigo's Superstore"]]]
-   [:div.l-cell.l-cell--align-center.l-cell--width-100 {:style {:padding-left (+ margin-left gutter)
-                                                                :padding-right (+ margin-right gutter)}}
-    [:span.c-text.c-text--p-size-large
-     "The Something Collection"]]])
+(defn masthead-body-center [Φ {:keys [width col-n col-width gutter margin-left margin-right]}]
+  [:div.l-cell.l-cell--align-center.l-cell--width-100 {:style {:width (+ width margin-left margin-right)
+                                                               :padding-left (+ margin-left gutter)
+                                                               :padding-right (+ margin-right gutter)}}
+   [:span.c-text.c-text--p-size-large
+    "The Something Collection"]])
 
+(defn masthead-lip-center [Φ {:keys [width col-n col-width gutter margin-left margin-right]}]
+  [:div.l-cell.l-cell--align-center.l-cell--height-100 {:style {:width (+ width margin-left margin-right)
+                                                                :padding-left (+ margin-left gutter)
+                                                                :padding-right (+ margin-right gutter)}}
+   [:span.c-text.c-text--p-size-xx-large.c-text--color-white-a
+    "Keigo's Superstore"]])
+
+(defn masthead-lip-left [Φ {:keys [width col-n col-width gutter margin-left]}]
+  [:div.l-cell.l-cell--justify-end {:style {:width (+ width margin-left)}}])
 
 (defn masthead [Φ]
   (log-debug Φ "render masthead")
   [:div.c-masthead
+   [:div.c-masthead__lip
+    [triptych Φ {:left {:hidden #{:xs :sm}
+                        :c [masthead-lip-left]}
+                 :center {:hidden #{}
+                          :c [masthead-lip-center]}}]]
    [triptych Φ {:left {:hidden #{:xs :sm}
-                       :c [masthead-left]}
+                       :c [masthead-body-left]}
                 :center {:hidden #{}
-                         :c [masthead-center]}}]])
+                         :c [masthead-body-center]}}]])
