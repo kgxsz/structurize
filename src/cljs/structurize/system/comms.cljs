@@ -1,6 +1,6 @@
 (ns structurize.system.comms
   (:require [com.stuartsierra.component :as component]
-            [structurize.system.side-effector :refer [side-effect!]]
+            [structurize.system.side-effector :refer [process-side-effect side-effect!]]
             [structurize.system.state :refer [read write!]]
             [structurize.lens :refer [in]]
             [traversy.lens :as l]
