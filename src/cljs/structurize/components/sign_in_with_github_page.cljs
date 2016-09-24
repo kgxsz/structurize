@@ -14,9 +14,6 @@
             [reagent.core :as r])
   (:require-macros [structurize.components.macros :refer [log-info log-debug log-error]]))
 
-;; TODO - don't pass anon fns
-;; TODO - co-locate CSS
-;; TODO - use BEM utility
 ;; TODO - spec everywhere
 
 ;; components ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -36,27 +33,19 @@
 
                         (log-debug φ "render sign-in-with-github-page")
 
-                        [:div.c-page
+                        [:div.l-cell.l-cell--fill-parent.l-cell--justify-center.l-cell--align-center
                          (if error?
-                           [:div.l-col.l-col--align-center.l-col--margin-top-xxx-large
-                            [:div.l-row.l-row--justify-center.l-row--align-center.l-row--height-xxx-large
-                             [:div.c-icon.c-icon--github.c-icon--h-size-x-large]
-                             [:div.l-cell.l-cell--margin-left-medium.l-cell--margin-right-medium
-                              [:span.c-text.c-text--h-size-x-large "+"]]
-                             [:div.c-icon.c-icon--poop.c-icon--h-size-x-large]]
-                            [:div.l-cell.l-cell--margin-top-medium
-                             [:span.c-text.c-text--h-size-x-small "Something went wrong!"]]
-                            [:div.l-cell.l-cell--margin-top-small
-                             [:span.c-text.c-text--p-size-large "We couldn't sign you in with GitHub."]]]
+                           [:div.l-row.l-row--justify-center.l-row--align-center
+                            [:div.c-icon.c-icon--github.c-icon--h-size-medium.c-icon--color-white-d]
+                            [:div.l-cell.l-cell--margin-left-small.l-cell--margin-right-small
+                             [:span.c-text.c-text--h-size-medium.c-text--color-white-d"+"]]
+                            [:div.c-icon.c-icon--poop.c-icon--h-size-medium.c-icon--color-white-d]]
 
-                           [:div.l-col.l-col--align-center.l-col--margin-top-xxx-large
-                            [:div.l-row.l-row--justify-center.l-row--align-center.l-row--height-xxx-large
-                             [:div.c-icon.c-icon--github.c-icon--h-size-x-large]
-                             [:div.l-cell.l-cell--margin-left-medium.l-cell--margin-right-medium
-                              [:span.c-text.c-text--h-size-x-large "+"]]
-                             [:div.c-icon.c-icon--clock.c-icon--h-size-x-large]]
-                            [:div.l-cell.l-cell--margin-top-medium
-                             [:span.c-text.c-text--h-size-x-small "Signing you in with GitHub"]]])]))}))
+                           [:div.l-row.l-row--justify-center.l-row--align-center
+                            [:div.c-icon.c-icon--github.c-icon--h-size-medium.c-icon--color-white-d]
+                            [:div.l-cell.l-cell--margin-left-small.l-cell--margin-right-small
+                             [:span.c-text.c-text--h-size-medium.c-text--color-white-d"+"]]
+                            [:div.c-icon.c-icon--clock.c-icon--h-size-medium.c-icon--color-white-d]])]))}))
 
 
 ;; side-effects ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;

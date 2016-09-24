@@ -32,11 +32,7 @@
      (for [i (range 2)]
        [:div {:key i
               :style {:margin-top gutter}}
-        [pod Φ]]))
-    [:div.l-cell.l-cell--margin-top-medium
-     [:button {:on-click (u/without-propagation
-                          #(side-effect! Φ :home-page/sign-out))}
-      "Sign out"]]]])
+        [pod Φ]]))]])
 
 
 (defn home-page-center [Φ {:keys [width col-n col-width gutter margin-left margin-right]}]
@@ -72,29 +68,19 @@
   (log-debug Φ "render home-page")
   (let [me (track Φ l/view-single
                   (in [:auth :me]))]
-    (if me
-      [:div.c-page
-       [header Φ]
-       [hero Φ]
-       [masthead Φ]
-       [triptych Φ {:left {:hidden #{:xs :sm}
-                           :c [home-page-left]}
-                    :center {:hidden #{}
-                             :c [home-page-center]}
-                    :right {:hidden #{:xs :sm :md}
-                            :c [home-page-right]}}]]
-      [:div.c-page
-       [:div.l-col.l-col--align-center.l-col--margin-top-xxx-large
-        [:div.l-cell.l-cell--justify-center.l-cell--align-center.l-cell--height-xxx-large
-         [:div.c-icon.c-icon--mustache.c-icon--h-size-x-large]]
-        [:div.l-cell.l-cell--margin-top-medium
-         [:span.c-text.c-text--h-size-x-small "Hello There!"]]
-        [:div.l-cell.l-cell--margin-top-medium
-         [:button {:on-click (u/without-propagation
-                              #(side-effect! Φ :home-page/initialise-sign-in-with-github))}
-          "Log in with GitHub"]]]])))
-
-
+    [:div.l-col.l-col--align-center.l-col--margin-top-xxx-large
+     [:div.l-cell.l-cell--justify-center.l-cell--align-center.l-cell--height-xxx-large
+      [:div.c-icon.c-icon--mustache.c-icon--h-size-x-large]]
+     [:div.l-cell.l-cell--margin-top-medium
+      [:span.c-text.c-text--h-size-x-small "Hello There!"]]
+     [:div.l-cell.l-cell--margin-top-medium
+      (if me
+        [:button {:on-click (u/without-propagation
+                             #(side-effect! Φ :home-page/sign-out))}
+         "Sign out"]
+        [:button {:on-click (u/without-propagation
+                             #(side-effect! Φ :home-page/initialise-sign-in-with-github))}
+         "Log in with GitHub"])]]))
 
 
 ;; side-effects ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;

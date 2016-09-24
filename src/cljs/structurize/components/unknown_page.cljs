@@ -19,11 +19,6 @@
 
 (defn unknown-page [φ]
   (log-debug φ "render unkown-page")
-  [:div.c-page
-   [:div.l-col.l-col--align-center.l-col--margin-top-xxx-large
-    [:div.l-cell.l-cell--justify-center.l-cell--align-center.l-cell--height-xxx-large
-     [:div.c-icon.c-icon--poop.c-icon--h-size-x-large]]
-    [:div.l-cell.l-cell--margin-top-medium
-     [:span.c-text.c-text--h-size-x-small "Looks like you're lost!"]]
-    [:div.l-cell.l-cell--margin-top-small
-     [:span.c-text.c-text--p-size-large "This page doesn't exist, or it has been removed."]]]])
+  [:div.l-cell.l-cell--fill-parent.l-cell--justify-center.l-cell--align-center
+   [:div.l-col.l-col--align-center
+    [:div.c-icon.c-icon--poop.c-icon--h-size-medium.c-icon--color-white-d]]])

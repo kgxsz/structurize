@@ -29,6 +29,7 @@
            :comms {:chsk-opts {:type :auto
                                :packer :edn}}
            :routes ["/" [["" :home]
+                         ["concepts/store" :store-concept]
                          ["sign-in/github" :sign-in-with-github]
                          [true :unknown]]]))
 

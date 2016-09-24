@@ -6,6 +6,7 @@
             [structurize.components.utils :as u]
             [structurize.components.tooling :refer [tooling]]
             [structurize.components.home-page :refer [home-page]]
+            [structurize.components.store-concept-page :refer [store-concept-page]]
             [structurize.components.unknown-page :refer [unknown-page]]
             [structurize.components.loading-page :refer [loading-page]]
             [structurize.components.sign-in-with-github-page :refer [sign-in-with-github-page]]
@@ -38,11 +39,11 @@
 
         (log-debug φ "render root")
 
-        [:div {:style {:width width}}
-
+        [:div.l-cell.l-cell--fill-parent {:style {:width width}}
          (match [loading? handler]
            [true _] [loading-page φ]
            [_ :home] [home-page φ]
+           [_ :store-concept] [store-concept-page φ]
            [_ :sign-in-with-github] [sign-in-with-github-page φ]
            [_ :unknown] [unknown-page φ])
 

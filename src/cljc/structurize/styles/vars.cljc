@@ -8,6 +8,7 @@
            :white-a "#FFFFFF"
            :white-b "#F2F2F2"
            :white-c "#DDDDDD"
+           :white-d "#CCCCCC"
            :grey-a "#505A64"
            :grey-b "#343337"
            :grey-c "#474C51"
