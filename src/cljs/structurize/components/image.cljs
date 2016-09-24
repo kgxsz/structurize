@@ -24,6 +24,7 @@
   (log-debug φ "mount image")
   (r/create-class
    {:component-did-mount #(side-effect! φ :image/did-mount {:node (r/dom-node %) :+image +image :src src})
+    :component-will-unmount #(side-effect! φ :image/will-unmount {:+image +image})
     :reagent-render (fn []
                       (let [{:keys [loaded?]} (track φ l/view-single +image)]
                         (log-debug φ "render image")
@@ -47,3 +48,11 @@
                                      (fn [x]
                                        (l/update x +image #(assoc % :loaded? true))))))
     (set! (.-src image) src)))
+
+
+(defmethod process-side-effect :image/will-unmount
+  [Φ id {:keys [node +image src] :as props}]
+  (let [image (js/Image.)]
+    (write! Φ :image/will-unmount
+            (fn [x]
+              (l/update x +image #(assoc % :loaded? false))))))
