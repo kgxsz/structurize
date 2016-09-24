@@ -43,7 +43,7 @@
           :on-click (when (and time-travelling? end-of-time?)
                       (u/without-propagation
                        #(side-effect! φ :writes-browser/stop-time-travelling)))}
-         [:div.c-icon.c-icon--control-play]]
+         [:div.c-icon.c-icon--control-play.c-icon--p-size-small.c-icon--color-dark-green]]
 
         [:div.c-writes-browser__controls__item.c-writes-browser__controls__item--yellow
          {:class (when time-travelling? (u/->class {:c-writes-browser__controls__item--opaque time-travelling?
@@ -51,7 +51,7 @@
           :on-click (when-not end-of-time?
                       (u/without-propagation
                        #(side-effect! φ :writes-browser/go-forward-in-time)))}
-         [:div.c-icon.c-icon--control-next]]
+         [:div.c-icon.c-icon--control-next.c-icon--p-size-small.c-icon--color-dark-yellow]]
 
         [:div.c-writes-browser__controls__item.c-writes-browser__controls__item--yellow
          {:class (u/->class {:c-writes-browser__controls__item--opaque time-travelling?
@@ -59,7 +59,7 @@
           :on-click (when-not beginning-of-time?
                       (u/without-propagation
                        #(side-effect! φ :writes-browser/go-back-in-time)))}
-         [:div.c-icon.c-icon--control-prev]]]
+         [:div.c-icon.c-icon--control-prev.c-icon--p-size-small.c-icon--color-dark-yellow]]]
 
        [:div.l-row
         (doall

@@ -24,6 +24,7 @@
   (let [+slide-over (in [:tooling :tooling-slide-over])]
     (log-debug φ "mount tooling")
     (fn []
+      (log-debug φ "render tooling")
       [:div.l-overlay.l-overlay--fill-viewport
        [slide-over φ {:+slide-over +slide-over
                       :absolute-width 800
@@ -33,7 +34,7 @@
           {:on-click (u/without-propagation
                       #(side-effect! φ :tooling/toggle-tooling-slide-over
                                      {:+slide-over +slide-over}))}
-          [:div.c-icon.c-icon--cog]]
+          [:div.c-icon.c-icon--cog.c-icon--color-white-b]]
          [:div.l-col.l-col--fill-parent
           [:div.l-col__item.c-tooling__item
            [writes-browser φ]]

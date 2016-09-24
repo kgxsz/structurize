@@ -4,7 +4,9 @@
             [garden.units :refer [px percent ms vh vw]]))
 
 (def text
-  [:.c-text
+  [:.c-text {:font-family "'Raleway', Arial"
+             :font-size (-> vars :p-size :medium px)
+             :color (-> vars :color :grey-a)}
    [:&--p-size
     (u/make-modifiers {:var :p-size :prop :font-size :unit px})]
    [:&--h-size

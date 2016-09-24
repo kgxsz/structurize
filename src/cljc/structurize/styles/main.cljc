@@ -40,15 +40,13 @@
 
 
 (def general
-  [:html
-   [:body {:font-family "'Raleway', Arial"
-           :font-size (-> vars :p-size :medium px)
-           :color (-> vars :color :grey-a)
-           :background-color (-> vars :color :white-b)}]
+  [:html {:background-color (-> vars :color :white-b)
+          :height (percent 100)
+          :overflow-x :hidden}
 
-   [:#js-root {:width (vw 100)
-               :height (vh 100)
-               :overflow-x :hidden}]])
+   [:body {:height (percent 100)}]
+
+   [:#js-root {:height (percent 100)}]])
 
 
 (def states

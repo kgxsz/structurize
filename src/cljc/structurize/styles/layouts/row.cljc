@@ -7,7 +7,8 @@
   [:.l-row {:display :flex
             :flex-direction :row}
    [:&--fill-parent {:width (percent 100)
-                     :height (percent 100)}]
+                     :height (percent 100)
+                     :min-height (percent 100)}]
 
    [:&--height-100 {:height (percent 100)}]
    [:&--height

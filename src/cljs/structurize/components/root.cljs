@@ -39,7 +39,7 @@
 
         (log-debug φ "render root")
 
-        [:div.l-cell.l-cell--fill-parent {:style {:width width}}
+        [:div.l-cell.l-cell--height-100 {:style {:width width}}
          (match [loading? handler]
            [true _] [loading-page φ]
            [_ :home] [home-page φ]

@@ -4,8 +4,10 @@
             [garden.units :refer [px percent ms vh vw]]))
 
 (def link
-  [:.c-link {:text-decoration :none
-             :color (-> vars :color :grey-a)}
+  [:.c-link {:font-family "'Raleway', Arial"
+             :font-size (-> vars :p-size :medium px)
+             :color (-> vars :color :grey-a)
+             :text-decoration :none}
 
    [:&:hover {:cursor :pointer}]
 

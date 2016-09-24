@@ -6,35 +6,27 @@
 (def writes-browser
   [:.c-writes-browser
    [:&__controls {:background-color (u/alpha (-> vars :color :grey-a) (-> vars :alpha :low))
-                   :border-radius (-> vars :border-radius :medium px)
-                   :padding (-> vars :spacing :medium px)}
+                  :border-radius (-> vars :border-radius :medium px)
+                  :padding (-> vars :spacing :medium px)}
 
-     [:&__item {:display :flex
-                :justify-content :center
-                :align-items :center
-                :width (-> vars :filling :medium px)
-                :height (-> vars :filling :medium px)
-                :cursor :not-allowed
-                :margin-bottom (-> vars :spacing :x-small px)
-                :border-radius (-> vars :filling :medium (/ 2) px)
-                :font-size (-> vars :p-size :small px)
-                :opacity (-> vars :alpha :low)}
+    [:&__item {:display :flex
+               :justify-content :center
+               :align-items :center
+               :width (-> vars :filling :medium px)
+               :height (-> vars :filling :medium px)
+               :cursor :not-allowed
+               :margin-bottom (-> vars :spacing :x-small px)
+               :border-radius (-> vars :filling :medium (/ 2) px)
+               :opacity (-> vars :alpha :low)}
 
-      [:&:last-child {:margin-bottom 0}]
-
-      [:&--green {:background-color (-> vars :color :light-green)
-                  :color (-> vars :color :dark-green)}]
-
-      [:&--yellow {:background-color (-> vars :color :light-yellow)
-                   :color (-> vars :color :dark-yellow)}]
-
+     [:&:last-child {:margin-bottom 0}]
+      [:&--green {:background-color (-> vars :color :light-green)}]
+      [:&--yellow {:background-color (-> vars :color :light-yellow)}]
       [:&--opaque {:opacity 1}]
-
       [:&--clickable {:cursor :pointer}]]]
 
     [:&__item {:padding (-> vars :spacing :medium px)
                :padding-right 0}
-
      [:&:last-child {:margin-right (-> vars :spacing :x-large px)}]]
 
     [:&__pill-superscript {:display :flex
