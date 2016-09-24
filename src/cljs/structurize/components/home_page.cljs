@@ -28,7 +28,9 @@
   (let [me (track Φ l/view-single
                   (in [:auth :me]))]
     [:div.l-col.l-col--fill-parent.l-col--justify-center.l-col--align-center
-     [:span.c-text.c-text--h-size-large "Structurize"]
+     [:div.l-row
+      [:span.c-icon.c-icon--diamond.c-icon--h-size-large]
+      [:span.c-text.c-text--h-size-large.c-text--margin-left-medium "Structurize"]]
 
      [:div.l-row.l-row--margin-top-x-large
       [:a.c-link.c-link--margin-right-medium {:href "/components"}
