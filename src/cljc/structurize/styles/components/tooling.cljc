@@ -4,14 +4,13 @@
             [garden.units :refer [px percent ms vh vw]]))
 
 (def tooling
-  [:.c-tooling
-   [:&__body {:color (-> vars :color :white-b)
-              :font-family "'Fira Mono', monospace"
-              :font-size (-> vars :p-size :small px)
-              :width (percent 100)
-              :height (percent 100)
-              :padding (-> vars :spacing :medium px)
-              :background-color (u/alpha (-> vars :color :black-b) (-> vars :alpha :high))}]
+  [:.c-tooling {:color (-> vars :color :white-b)
+                :font-family "'Fira Mono', monospace"
+                :font-size (-> vars :p-size :small px)}
+   [:&__content {:width (percent 100)
+                 :height (percent 100)
+                 :padding (-> vars :spacing :medium px)
+                 :background-color (u/alpha (-> vars :color :black-b) (-> vars :alpha :high))}]
 
    [:&__handle {:display :flex
                 :justify-content :center

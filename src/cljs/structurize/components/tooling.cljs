@@ -20,9 +20,9 @@
 
 ;; components ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defn tooling-body [φ]
-  (log-debug φ "render tooling-body")
-  [:div.l-overlay__content.c-tooling__body
+(defn tooling-content [φ]
+  (log-debug φ "render tooling-content")
+  [:div.l-overlay__content.c-tooling__content
    [:div.c-tooling__handle
     {:on-click (u/without-propagation
 
@@ -44,7 +44,7 @@
        [slide-over φ {:+slide-over +slide-over
                       :absolute-width 800
                       :direction :right
-                      :c [tooling-body]}]])))
+                      :c [tooling-content]}]])))
 
 
 ;; side-effects ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;

@@ -4,8 +4,7 @@
             [garden.units :refer [px percent ms vh vw]]))
 
 (def icon
-  [:.c-icon {:font-size (-> vars :p-size :medium px)
-             :color (-> vars :color :grey-a)}
+  [:.c-icon
    [:&--p-size
     (u/make-modifiers {:var :p-size :prop :font-size :unit px})]
    [:&--h-size

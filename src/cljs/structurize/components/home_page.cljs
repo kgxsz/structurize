@@ -29,26 +29,26 @@
     [:div.l-cell.l-cell--fill-parent
      [:div.l-col.l-col--align-center.l-col--padding-top-25
       [:div.l-row
-       [:span.c-icon.c-icon--diamond.c-icon--h-size-medium]
-       [:span.c-text.c-text--h-size-medium.c-text--margin-left-medium "Structurize"]]
+       [:span.c-icon.c-icon--diamond.c-icon--h-size-medium.c-icon--margin-right-medium]
+       [:span.c-text.c-text--h-size-medium "Structurize"]]
 
       [:div.l-col.l-col--align-center.l-col--margin-top-xx-large
        [:a.c-link {:on-click (u/without-propagation
                               #(side-effect! Φ :home-page/go-to-component-guide))}
-        [:span.c-icon.c-icon--layers]
-        [:span.c-text.c-text--margin-left-x-small "Component Guide"]]
+        [:span.c-icon.c-icon--layers.c-icon--margin-right-x-small]
+        [:span.c-text "Component Guide"]]
 
        [:a.c-link.c-link--margin-top-large {:on-click (u/without-propagation
                                                        #(side-effect! Φ :home-page/go-to-store-concept))}
-        [:span.c-icon.c-icon--crop]
-        [:span.c-text.c-text--margin-left-x-small "Design Concepts"]]
+        [:span.c-icon.c-icon--crop.c-icon--margin-right-x-small]
+        [:span.c-text "Design Concepts"]]
 
        [:a.c-link.c-link--margin-top-large {:on-click (u/without-propagation
                                                         #(side-effect! Φ (if me
                                                                            :home-page/sign-out
                                                                            :home-page/initialise-sign-in-with-github)))}
-        [:span.c-icon.c-icon--github]
-        [:span.c-text.c-text--margin-left-x-small (if me "Sign out" "Sign in")]]]]]))
+        [:span.c-icon.c-icon--github.c-icon--margin-right-x-small]
+        [:span.c-text (if me "Sign out" "Sign in")]]]]]))
 
 
 ;; side-effects ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;

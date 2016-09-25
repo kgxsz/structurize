@@ -1,14 +1,15 @@
 (ns structurize.styles.main
   (:require [structurize.styles.vars :refer [vars]]
             [structurize.styles.utils :as u]
+            [structurize.styles.components.app :refer [app]]
+            [structurize.styles.components.tooling :refer [tooling]]
+            [structurize.styles.components.writes-browser :refer [writes-browser]]
+            [structurize.styles.components.app-browser :refer [app-browser]]
             [structurize.styles.components.header :refer [header]]
             [structurize.styles.components.hero :refer [hero]]
             [structurize.styles.components.masthead :refer [masthead]]
             [structurize.styles.components.image :refer [image]]
             [structurize.styles.components.slide-over :refer [slide-over]]
-            [structurize.styles.components.writes-browser :refer [writes-browser]]
-            [structurize.styles.components.app-browser :refer [app-browser]]
-            [structurize.styles.components.tooling :refer [tooling]]
             [structurize.styles.components.text :refer [text]]
             [structurize.styles.components.icon :refer [icon]]
             [structurize.styles.components.link :refer [link]]
@@ -65,6 +66,10 @@
 
 (def components
   [:html
+   app
+   tooling
+   writes-browser
+   app-browser
    header
    hero
    masthead
@@ -72,10 +77,7 @@
    slide-over
    text
    icon
-   link
-   tooling
-   writes-browser
-   app-browser])
+   link])
 
 
 (def main
