@@ -61,7 +61,7 @@
   ([Φ id] (side-effect! Φ id {}))
   ([{:keys [!state !tooling-state] :as Φ} id props]
    (if (or (:tooling? (meta Φ))
-           (not (l/view-single @!tooling-state (in [:tooling :time-travelling?]))))
+           (not (l/view-single @!tooling-state (in [:time-travelling?]))))
      (do
        (log-debug Φ "side-effect:" id)
        (process-side-effect Φ id props))
