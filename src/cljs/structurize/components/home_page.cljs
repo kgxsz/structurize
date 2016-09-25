@@ -68,34 +68,29 @@
 ;; side-effects ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defmethod process-side-effect :home-page/did-mount [Φ id props]
-  (let [data []
+  (let [{:keys [height width]} (read Φ l/view-single
+                                     (in [:viewport]))
+
+        data (clj->js (mapv (fn [] {:x (rand-int width) :y (rand-int height)}) (range 250)))
+
         svg (d3.select "#voronoi")
+        width (.attr svg "width")
+        height (.attr svg "height")
 
-        v (d3.geom.voronoi)
+        voronoi (-> (d3.geom.voronoi)
+                    (.x (fn [d] (aget d "x")))
+                    (.y (fn [d] (aget d "y")))
+                    #_(.clipExtent (clj->js [[0 0] [700 700]])))
 
-        t (.thinner (textures.lines))
-        _ (.call svg t)
-        r (doto (.append svg "rect")
-            (.attr "width" "100%")
-            (.attr "height" "100%")
-            (.style "fill" (.url t)))]
-
-    #_[sel (d3.select node)
-        t (doto (textures.lines)
-            (.size size)
-            (.strokeWidth width)
-            (.orientation orientation)
-            (.stroke colour))
-        svg (doto (.append sel "svg")
-              (.style "height" "100%")
-              (.style "width" "100%")
-              (.call t))
-        r (doto (.append svg "rect")
-            (.attr "x" 0)
-            (.attr "y" 0)
-            (.attr "width" "100%")
-            (.attr "height" "100%")
-            (.style "fill" (.url t)))]))
+        pathsss (-> svg
+                  (.selectAll "paths")
+                  (.data (voronoi data))
+                  (.enter)
+                  (.append "path")
+                  (.attr "d" (fn [d i] (str "M" (.join d "L") "Z")))
+                  (.datum (fn [d i] (.-point d)))
+                  (.attr "fill" "transparent")
+                  (.attr "stroke" "#DFDFDF"))]))
 
 (defmethod process-side-effect :home-page/initialise-sign-in-with-github
   [{:keys [config-opts] :as Φ} id props]
