@@ -15,7 +15,7 @@
 ;; TODO - spec everywhere
 
 (def +slide-over
-  (in [:tooling :tooling-slide-over]))
+  (in [:tooling-slide-over]))
 
 
 ;; components ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;

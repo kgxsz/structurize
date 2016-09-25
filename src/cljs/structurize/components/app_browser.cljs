@@ -32,24 +32,24 @@
     (fn [_ _ opts]
       (let [{:keys [tail-braces first? last? downstream-focused?]} opts
             track-index (track φ l/view-single
-                               (in [:tooling :track-index]))
+                               (in [:track-index]))
 
             node (track (with-meta φ {:tooling? false}) l/view-single
                         (l/in path))
             collapsed? (track φ l/view-single
-                              (in [:tooling :app-browser-props :collapsed])
+                              (in [:app-browser-props :collapsed])
                               #(contains? % path))
             written? (track φ l/view-single
-                            (in [:tooling :app-browser-props :written :paths])
+                            (in [:app-browser-props :written :paths])
                             #(contains? % path))
             upstream-written? (track φ l/view-single
-                                     (in [:tooling :app-browser-props :written :upstream-paths])
+                                     (in [:app-browser-props :written :upstream-paths])
                                      #(contains? % path))
             focused? (track φ l/view-single
-                            (in [:tooling :app-browser-props :focused :paths])
+                            (in [:app-browser-props :focused :paths])
                             #(contains? % path))
             upstream-focused? (track φ l/view-single
-                                     (in [:tooling :app-browser-props :focused :upstream-paths])
+                                     (in [:app-browser-props :focused :upstream-paths])
                                      #(contains? % path))
             downstream-focused? (or downstream-focused? focused?)
 
@@ -120,8 +120,8 @@
   (fn [_ _ opts]
     (let [{:keys [tail-braces downstream-focused?]} opts
           track-index (track φ l/view-single
-                             (in [:tooling :track-index]))
-          nodes (track (with-meta φ {:tooling? false :hi 1}) l/view-single
+                             (in [:track-index]))
+          nodes (track (with-meta φ {:tooling? false}) l/view-single
                        (l/in path))
           num-nodes (count nodes)]
 
@@ -151,7 +151,7 @@
   [Φ id {:keys [path] :as props}]
   (write! Φ :app-browser/toggle-node-collapsed
           (fn [x]
-            (update-in x [:tooling :app-browser-props :collapsed]
+            (update-in x [:app-browser-props :collapsed]
                        #(if (contains? % path)
                           (disj % path)
                           (conj % path))))))
@@ -162,7 +162,7 @@
   (write! Φ :app-browser/toggle-node-focused
           (fn [x]
             (-> x
-                (update-in [:tooling :app-browser-props :focused :paths]
+                (update-in [:app-browser-props :focused :paths]
                            #(if (empty? %) #{path} #{}))
-                (update-in [:tooling :app-browser-props :focused :upstream-paths]
+                (update-in [:app-browser-props :focused :upstream-paths]
                            #(if (empty? %) (su/make-upstream-paths #{path}) #{}))))))

@@ -3,7 +3,6 @@
             [com.stuartsierra.component :as component]
             [taoensso.timbre :as log]))
 
-
 (defrecord ConfigOpts []
   component/Lifecycle
 
@@ -11,8 +10,7 @@
     (log/info "initialising config-opts")
     (assoc component
            :tooling {:enabled? true
-                     :log? false
-                     :max-processed-mutations 50}
+                     :log? false}
            :viewport {:breakpoints {:xs 544
                                     :sm 768
                                     :md 992

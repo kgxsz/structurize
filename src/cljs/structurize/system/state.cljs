@@ -23,8 +23,8 @@
   ([{:keys [!app-state !tooling-state] :as Φ} v +lens f]
    (if (:tooling? (meta Φ))
      @(r/track #(f (v @!tooling-state +lens)))
-     @(r/track #(let [index (get-in @!tooling-state [:tooling :track-index])]
-                 (f (v @!app-state (l/*> (l/in [:app-history index]) +lens))))))))
+     @(r/track #(let [index (:track-index @!tooling-state)]
+                 (f (v @!app-state (l/*> (l/in [index]) +lens))))))))
 
 
 (defn read
@@ -38,8 +38,8 @@
 
   (if (:tooling? (meta Φ))
     (v @!tooling-state +lens)
-    (let [index (get-in @!tooling-state [:tooling :read-write-index])]
-      (v @!app-state (l/*> (l/in [:app-history index]) +lens)))))
+    (let [index (:read-write-index @!tooling-state)]
+      (v @!app-state (l/*> (l/in [index]) +lens)))))
 
 
 (defn write!
@@ -55,9 +55,9 @@
       (swap! !tooling-state f))
     (let [app-state @!app-state
           tooling-state @!tooling-state
-          index (get-in tooling-state [:tooling :read-write-index])
-          time-travelling? (get-in tooling-state [:tooling :time-travelling?])
-          pre-app (get-in app-state [:app-history index])
+          index (:read-write-index tooling-state)
+          time-travelling? (:time-travelling? tooling-state)
+          pre-app (get app-state index)
           post-app (f pre-app)
           paths (u/make-paths post-app pre-app)
           upstream-paths (u/make-upstream-paths paths)]
@@ -65,45 +65,45 @@
       (log-debug Φ "write:" id)
 
       (swap! !tooling-state #(cond-> %
-                               true (update-in [:tooling :read-write-index] inc)
-                               (not time-travelling?) (update-in [:tooling :track-index] inc)
-                               true (assoc-in [:tooling :writes (inc index)] {:id id
-                                                                              :n (inc index)
-                                                                              :paths paths
-                                                                              :upstream-paths upstream-paths
-                                                                              :t (t/now)})
-                               (not time-travelling?) (assoc-in [:tooling :app-browser-props :written] {:paths paths
-                                                                                                        :upstream-paths upstream-paths})))
+                               true (update :read-write-index inc)
+                               (not time-travelling?) (update :track-index inc)
+                               true (assoc-in [:writes (inc index)] {:id id
+                                                                     :n (inc index)
+                                                                     :paths paths
+                                                                     :upstream-paths upstream-paths
+                                                                     :t (t/now)})
+                               (not time-travelling?) (assoc-in [:app-browser-props :written] {:paths paths
+                                                                                               :upstream-paths upstream-paths})))
 
-      (swap! !app-state assoc-in [:app-history (inc index)] post-app))))
+      (swap! !app-state assoc (inc index) post-app))))
 
 
 ;; helper functions ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defn make-!app-state [config-opts]
-  (r/atom {:app-history {0 {:location {:path nil
-                                       :handler :unknown
-                                       :query nil}
-                            :count 0
-                            :viewport {}
-                            :app-status :uninitialised
-                            :comms {:chsk-status :initialising
-                                    :message {}
-                                    :post {}}
-                            :auth {}}}}))
+  (r/atom {0 {:location {:path nil
+                         :handler :unknown
+                         :query nil}
+              :count 0
+              :viewport {}
+              :app-status :uninitialised
+              :comms {:chsk-status :initialising
+                      :message {}
+                      :post {}}
+              :auth {}}}))
 
 
 (defn make-!tooling-state [config-opts]
-  (r/atom {:tooling {:track-index 0
-                     :read-write-index 0
-                     :time-travelling? false
-                     :tooling-slide-over {:open? false}
-                     :writes {}
-                     :app-browser-props {:written {:paths #{}
-                                                   :upstream-paths #{}}
-                                         :collapsed #{}
-                                         :focused {:paths #{}
-                                                   :upstream-paths #{}}}}}))
+  (r/atom {:track-index 0
+           :read-write-index 0
+           :time-travelling? false
+           :tooling-slide-over {:open? false}
+           :writes {}
+           :app-browser-props {:written {:paths #{}
+                                         :upstream-paths #{}}
+                               :collapsed #{}
+                               :focused {:paths #{}
+                                         :upstream-paths #{}}}}))
 
 
 ;; component setup ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
