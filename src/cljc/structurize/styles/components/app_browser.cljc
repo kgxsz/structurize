@@ -5,8 +5,7 @@
 
 (def app-browser
   [:.c-app-browser
-
-   [:&__brace {:padding-top (-> vars :nudge :xx-large px)}]
+   [:&__brace {:padding-top (-> vars :spacing :x-small px)}]
 
    [:&__node {:display :flex}
 
