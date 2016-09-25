@@ -52,6 +52,8 @@
                                          :compiler {:output-to "resources/public/js/structurize.js"
                                                     :main "structurize.runner"
                                                     :asset-path "/js/out"
+                                                    :foreign-libs [{:file "dev-resources/js/foreign-libs/d3-voronoi.js"
+                                                                    :provides ["d3.voronoi"]}]
                                                     :optimizations :none
                                                     :source-map true}}]}
 
@@ -81,6 +83,8 @@
                                              :compiler {:output-to "resources/public/js/structurize.js"
                                                         :main "structurize.runner"
                                                         :asset-path "/js/out"
+                                                        :foreign-libs [{:file  "dev-resources/js/foreign-libs/d3-voronoi.js"
+                                                                        :provides ["d3.voronoi"]}]
                                                         :optimizations :advanced}}]}
 
                        :garden {:builds [{:id "main"

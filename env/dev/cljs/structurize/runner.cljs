@@ -4,7 +4,8 @@
             [structurize.system.tooling-renderer :as tooling-renderer]
             [cljsjs.lodash]
             [cljsjs.d3]
-            [cljsjs.textures]))
+            [cljsjs.textures]
+            [d3.voronoi]))
 
 (defn reload []
   (let [φ {:config-opts (:config-opts system)

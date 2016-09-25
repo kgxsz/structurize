@@ -23,41 +23,79 @@
 ;; components ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defn home-page [{:keys [config-opts] :as Φ}]
-  (log-debug Φ "render home-page")
-  (let [me (track Φ l/view-single
-                  (in [:auth :me]))]
-    [:div.l-cell.l-cell--fill-parent
-     [:div.l-col.l-col--align-center.l-col--padding-top-25
-      [:div.l-row
-       [:span.c-icon.c-icon--diamond.c-icon--h-size-medium.c-icon--margin-right-medium]
-       [:span.c-text.c-text--h-size-medium "Structurize"]]
+  (r/create-class
+   {:component-did-mount #(side-effect! Φ :home-page/did-mount)
+    :reagent-render (fn []
+                      (log-debug Φ "render home-page")
+                      (let [me (track Φ l/view-single
+                                      (in [:auth :me]))]
 
-      [:div.l-col.l-col--align-center.l-col--margin-top-xx-large
-       (let [path (b/path-for (:routes config-opts) :component-guide)]
-         [:a.c-link.c-link--margin-top-large {:href path
-                                              :on-click (u/without-default
-                                                         #(side-effect! Φ :home-page/change-location
-                                                                        {:path path}))}
-          [:span.c-icon.c-icon--layers.c-icon--margin-right-x-small]
-          [:span.c-text "Component Guide"]])
+                        [:div.l-cell.l-cell--fill-parent {:style {:position :relative}}
+                         [:svg#voronoi {:style {:position :absolute
+                                                :height "100%"
+                                                :width "100%"
+                                                :z-index -1}}]
+                         [:div.l-col.l-col--align-center.l-col--padding-top-25
+                          [:div.l-row
+                           [:span.c-icon.c-icon--diamond.c-icon--h-size-medium.c-icon--margin-right-medium]
+                           [:span.c-text.c-text--h-size-medium "Structurize"]]
 
-       (let [path (b/path-for (:routes config-opts) :store-concept)]
-         [:a.c-link.c-link--margin-top-large {:href path
-                                              :on-click (u/without-default
-                                                         #(side-effect! Φ :home-page/change-location
-                                                                        {:path path}))}
-          [:span.c-icon.c-icon--crop.c-icon--margin-right-x-small]
-          [:span.c-text "Design Concepts"]])
+                          [:div.l-col.l-col--align-center.l-col--margin-top-xx-large
+                           (let [path (b/path-for (:routes config-opts) :component-guide)]
+                             [:a.c-link.c-link--margin-top-large {:href path
+                                                                  :on-click (u/without-default
+                                                                             #(side-effect! Φ :home-page/change-location
+                                                                                            {:path path}))}
+                              [:span.c-icon.c-icon--layers.c-icon--margin-right-x-small]
+                              [:span.c-text "Component Guide"]])
 
-       [:a.c-link.c-link--margin-top-large {:on-click (u/without-propagation
-                                                        #(side-effect! Φ (if me
-                                                                           :home-page/sign-out
-                                                                           :home-page/initialise-sign-in-with-github)))}
-        [:span.c-icon.c-icon--github.c-icon--margin-right-x-small]
-        [:span.c-text (if me "Sign out" "Sign in")]]]]]))
+                           (let [path (b/path-for (:routes config-opts) :store-concept)]
+                             [:a.c-link.c-link--margin-top-large {:href path
+                                                                  :on-click (u/without-default
+                                                                             #(side-effect! Φ :home-page/change-location
+                                                                                            {:path path}))}
+                              [:span.c-icon.c-icon--crop.c-icon--margin-right-x-small]
+                              [:span.c-text "Design Concepts"]])
+
+                           [:a.c-link.c-link--margin-top-large {:on-click (u/without-propagation
+                                                                           #(side-effect! Φ (if me
+                                                                                              :home-page/sign-out
+                                                                                              :home-page/initialise-sign-in-with-github)))}
+                            [:span.c-icon.c-icon--github.c-icon--margin-right-x-small]
+                            [:span.c-text (if me "Sign out" "Sign in")]]]]]))}))
 
 
 ;; side-effects ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(defmethod process-side-effect :home-page/did-mount [Φ id props]
+  (let [data []
+        svg (d3.select "#voronoi")
+
+        v (d3.geom.voronoi)
+
+        t (.thinner (textures.lines))
+        _ (.call svg t)
+        r (doto (.append svg "rect")
+            (.attr "width" "100%")
+            (.attr "height" "100%")
+            (.style "fill" (.url t)))]
+
+    #_[sel (d3.select node)
+        t (doto (textures.lines)
+            (.size size)
+            (.strokeWidth width)
+            (.orientation orientation)
+            (.stroke colour))
+        svg (doto (.append sel "svg")
+              (.style "height" "100%")
+              (.style "width" "100%")
+              (.call t))
+        r (doto (.append svg "rect")
+            (.attr "x" 0)
+            (.attr "y" 0)
+            (.attr "width" "100%")
+            (.attr "height" "100%")
+            (.style "fill" (.url t)))]))
 
 (defmethod process-side-effect :home-page/initialise-sign-in-with-github
   [{:keys [config-opts] :as Φ} id props]
