@@ -22,20 +22,24 @@
 
 ;; components ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+;; TODO - this is a bit all over the place in order to get the svg capturing events
+;; TODO - consider bringing out the SVG all-together into a separate component
+
 (defn home-page [{:keys [config-opts] :as Φ}]
   (r/create-class
-   {:component-did-mount #(side-effect! Φ :home-page/did-mount)
+   {:component-did-mount #(side-effect! Φ :home-page/did-mount {:node (r/dom-node %)})
     :reagent-render (fn []
                       (log-debug Φ "render home-page")
                       (let [me (track Φ l/view-single
                                       (in [:auth :me]))]
 
                         [:div.l-cell.l-cell--fill-parent {:style {:position :relative}}
-                         [:svg#voronoi {:style {:position :absolute
-                                                :height "100%"
+                         [:svg#voronoi {:style {:height "100%"
                                                 :width "100%"
                                                 :z-index -1}}]
-                         [:div.l-col.l-col--align-center.l-col--padding-top-25
+                         [:div.l-col.l-col--fill-parent.l-col--align-center.l-col--padding-top-25 {:style {:position :absolute
+                                                                                                           :pointer-events :none
+                                                                                                           :top 0}}
                           [:div.l-row
                            [:span.c-icon.c-icon--diamond.c-icon--h-size-medium.c-icon--margin-right-medium]
                            [:span.c-text.c-text--h-size-medium "Structurize"]]
@@ -51,6 +55,9 @@
 
                            (let [path (b/path-for (:routes config-opts) :store-concept)]
                              [:a.c-link.c-link--margin-top-large {:href path
+                                                                  :style {
+                                                                          :pointer-events :auto
+                                                                          }
                                                                   :on-click (u/without-default
                                                                              #(side-effect! Φ :home-page/change-location
                                                                                             {:path path}))}
@@ -67,11 +74,12 @@
 
 ;; side-effects ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defmethod process-side-effect :home-page/did-mount [Φ id props]
+(defmethod process-side-effect :home-page/did-mount [Φ id {:keys [node]}]
   (let [{:keys [height width]} (read Φ l/view-single
                                      (in [:viewport]))
 
-        data (clj->js (mapv (fn [] {:x (rand-int width) :y (rand-int height)}) (range 300)))
+        raw-data (mapv (fn [] {:x (rand-int width) :y (rand-int height)}) (range 200))
+        data (clj->js raw-data)
 
         svg (d3.select "#voronoi")
 
@@ -79,15 +87,30 @@
                     (.x (fn [d] (aget d "x")))
                     (.y (fn [d] (aget d "y"))))
 
-        paths (-> svg
-                  (.selectAll "paths")
-                  (.data (voronoi data))
-                  (.enter)
-                  (.append "path")
-                  (.attr "d" (fn [d i] (str "M" (.join d "L") "Z")))
-                  (.datum (fn [d i] (.-point d)))
-                  (.attr "fill" "transparent")
-                  (.attr "stroke" "#DFDFDF"))]))
+        draw-paths (fn [paths]
+                     (-> paths
+                         (.attr "d" (fn [d i] (str "M" (.join d "L") "Z")))
+                         (.datum (fn [d i] (.-point d)))
+                         (.attr "fill" "transparent")
+                         (.attr "stroke" "#DFDFDF")))
+
+        _ (def paths (-> svg
+                         (.selectAll "paths")
+                         (.data (voronoi data))
+                         (.enter)
+                         (.append "path")
+                         (.call draw-paths)))
+
+
+        redraw (fn []
+                 (set! paths (-> paths
+                                 (.data (voronoi data))
+                                 (.call draw-paths))))
+
+        _ (.on svg "mousemove" (fn []
+                                 (let [[x y] (d3.mouse node)]
+                                   (aset data 0 (clj->js {:x x :y y}))
+                                   (redraw))))]))
 
 (defmethod process-side-effect :home-page/initialise-sign-in-with-github
   [{:keys [config-opts] :as Φ} id props]
