@@ -22,15 +22,6 @@
 
 ;; components ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defn counter [Φ]
-  (log-debug Φ "render counter")
-  (let [count (track Φ l/view-single
-                     (in [:count]))]
-    [:a.c-link.c-link--margin-top-large {:on-click (u/without-propagation
-                                                    #(side-effect! Φ :home-page/inc-count))}
-     [:span.c-icon.c-icon--heart]
-     [:span.c-text.c-text--margin-left-x-small count]]))
-
 (defn home-page [Φ]
   (log-debug Φ "render home-page")
   (let [me (track Φ l/view-single
@@ -57,9 +48,7 @@
                                                                            :home-page/sign-out
                                                                            :home-page/initialise-sign-in-with-github)))}
         [:span.c-icon.c-icon--github]
-        [:span.c-text.c-text--margin-left-x-small (if me "Sign out" "Sign in")]]
-
-       [counter Φ]]]]))
+        [:span.c-text.c-text--margin-left-x-small (if me "Sign out" "Sign in")]]]]]))
 
 
 ;; side-effects ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
