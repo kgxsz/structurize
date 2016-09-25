@@ -6,7 +6,9 @@
 (def link
   [:.c-link {:text-decoration :none}
 
-   [:&:hover {:cursor :pointer}]
+   [:&:visited :&:hover :&:active {:color :inherit}]
+   [:&:hover {:cursor :pointer
+              :color (-> vars :color :black-a)}]
 
    [:&--p-size
     (u/make-modifiers {:var :p-size :prop :font-size :unit px})]

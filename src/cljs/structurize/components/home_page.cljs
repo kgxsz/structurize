@@ -22,7 +22,7 @@
 
 ;; components ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defn home-page [Φ]
+(defn home-page [{:keys [config-opts] :as Φ}]
   (log-debug Φ "render home-page")
   (let [me (track Φ l/view-single
                   (in [:auth :me]))]
@@ -33,15 +33,21 @@
        [:span.c-text.c-text--h-size-medium "Structurize"]]
 
       [:div.l-col.l-col--align-center.l-col--margin-top-xx-large
-       [:a.c-link {:on-click (u/without-propagation
-                              #(side-effect! Φ :home-page/go-to-component-guide))}
-        [:span.c-icon.c-icon--layers.c-icon--margin-right-x-small]
-        [:span.c-text "Component Guide"]]
+       (let [path (b/path-for (:routes config-opts) :component-guide)]
+         [:a.c-link.c-link--margin-top-large {:href path
+                                              :on-click (u/without-default
+                                                         #(side-effect! Φ :home-page/change-location
+                                                                        {:path path}))}
+          [:span.c-icon.c-icon--layers.c-icon--margin-right-x-small]
+          [:span.c-text "Component Guide"]])
 
-       [:a.c-link.c-link--margin-top-large {:on-click (u/without-propagation
-                                                       #(side-effect! Φ :home-page/go-to-store-concept))}
-        [:span.c-icon.c-icon--crop.c-icon--margin-right-x-small]
-        [:span.c-text "Design Concepts"]]
+       (let [path (b/path-for (:routes config-opts) :store-concept)]
+         [:a.c-link.c-link--margin-top-large {:href path
+                                              :on-click (u/without-default
+                                                         #(side-effect! Φ :home-page/change-location
+                                                                        {:path path}))}
+          [:span.c-icon.c-icon--crop.c-icon--margin-right-x-small]
+          [:span.c-text "Design Concepts"]])
 
        [:a.c-link.c-link--margin-top-large {:on-click (u/without-propagation
                                                         #(side-effect! Φ (if me
@@ -85,11 +91,6 @@
                                   (assoc-in x [:auth :sign-out-status] :failed))))}))
 
 
-(defmethod process-side-effect :home-page/go-to-store-concept
-  [{:keys [config-opts] :as Φ} id props]
-  (change-location! Φ {:path (b/path-for (:routes config-opts) :store-concept)}))
-
-
-(defmethod process-side-effect :home-page/go-to-component-guide
-  [{:keys [config-opts] :as Φ} id props]
-  (change-location! Φ {:path (b/path-for (:routes config-opts) :component-guide)}))
+(defmethod process-side-effect :home-page/change-location
+  [{:keys [config-opts] :as Φ} id {:keys [path] :as props}]
+  (change-location! Φ {:path path}))
