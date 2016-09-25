@@ -93,10 +93,3 @@
 (defmethod process-side-effect :home-page/go-to-component-guide
   [{:keys [config-opts] :as Φ} id props]
   (change-location! Φ {:path (b/path-for (:routes config-opts) :component-guide)}))
-
-
-(defmethod process-side-effect :home-page/inc-count
-  [{:keys [config-opts] :as Φ} id props]
-  (write! Φ :home-page/inc-count
-          (fn [x]
-            (l/update x (in [:count]) inc))))
