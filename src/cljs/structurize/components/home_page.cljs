@@ -71,18 +71,15 @@
   (let [{:keys [height width]} (read Φ l/view-single
                                      (in [:viewport]))
 
-        data (clj->js (mapv (fn [] {:x (rand-int width) :y (rand-int height)}) (range 250)))
+        data (clj->js (mapv (fn [] {:x (rand-int width) :y (rand-int height)}) (range 300)))
 
         svg (d3.select "#voronoi")
-        width (.attr svg "width")
-        height (.attr svg "height")
 
         voronoi (-> (d3.geom.voronoi)
                     (.x (fn [d] (aget d "x")))
-                    (.y (fn [d] (aget d "y")))
-                    #_(.clipExtent (clj->js [[0 0] [700 700]])))
+                    (.y (fn [d] (aget d "y"))))
 
-        pathsss (-> svg
+        paths (-> svg
                   (.selectAll "paths")
                   (.data (voronoi data))
                   (.enter)
