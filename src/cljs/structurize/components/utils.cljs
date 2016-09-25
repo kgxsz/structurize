@@ -19,3 +19,8 @@
 (defn without-propagation [& fs]
   "Takes functions to run, and stops the event propagation."
   (fn [e] (doseq [f fs] (f)) (.stopPropagation e)))
+
+
+(defn without-default [& fs]
+  "Takes functions to run, and prevents the browser from taking its default action."
+  (fn [e] (doseq [f fs] (f)) (.preventDefault e)))

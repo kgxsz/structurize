@@ -25,7 +25,6 @@
   [:div.l-overlay__content.c-tooling__content
    [:div.c-tooling__handle
     {:on-click (u/without-propagation
-
                 #(side-effect! φ :tooling/toggle-tooling-slide-over
                                {:+slide-over +slide-over}))}
     [:div.c-icon.c-icon--cog.c-icon--color-white-b]]

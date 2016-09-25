@@ -35,16 +35,15 @@
 
       (log-debug φ "render writes-browser")
 
-
       [:div.l-row.c-writes-browser
-       [:div.l-col.c-writes-browser__controls
+       [:div.l-col.l-col--padding-medium.c-writes-browser__controls
         [:div.c-writes-browser__controls__item.c-writes-browser__controls__item--green
          {:class (u/->class {:c-writes-browser__controls__item--opaque (not time-travelling?)
                              :c-writes-browser__controls__item--clickable (and end-of-time? time-travelling?)})
           :on-click (when (and time-travelling? end-of-time?)
                       (u/without-propagation
                        #(side-effect! φ :writes-browser/stop-time-travelling)))}
-         [:div.c-icon.c-icon--control-play.c-icon--p-size-small.c-icon--color-dark-green]]
+         [:div.c-icon.c-icon--control-play.c-icon--color-dark-green]]
 
         [:div.c-writes-browser__controls__item.c-writes-browser__controls__item--yellow
          {:class (when time-travelling? (u/->class {:c-writes-browser__controls__item--opaque time-travelling?
@@ -52,7 +51,7 @@
           :on-click (when-not end-of-time?
                       (u/without-propagation
                        #(side-effect! φ :writes-browser/go-forward-in-time)))}
-         [:div.c-icon.c-icon--control-next.c-icon--p-size-small.c-icon--color-dark-yellow]]
+         [:div.c-icon.c-icon--control-next.c-icon--color-dark-yellow]]
 
         [:div.c-writes-browser__controls__item.c-writes-browser__controls__item--yellow
          {:class (u/->class {:c-writes-browser__controls__item--opaque time-travelling?
@@ -60,18 +59,18 @@
           :on-click (when-not beginning-of-time?
                       (u/without-propagation
                        #(side-effect! φ :writes-browser/go-back-in-time)))}
-         [:div.c-icon.c-icon--control-prev.c-icon--p-size-small.c-icon--color-dark-yellow]]]
+         [:div.c-icon.c-icon--control-prev.c-icon--color-dark-yellow]]]
 
        [:div.l-row
         (doall
          (for [{:keys [id n]} (take-last track-index (sort-by :n > writes))]
-           [:div.l-col.c-writes-browser__item {:key n}
-            [:div.c-writes-browser__pill-superscript
-             [:span.c-writes-browser__pill-superscript__symbol "Δ"]
-             [:span n]]
+           [:div.c-writes-browser__item {:key n}
+            [:div.c-writes-browser__item__superscript
+             [:span.c-text.c-text--margin-right-xx-small "Δ"]
+             [:span.c-text n]]
 
-            [:div.c-writes-browser__pill
-             [:div.c-writes-browser__pill__content
+            [:div.c-writes-browser__item__pill
+             [:div.c-writes-browser__item__pill__content
               (pr-str id)]]]))]])))
 
 

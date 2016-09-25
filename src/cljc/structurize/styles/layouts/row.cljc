@@ -44,6 +44,9 @@
    [:&--margin-left
     (u/make-modifiers {:var :proportion :prop :margin-left :unit vw})
     (u/make-modifiers {:var :spacing :prop :margin-left :unit px})]
+   [:&--margin
+    (u/make-modifiers {:var :proportion :prop :margin :unit vw})
+    (u/make-modifiers {:var :spacing :prop :margin :unit px})]
 
    [:&--padding-top
     (u/make-modifiers {:var :proportion :prop :padding-top :unit vh})
@@ -56,4 +59,7 @@
     (u/make-modifiers {:var :spacing :prop :padding-bottom :unit px})]
    [:&--padding-left
     (u/make-modifiers {:var :proportion :prop :padding-left :unit vw})
-    (u/make-modifiers {:var :spacing :prop :padding-left :unit px})]])
+    (u/make-modifiers {:var :spacing :prop :padding-left :unit px})]
+   [:&--padding
+    (u/make-modifiers {:var :proportion :prop :padding :unit vw})
+    (u/make-modifiers {:var :spacing :prop :padding :unit px})]])
