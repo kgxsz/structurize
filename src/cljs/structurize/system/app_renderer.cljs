@@ -4,7 +4,6 @@
             [reagent.core :as r]
             [taoensso.timbre :as log]))
 
-
 (defn render-app [Φ]
   (r/render [app Φ] (js/document.getElementById "js-app")))
 
@@ -15,7 +14,8 @@
   (start [component]
     (log/info "initialising app renderer")
     (render-app {:config-opts config-opts
-                 :!state (:!state state)
+                 :!app-state (:!app-state state)
+                 :!tooling-state (:!tooling-state state)
                  :history (:history browser)
                  :chsk (:chsk comms)
                  :chsk-state (:chsk-state comms)

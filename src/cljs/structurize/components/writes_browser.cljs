@@ -25,6 +25,7 @@
                         (l/*> (in [:tooling :writes]) l/all-values))
           read-write-index (track φ l/view-single
                                   (in [:tooling :read-write-index]))
+
           track-index (track φ l/view-single
                              (in [:tooling :track-index]))
           time-travelling? (track φ l/view-single
@@ -33,6 +34,7 @@
           beginning-of-time? (zero? track-index)]
 
       (log-debug φ "render writes-browser")
+
 
       [:div.l-row.c-writes-browser
        [:div.l-col.c-writes-browser__controls

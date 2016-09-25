@@ -8,13 +8,14 @@
 
 (defn reload []
   (let [φ {:config-opts (:config-opts system)
-           :!state (get-in system [:state :!state])
+           :!app-state (get-in system [:state :!app-state])
+           :!tooling-state (get-in system [:state :!tooling-state])
            :history (get-in system [:browser :history])
            :chsk (get-in system [:comms :chsk])
            :chsk-state (get-in system [:comms :chsk-state])
            :chsk-send (get-in system [:comms :chsk-send])} ]
     (app-renderer/render-app φ)
-    (tooling-renderer/render-tooling (assoc φ :context {:tooling? true}))))
+    (tooling-renderer/render-tooling (with-meta φ {:tooling? true}))))
 
 
 (defn ^:export start []

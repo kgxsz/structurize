@@ -2,7 +2,7 @@
   #?(:clj (:require [taoensso.timbre :refer [info debug error]])))
 
 #?(:clj (defmacro log [φ level body]
-          `(when (or (not (get-in ~φ [:context :tooling?]))
+          `(when (or (not (:tooling? (meta ~φ)))
                      (get-in ~φ [:config-opts :tooling :log?]))
              (~level ~@body))))
 

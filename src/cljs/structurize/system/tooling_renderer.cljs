@@ -13,13 +13,13 @@
 
   (start [component]
     (log/info "initialising tooling renderer")
-    (render-tooling {:context {:tooling? true}
-                     :config-opts config-opts
-                     :!state (:!state state)
-                     :history (:history browser)
-                     :chsk (:chsk comms)
-                     :chsk-state (:chsk-state comms)
-                     :chsk-send (:chsk-send comms)})
+    (render-tooling ^:tooling? {:config-opts config-opts
+                                :!app-state (:!app-state state)
+                                :!tooling-state (:!tooling-state state)
+                                :history (:history browser)
+                                :chsk (:chsk comms)
+                                :chsk-state (:chsk-state comms)
+                                :chsk-send (:chsk-send comms)})
     component)
 
   (stop [component] component))

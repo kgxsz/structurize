@@ -18,34 +18,32 @@
    timeout - in milliseconds"
   [{:keys [chsk-send] :as φ} id params {:keys [timeout on-success on-failure]}]
 
-  (let [φ (assoc φ :context {:comms? true})]
+  (log/debug "dispatching message to server:" id)
+  (write! φ :comms/message-sent
+          (fn [x]
+            (assoc-in x [:comms :message id] {:status :sent})))
 
-    (log/debug "dispatching message to server:" id)
-    (write! φ :comms/message-sent
-            (fn [x]
-              (assoc-in x [:comms :message id] {:status :sent})))
-
-    (chsk-send
-     [id params]
-     (or timeout 10000)
-     (fn [reply]
-       (if (sente/cb-success? reply)
-         (let [[id _] reply]
-           (log/debug "received a message reply from server:" id)
-           (write! φ :comms/message-reply-received
-                   (fn [x]
-                     (-> x
-                         (assoc-in [:comms :message id :status] :reply-received)
-                         (assoc-in [:comms :message id :reply] (second reply)))))
-           (when on-success (on-success reply)))
-         (do
-           (log/warn "message failed with:" reply)
-           (write! φ :comms/message-failed
-                   (fn [x]
-                     (-> x
-                         (assoc-in [:comms :message id :status] :failed)
-                         (assoc-in [:comms :message id :reply] reply))))
-           (when on-failure (on-failure reply))))))))
+  (chsk-send
+   [id params]
+   (or timeout 10000)
+   (fn [reply]
+     (if (sente/cb-success? reply)
+       (let [[id _] reply]
+         (log/debug "received a message reply from server:" id)
+         (write! φ :comms/message-reply-received
+                 (fn [x]
+                   (-> x
+                       (assoc-in [:comms :message id :status] :reply-received)
+                       (assoc-in [:comms :message id :reply] (second reply)))))
+         (when on-success (on-success reply)))
+       (do
+         (log/warn "message failed with:" reply)
+         (write! φ :comms/message-failed
+                 (fn [x]
+                   (-> x
+                       (assoc-in [:comms :message id :status] :failed)
+                       (assoc-in [:comms :message id :reply] reply))))
+         (when on-failure (on-failure reply)))))))
 
 
 (defn post!
@@ -60,41 +58,40 @@
    timeout - in milliseconds"
   [{:keys [chsk chsk-state] :as φ} path params {:keys [timeout on-success on-failure]}]
 
-  (let [φ (assoc φ :context {:comms? true})]
-    (log/debug "dispatching post to server:" path)
+  (log/debug "dispatching post to server:" path)
 
-    (write! φ :comms/post-sent
-            (fn [x]
-              (assoc-in x [:comms :post path] {:status :sent})))
+  (write! φ :comms/post-sent
+          (fn [x]
+            (assoc-in x [:comms :post path] {:status :sent})))
 
-    (sente/ajax-lite
-     path
-     {:method :post
-      :timeout-ms (or timeout 10000)
-      :params (merge params (select-keys @chsk-state [:csrf-token]))}
-     (fn [response]
-       (if (:success? response)
-         (do
-           (log/debug "received a post response from server:" path)
-           (write! φ :comms/post-response-received
-                   (fn [x]
-                     (-> x
-                         (assoc-in [:comms :post path :status] :response-received)
-                         (assoc-in [:comms :post path :response] (:?content response))
-                         (assoc :app-status :uninitialised))))
-           (when on-success (on-success response))
+  (sente/ajax-lite
+   path
+   {:method :post
+    :timeout-ms (or timeout 10000)
+    :params (merge params (select-keys @chsk-state [:csrf-token]))}
+   (fn [response]
+     (if (:success? response)
+       (do
+         (log/debug "received a post response from server:" path)
+         (write! φ :comms/post-response-received
+                 (fn [x]
+                   (-> x
+                       (assoc-in [:comms :post path :status] :response-received)
+                       (assoc-in [:comms :post path :response] (:?content response))
+                       (assoc :app-status :uninitialised))))
+         (when on-success (on-success response))
 
-           ;; we reconnect the websocket connection here to pick up any changes
-           ;; in the session that may have come about with the post request
-           (sente/chsk-reconnect! chsk))
-         (do
-           (log/warn "post failed with:" response)
-           (write! φ :comms/post-failed
-                   (fn [x]
-                     (-> x
-                         (assoc-in [:comms :post path :status] :failed)
-                         (assoc-in [:comms :post path :response] response))))
-           (when on-failure (on-failure response))))))))
+         ;; we reconnect the websocket connection here to pick up any changes
+         ;; in the session that may have come about with the post request
+         (sente/chsk-reconnect! chsk))
+       (do
+         (log/warn "post failed with:" response)
+         (write! φ :comms/post-failed
+                 (fn [x]
+                   (-> x
+                       (assoc-in [:comms :post path :status] :failed)
+                       (assoc-in [:comms :post path :response] response))))
+         (when on-failure (on-failure response)))))))
 
 
 ;; backend to frontend message handling ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -158,9 +155,9 @@
     (log/info "initialising comms")
     (let [chsk-opts (get-in config-opts [:comms :chsk-opts])
           {:keys [chsk ch-recv] chsk-send :send-fn chsk-state :state} (sente/make-channel-socket! "/chsk" chsk-opts)
-          φ {:context {:comms? true}
-             :config-opts config-opts
-             :!state (:!state state)
+          φ {:config-opts config-opts
+             :!app-state (:!app-state state)
+             :!tooling-state (:!tooling-state state)
              :chsk chsk
              :chsk-state chsk-state
              :chsk-send chsk-send}]

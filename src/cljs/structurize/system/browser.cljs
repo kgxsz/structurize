@@ -122,9 +122,9 @@
   (start [component]
     (log/info "initialising browser")
     (let [history (make-history)
-          φ {:context {:browser? true}
-             :config-opts config-opts
-             :!state (:!state state)
+          φ {:config-opts config-opts
+             :!app-state (:!app-state state)
+             :!tooling-state (:!tooling-state state)
              :history history}]
       (log/info "begin listening for change of location from the browser")
       (listen-for-change-of-location φ)

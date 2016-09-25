@@ -33,8 +33,9 @@
       (let [{:keys [tail-braces first? last? downstream-focused?]} opts
             track-index (track φ l/view-single
                                (in [:tooling :track-index]))
-            node (track φ l/view-single
-                        (l/*> (in [:app-history track-index]) (l/in path)))
+
+            node (track (with-meta φ {:tooling? false}) l/view-single
+                        (l/in path))
             collapsed? (track φ l/view-single
                               (in [:tooling :app-browser-props :collapsed])
                               #(contains? % path))
@@ -120,8 +121,8 @@
     (let [{:keys [tail-braces downstream-focused?]} opts
           track-index (track φ l/view-single
                              (in [:tooling :track-index]))
-          nodes (track φ l/view-single
-                       (l/*> (in [:app-history track-index]) (l/in path)))
+          nodes (track (with-meta φ {:tooling? false :hi 1}) l/view-single
+                       (l/in path))
           num-nodes (count nodes)]
 
       (log-debug φ "render node-group:" path)

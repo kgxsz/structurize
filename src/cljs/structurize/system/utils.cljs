@@ -55,22 +55,15 @@
 
 
 (defn side-effect!
-
   "Dispatches a side-effect depending on the situation. Always allow tooling, browser and
    comms side effects. Otherwise ignore side effects when time travelling."
 
   ([Φ id] (side-effect! Φ id {}))
-  ([{:keys [!state context] :as Φ} id props]
-   (let [time-travelling? (l/view-single @!state (in [:tooling :time-travelling?]))
-         tooling? (:tooling? context)]
+  ([{:keys [!state !tooling-state] :as Φ} id props]
+   (if (or (:tooling? (meta Φ))
+           (not (l/view-single @!tooling-state (in [:tooling :time-travelling?]))))
+     (do
+       (log-debug Φ "side-effect:" id)
+       (process-side-effect Φ id props))
 
-     (cond
-       tooling? (do
-                  (log-debug Φ "side-effect:" id)
-                  (process-side-effect Φ id props))
-
-       (not time-travelling?) (do
-                                (log-debug Φ "side-effect:" id)
-                                (process-side-effect Φ id props))
-
-       :else (log-debug Φ "during time travel, ignoring side-effect:" id)))))
+     (log-debug Φ "during time travel, ignoring side-effect:" id))))
