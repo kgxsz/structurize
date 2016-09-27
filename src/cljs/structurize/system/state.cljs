@@ -24,7 +24,7 @@
    (if (:tooling? (meta Φ))
      @(r/track #(f (v @!tooling-state +lens)))
      @(r/track #(let [index (:track-index @!tooling-state)]
-                 (f (v @!app-state (l/*> (l/in [index]) +lens))))))))
+                  (f (v @!app-state (l/*> (l/in [index]) +lens))))))))
 
 
 (defn read
