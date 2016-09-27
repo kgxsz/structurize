@@ -5,6 +5,7 @@
             [structurize.styles.components.tooling :refer [tooling]]
             [structurize.styles.components.writes-browser :refer [writes-browser]]
             [structurize.styles.components.app-browser :refer [app-browser]]
+            [structurize.styles.components.home-page :refer [home-page]]
             [structurize.styles.components.header :refer [header]]
             [structurize.styles.components.hero :refer [hero]]
             [structurize.styles.components.masthead :refer [masthead]]
@@ -42,10 +43,10 @@
 
 (def general
   [:html {:background-color (-> vars :color :white-b)
-          :height "100%"
+          :height (percent 100)
           :overflow-y :scroll}
-   [:body {:height "100%"}]
-   [:#js-app {:height "100%"}]])
+   [:body {:height (percent 100)}]
+   [:#js-app {:height (percent 100)}]])
 
 
 (def states
@@ -69,6 +70,7 @@
    tooling
    writes-browser
    app-browser
+   home-page
    header
    hero
    masthead

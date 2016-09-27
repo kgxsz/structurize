@@ -25,9 +25,8 @@
 ;; TODO - this is a bit all over the place in order to get the svg capturing events
 ;; TODO - consider bringing out the SVG all-together into a separate component
 
-(defn voronoi []
-  
-  )
+(defn voronoi [{:keys [config-opts] :as Φ}]
+  [:svg#voronoi.l-cell.l-cell--fill-parent])
 
 (defn home-page [{:keys [config-opts] :as Φ}]
   (r/create-class
@@ -37,44 +36,40 @@
                       (let [me (track Φ l/view-single
                                       (in [:auth :me]))]
 
-                        [:div {:style {:height "100%"
-                                       :position :relative}}
-                         [:div {:style {:height "100%"
-                                        :overflow :hidden}}
-                          [:svg#voronoi.l-cell.l-cell--fill-parent {:style {:z-index -1}}]]
-                         [:div.l-col.l-col--width-100.l-col--align-center.l-col--padding-top-25 {:style {:position :absolute
-                                                                                                         :pointer-events :none
-                                                                                                         :top 0}}
-                          [:div.l-row
-                           [:span.c-icon.c-icon--diamond.c-icon--h-size-medium.c-icon--margin-right-medium]
-                           [:span.c-text.c-text--h-size-medium "Structurize"]]
+                        [:div.l-cell.l-cell--height-100.c-home-page
+                         [voronoi Φ]
+                         [:div.l-overlay
+                          [:div.l-col.l-col--width-100.l-col--align-center.l-col--padding-top-25
+                           [:div.l-row
+                            [:span.c-icon.c-icon--diamond.c-icon--h-size-medium.c-icon--margin-right-medium]
+                            [:span.c-text.c-text--h-size-medium "Structurize"]]
 
-                          [:div.l-col.l-col--align-center.l-col--margin-top-xx-large
-                           (let [path (b/path-for (:routes config-opts) :component-guide)]
-                             [:a.c-link.c-link--margin-top-large {:href path
-                                                                  :on-click (u/without-default
-                                                                             #(side-effect! Φ :home-page/change-location
-                                                                                            {:path path}))}
-                              [:span.c-icon.c-icon--layers.c-icon--margin-right-x-small]
-                              [:span.c-text "Component Guide"]])
+                           [:div.l-col.l-col--align-center.l-col--margin-top-xx-large
+                            (let [path (b/path-for (:routes config-opts) :component-guide)]
+                              [:a.c-link.c-link--margin-top-large {:href path
+                                                                   :on-click (u/without-default
+                                                                              #(side-effect! Φ :home-page/change-location
+                                                                                             {:path path}))}
+                               [:span.c-icon.c-icon--layers.c-icon--margin-right-x-small]
+                               [:span.c-text "Component Guide"]])
 
-                           (let [path (b/path-for (:routes config-opts) :store-concept)]
-                             [:a.c-link.c-link--margin-top-large {:href path
-                                                                  :style {
-                                                                          :pointer-events :auto
-                                                                          }
-                                                                  :on-click (u/without-default
-                                                                             #(side-effect! Φ :home-page/change-location
-                                                                                            {:path path}))}
-                              [:span.c-icon.c-icon--crop.c-icon--margin-right-x-small]
-                              [:span.c-text "Design Concepts"]])
+                            (let [path (b/path-for (:routes config-opts) :store-concept)]
+                              [:a.c-link.c-link--margin-top-large {:href path
+                                                                   :style {
+                                                                           :pointer-events :auto
+                                                                           }
+                                                                   :on-click (u/without-default
+                                                                              #(side-effect! Φ :home-page/change-location
+                                                                                             {:path path}))}
+                               [:span.c-icon.c-icon--crop.c-icon--margin-right-x-small]
+                               [:span.c-text "Design Concepts"]])
 
-                           [:a.c-link.c-link--margin-top-large {:on-click (u/without-propagation
-                                                                           #(side-effect! Φ (if me
-                                                                                              :home-page/sign-out
-                                                                                              :home-page/initialise-sign-in-with-github)))}
-                            [:span.c-icon.c-icon--github.c-icon--margin-right-x-small]
-                            [:span.c-text (if me "Sign out" "Sign in")]]]]]))}))
+                            [:a.c-link.c-link--margin-top-large {:on-click (u/without-propagation
+                                                                            #(side-effect! Φ (if me
+                                                                                               :home-page/sign-out
+                                                                                               :home-page/initialise-sign-in-with-github)))}
+                             [:span.c-icon.c-icon--github.c-icon--margin-right-x-small]
+                             [:span.c-text (if me "Sign out" "Sign in")]]]]]]))}))
 
 
 ;; side-effects ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;

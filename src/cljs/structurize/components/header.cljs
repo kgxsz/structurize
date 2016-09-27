@@ -34,7 +34,7 @@
 
 (defn header [Φ]
   (log-debug Φ "render header")
-  [:div.c-header
+  [:div.l-cell.l-cell--padding-top-x-small.l-cell--padding-bottom-x-small.c-header
    [triptych Φ {:left {:hidden #{:xs :sm :md}
                        :c [header-left]}
                 :center {:c [header-center]}

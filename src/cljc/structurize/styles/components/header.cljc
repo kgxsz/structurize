@@ -7,8 +7,6 @@
 (def header
   [:.c-header {:height (-> vars :header-height :medium px)
                :position :fixed
-               :padding-top (-> vars :spacing :x-small px)
-               :padding-bottom (-> vars :spacing :x-small px)
                :top 0
                :z-index 1
                :background-color (-> vars :color :white-a)}
