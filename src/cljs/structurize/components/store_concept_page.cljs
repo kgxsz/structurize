@@ -65,7 +65,7 @@
 
 (defn store-concept-page [Φ]
   (log-debug Φ "render store-concept-page")
-  [:div
+  [:div.l-cell.l-cell--margin-bottom-medium
    [header Φ]
    [hero Φ]
    [masthead Φ]
