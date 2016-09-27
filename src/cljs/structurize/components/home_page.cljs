@@ -54,10 +54,7 @@
                                [:span.c-text "Component Guide"]])
 
                             (let [path (b/path-for (:routes config-opts) :store-concept)]
-                              [:a.c-link.c-link--margin-top-large {:href path
-                                                                   :style {
-                                                                           :pointer-events :auto
-                                                                           }
+                              [:a.c-link.c-link--margin-top-large {:href path 
                                                                    :on-click (u/without-default
                                                                               #(side-effect! Φ :home-page/change-location
                                                                                              {:path path}))}

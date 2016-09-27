@@ -4,7 +4,8 @@
             [garden.units :refer [px percent ms vh vw]]))
 
 (def link
-  [:.c-link {:text-decoration :none}
+  [:.c-link {:text-decoration :none
+             :pointer-events :auto}
 
    [:&:visited :&:hover :&:active {:color :inherit}]
    [:&:hover {:cursor :pointer
