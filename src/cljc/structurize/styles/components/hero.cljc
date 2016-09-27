@@ -5,6 +5,7 @@
 
 (def hero
   [:.c-hero
-   [:&__image {:min-height (-> vars :hero-image-min-height :medium px)
+   [:&__image {:margin-top (-> vars :header-height :medium px)
+               :min-height (-> vars :hero-image-min-height :medium px)
                :max-height (-> vars :hero-image-max-height :medium px)}]])
 
