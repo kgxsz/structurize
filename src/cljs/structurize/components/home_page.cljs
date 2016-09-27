@@ -25,6 +25,10 @@
 ;; TODO - this is a bit all over the place in order to get the svg capturing events
 ;; TODO - consider bringing out the SVG all-together into a separate component
 
+(defn voronoi []
+  
+  )
+
 (defn home-page [{:keys [config-opts] :as Φ}]
   (r/create-class
    {:component-did-mount #(side-effect! Φ :home-page/did-mount {:node (r/dom-node %)})
@@ -33,13 +37,14 @@
                       (let [me (track Φ l/view-single
                                       (in [:auth :me]))]
 
-                        [:div.l-cell.l-cell--fill-parent {:style {:position :relative}}
-                         [:svg#voronoi {:style {:height "100%"
-                                                :width "100%"
-                                                :z-index -1}}]
-                         [:div.l-col.l-col--fill-parent.l-col--align-center.l-col--padding-top-25 {:style {:position :absolute
-                                                                                                           :pointer-events :none
-                                                                                                           :top 0}}
+                        [:div {:style {:height "100%"
+                                       :position :relative}}
+                         [:div {:style {:height "100%"
+                                        :overflow :hidden}}
+                          [:svg#voronoi.l-cell.l-cell--fill-parent {:style {:z-index -1}}]]
+                         [:div.l-col.l-col--width-100.l-col--align-center.l-col--padding-top-25 {:style {:position :absolute
+                                                                                                         :pointer-events :none
+                                                                                                         :top 0}}
                           [:div.l-row
                            [:span.c-icon.c-icon--diamond.c-icon--h-size-medium.c-icon--margin-right-medium]
                            [:span.c-text.c-text--h-size-medium "Structurize"]]
@@ -78,7 +83,7 @@
   (let [{:keys [height width]} (read Φ l/view-single
                                      (in [:viewport]))
 
-        raw-data (mapv (fn [] {:x (rand-int width) :y (rand-int height)}) (range 200))
+        raw-data (mapv (fn [] {:x (rand-int width) :y (rand-int height)}) (range 100))
         data (clj->js raw-data)
 
         svg (d3.select "#voronoi")

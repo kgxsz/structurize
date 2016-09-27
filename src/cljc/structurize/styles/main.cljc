@@ -42,7 +42,10 @@
 
 (def general
   [:html {:background-color (-> vars :color :white-b)
-          :overflow-y :scroll}])
+          :height "100%"
+          :overflow-y :scroll}
+   [:body {:height "100%"}]
+   [:#js-app {:height "100%"}]])
 
 
 (def states

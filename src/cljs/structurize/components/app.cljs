@@ -35,7 +35,8 @@
 
     (log-debug φ "render app")
 
-    [:div.c-app {:style {:width width}}
+    [:div.c-app {:style {:width width
+                         :height "100%"}}
      (match [loading? handler]
             [true _] [loading-page φ]
             [_ :home] [home-page φ]
