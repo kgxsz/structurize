@@ -7,18 +7,12 @@
   [:.c-tooling {:color (-> vars :color :white-b)
                 :font-family "'Fira Mono', monospace"
                 :font-size (-> vars :p-size :small px)}
-   [:&__content {:width (percent 100)
-                 :height (percent 100)
-                 :padding (-> vars :spacing :medium px)
+
+   [:&__content {:pointer-events :auto
                  :background-color (u/alpha (-> vars :color :black-b) (-> vars :alpha :high))}]
 
-   [:&__handle {:display :flex
-                :justify-content :center
-                :align-items :center
-                :cursor :pointer
+   [:&__handle {:cursor :pointer
                 :background-color (u/alpha (-> vars :color :black-b) (-> vars :alpha :high))
-                :width (-> vars :filling :medium px)
-                :height (-> vars :filling :medium px)
                 :border-top-left-radius (-> vars :border-radius :medium px)
                 :border-bottom-left-radius (-> vars :border-radius :medium px)
                 :position :absolute

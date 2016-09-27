@@ -22,8 +22,8 @@
 
 (defn tooling-content [φ]
   (log-debug φ "render tooling-content")
-  [:div.l-overlay__content.c-tooling__content
-   [:div.c-tooling__handle
+  [:div.l-cell.l-cell--fill-parent.l-cell--padding-medium.c-tooling__content
+   [:div.l-cell.l-cell--justify-center.l-cell--align-center.l-cell--width-medium.l-cell--height-medium.c-tooling__handle
     {:on-click (u/without-propagation
                 #(side-effect! φ :tooling/toggle-tooling-slide-over
                                {:+slide-over +slide-over}))}
@@ -39,11 +39,12 @@
   (let [tooling-enabled? (get-in config-opts [:tooling :enabled?])]
     (log-debug φ "render tooling")
     (when tooling-enabled?
-      [:div.l-overlay.l-overlay--fill-viewport.c-tooling
-       [slide-over φ {:+slide-over +slide-over
-                      :absolute-width 800
-                      :direction :right
-                      :c [tooling-content]}]])))
+      [:div.l-overlay.l-overlay--fill-viewport
+       [:div.c-tooling
+        [slide-over φ {:+slide-over +slide-over
+                       :absolute-width 800
+                       :direction :right
+                       :c [tooling-content]}]]])))
 
 
 ;; side-effects ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
