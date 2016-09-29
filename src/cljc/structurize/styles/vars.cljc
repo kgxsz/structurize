@@ -12,9 +12,11 @@
            :grey-a "#505A64"
            :grey-b "#343337"
            :grey-c "#474C51"
+
            :light-green "#D3EDA3"
            :green "#5EB95E"
            :dark-green "#73962E"
+
            :light-purple "#DDAEFF"
            :purple "#8058A5"
            :dark-purple "#8156A7"
@@ -29,7 +31,43 @@
            :dark-orange "#FEC58D"
            :light-blue "#E1F2FA"
            :blue "#1F8DD6"
-           :dark-blue "#5992AA"}
+           :dark-blue "#5992AA"
+
+           :amber-light "#FFF8E0"
+           :amber-medium "#FFC300"
+
+           :green-light "#E8F5E9"
+           :green-medium "#42B145"
+
+           :teal-light "#DFF2F1"
+           :teal-medium "#009788"
+
+           :baby-blue-light "#E0F5FF"
+           :baby-blue-medium "#00A5FA"
+
+           :pink-light "#FDE4EC"
+           :pink-medium "#EC1561"
+
+           :red-light "#FFEBEE"
+           :red-medium "#FD3D07"
+
+           :purple-light "#F3E5F5"
+           :purple-medium "#9F06B4"
+
+           :orange-light "#FBE9E7"
+           :orange-medium "#FF5722"
+
+           :cyan-light "#DFF7FA"
+           :cyan-medium "#00BCD8"
+
+           :blue-light "#E1F2FF"
+           :blue-medium "#0092F9"
+
+           :yellow-light "#FFF3dF"
+           :yellow-medium "#FF9A00"
+
+           :violet-light "#EDE7F6"
+           :violet-medium "#672CBD"}
 
    :p-size {:xx-small 8
             :x-small 10

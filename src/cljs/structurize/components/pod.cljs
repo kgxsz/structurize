@@ -23,10 +23,16 @@
   (log-debug Φ "render pod")
   [:div {:style {:height (+ 200 (rand 200))
                  :background-color (rand-nth
-                                    (vals (select-keys (-> vars :color) [:green
-                                                                         :purple
-                                                                         :yellow
-                                                                         :red
-                                                                         :orange
-                                                                         :blue])))
+                                    (vals (select-keys (-> vars :color) [:green-medium
+                                                                         :amber-medium
+                                                                         :teal-medium
+                                                                         :baby-blue-medium
+                                                                         :pink-medium
+                                                                         :cyan-medium
+                                                                         :yellow-medium
+                                                                         :violet-medium
+                                                                         :purple-medium
+                                                                         :red-medium
+                                                                         :orange-medium
+                                                                         :blue-medium])))
                  :opacity 0.1}}])
