@@ -7,7 +7,8 @@
   [:.c-link {:text-decoration :none
              :pointer-events :auto}
 
-   [:&:visited :&:hover :&:active {:color :inherit}]
+   [:&:visited :&:hover :&:focus :&:active {:color :inherit
+                                            :text-decoration :none}]
    [:&:hover {:cursor :pointer
               :color (-> vars :color :black-a)}]
 
