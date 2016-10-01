@@ -12,27 +12,49 @@
             [reagent.core :as r])
   (:require-macros [structurize.components.macros :refer [log-info log-debug log-error]]))
 
-;; TODO - don't pass anon fns
-;; TODO - co-locate CSS
-;; TODO - use BEM utility
 ;; TODO - spec everywhere
+
+;; d3 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(defn make-texture [Φ {:keys [node]}]
+  (let [svg (d3.select node)
+        colour (rand-nth
+                (vals (select-keys (-> vars :color) [:green-medium
+                                                     :amber-medium
+                                                     :teal-medium
+                                                     :baby-blue-medium
+                                                     :pink-medium
+                                                     :cyan-medium
+                                                     :yellow-medium
+                                                     :violet-medium
+                                                     :purple-medium
+                                                     :red-medium
+                                                     :orange-medium
+                                                     :blue-medium])))
+        orientation "6/8"
+        width 1
+        size 5
+        sel (d3.select node)
+        texture (doto (textures.lines)
+            (.size size)
+            (.strokeWidth width)
+            (.orientation orientation)
+            (.stroke colour))]
+    (-> svg
+        (.call texture)
+        (.append "rect")
+        (.attr "x" 0)
+        (.attr "y" 0)
+        (.attr "width" "100%")
+        (.attr "height" "100%")
+        (.style "fill" (.url texture)))))
+
 
 ;; components ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defn pod [Φ]
   (log-debug Φ "render pod")
-  [:div {:style {:height (+ 200 (rand 200))
-                 :background-color (rand-nth
-                                    (vals (select-keys (-> vars :color) [:green-medium
-                                                                         :amber-medium
-                                                                         :teal-medium
-                                                                         :baby-blue-medium
-                                                                         :pink-medium
-                                                                         :cyan-medium
-                                                                         :yellow-medium
-                                                                         :violet-medium
-                                                                         :purple-medium
-                                                                         :red-medium
-                                                                         :orange-medium
-                                                                         :blue-medium])))
-                 :opacity 0.1}}])
+  (r/create-class
+   {:component-did-mount #(make-texture Φ {:node (r/dom-node %)})
+    :reagent-render (fn []
+                      [:svg.l-cell.l-cell--width-100 {:style {:height (+ 200 (rand 200))}}])}))
