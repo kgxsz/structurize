@@ -52,7 +52,6 @@
 
 (defmethod process-side-effect :image/will-unmount
   [Φ id {:keys [node +image src] :as props}]
-  (let [image (js/Image.)]
-    (write! Φ :image/will-unmount
-            (fn [x]
-              (l/update x +image #(assoc % :loaded? false))))))
+  (write! Φ :image/will-unmount
+          (fn [x]
+            (l/update x +image #(assoc % :loaded? false)))))
