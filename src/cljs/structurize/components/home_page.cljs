@@ -31,7 +31,7 @@
         focus-y (* height .35)
         grey-scale-max 240
         grey-scale-min 190
-        point-count 150
+        point-n 150
         radial-max (js/Math.sqrt (+ (js/Math.pow (max focus-x (- width focus-x)) 2)
                                     (js/Math.pow (max focus-y (- height focus-y)) 2)))
         scale-factor (/ (- grey-scale-max grey-scale-min) radial-max)
@@ -42,12 +42,12 @@
                        (int (- grey-scale-max (* scale-factor r)))))
 
         points (clj->js
-                (repeatedly point-count (fn []
-                                          (let [x (rand-int width)
-                                                y (rand-int height)
-                                                z (grey-scale [x y])
-                                                fill (c/rgb->hex {:red z :green z :blue z})]
-                                            {:x x :y y :fill fill}))))
+                (repeatedly point-n (fn []
+                                      (let [x (rand-int width)
+                                            y (rand-int height)
+                                            z (grey-scale [x y])
+                                            fill (c/rgb->hex {:red z :green z :blue z})]
+                                        {:x x :y y :fill fill}))))
 
         voronoi (-> (d3.geom.voronoi)
                     (.x (fn [d] (aget d "x")))
