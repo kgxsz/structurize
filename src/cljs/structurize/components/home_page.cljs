@@ -30,7 +30,7 @@
         focus-x (/ width 2)
         focus-y (* height .35)
         grey-scale-max 240
-        grey-scale-min 180
+        grey-scale-min 190
         point-count 150
         radial-max (js/Math.sqrt (+ (js/Math.pow (max focus-x (- width focus-x)) 2)
                                     (js/Math.pow (max focus-y (- height focus-y)) 2)))
@@ -57,9 +57,7 @@
                      (-> paths
                          (.attr "d" (fn [d i] (str "M" (.join d "L") "Z")))
                          (.datum (fn [d i] (aget d "point")))
-                         (.attr "fill" (fn [d] (aget d "fill")))
-                         (.attr "stroke-width" 0)
-                         (.attr "stroke" "transparent")))]
+                         (.attr "fill" (fn [d] (aget d "fill")))))]
     (def paths (-> svg
                    (.selectAll "paths")
                    (.data (voronoi points))
