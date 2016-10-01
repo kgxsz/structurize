@@ -13,6 +13,7 @@
             [structurize.lens :refer [in]]
             [structurize.types :as t]
             [structurize.styles.vars :refer [vars]]
+            [garden.color :as c]
             [cljs.spec :as s]
             [bidi.bidi :as b]
             [traversy.lens :as l]
@@ -24,37 +25,29 @@
 ;; d3 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defn make-voronoi [Φ {:keys [node width height]}]
-  (let [colour-scheme [{:fill (-> vars :color :violet-light)
-                        :stroke (-> vars :color :violet-medium)}
-                       {:fill (-> vars :color :yellow-light)
-                        :stroke (-> vars :color :yellow-medium)}
-                       {:fill (-> vars :color :blue-light)
-                        :stroke (-> vars :color :blue-medium)}
-                       {:fill (-> vars :color :cyan-light)
-                        :stroke (-> vars :color :cyan-medium)}
-                       {:fill (-> vars :color :orange-light)
-                        :stroke (-> vars :color :orange-medium)}
-                       {:fill (-> vars :color :purple-light)
-                        :stroke (-> vars :color :purple-medium)}
-                       {:fill (-> vars :color :red-light)
-                        :stroke (-> vars :color :red-medium)}
-                       {:fill (-> vars :color :pink-light)
-                        :stroke (-> vars :color :pink-medium)}
-                       {:fill (-> vars :color :baby-blue-light)
-                        :stroke (-> vars :color :baby-blue-medium)}
-                       {:fill (-> vars :color :teal-light)
-                        :stroke (-> vars :color :teal-medium)}
-                       {:fill (-> vars :color :green-light)
-                        :stroke (-> vars :color :green-medium)}
-                       {:fill (-> vars :color :amber-light)
-                        :stroke (-> vars :color :amber-medium)}]
+  (let [svg (d3.select node)
 
-        svg (d3.select node)
+        focus-x (/ width 2)
+        focus-y (* height .35)
+        grey-scale-max 240
+        grey-scale-min 180
+        point-count 150
+        radial-max (js/Math.sqrt (+ (js/Math.pow (max focus-x (- width focus-x)) 2)
+                                    (js/Math.pow (max focus-y (- height focus-y)) 2)))
+        scale-factor (/ (- grey-scale-max grey-scale-min) radial-max)
+
+        grey-scale (fn [[x y]]
+                     (let [r (js/Math.sqrt (+ (js/Math.pow (- x focus-x) 2)
+                                              (js/Math.pow (- y focus-y) 2)))]
+                       (int (- grey-scale-max (* scale-factor r)))))
 
         points (clj->js
-                (repeatedly 100 #(merge {:x (rand-int width)
-                                         :y (rand-int height)}
-                                        (rand-nth colour-scheme))))
+                (repeatedly point-count (fn []
+                                          (let [x (rand-int width)
+                                                y (rand-int height)
+                                                z (grey-scale [x y])
+                                                fill (c/rgb->hex {:red z :green z :blue z})]
+                                            {:x x :y y :fill fill}))))
 
         voronoi (-> (d3.geom.voronoi)
                     (.x (fn [d] (aget d "x")))
@@ -65,8 +58,8 @@
                          (.attr "d" (fn [d i] (str "M" (.join d "L") "Z")))
                          (.datum (fn [d i] (aget d "point")))
                          (.attr "fill" (fn [d] (aget d "fill")))
-                         (.attr "stroke-width" 0.3)
-                         (.attr "stroke" (fn [d] (aget d "stroke")))))]
+                         (.attr "stroke-width" 0)
+                         (.attr "stroke" "transparent")))]
     (def paths (-> svg
                    (.selectAll "paths")
                    (.data (voronoi points))
@@ -75,11 +68,11 @@
                    (.call draw-paths)))
 
     (.on svg "mousemove" (fn []
-                           (let [[x y] (d3.mouse node)]
+                           (let [[x y] (d3.mouse node)
+                                 z (grey-scale [x y])]
                              (aset points 0 (clj->js {:x x
                                                       :y y
-                                                      :fill (-> vars :color :violet-light)
-                                                      :stroke (-> vars :color :violet-medium)}))
+                                                      :fill (c/rgb->hex {:red z :green z :blue z})}))
                              (set! paths (-> paths
                                              (.data (voronoi points))
                                              (.call draw-paths))))))))
@@ -106,9 +99,9 @@
      [voronoi Φ {:width width :height height}]
      [:div.l-overlay
       [:div.l-col.l-col--width-100.l-col--align-center.l-col--padding-top-25
-       [:div.l-row
+       [:div.l-row.l-row--align-center
         [:span.c-icon.c-icon--diamond.c-icon--h-size-medium.c-icon--margin-right-small]
-        [:span.c-icon.c-icon--diamond.c-icon--h-size-medium]
+        [:span.c-icon.c-icon--diamond.c-icon--h-size-large]
         [:span.c-icon.c-icon--diamond.c-icon--h-size-medium.c-icon--margin-left-small]]
        [:span.c-text.c-text--h-size-medium.c-text--margin-top-small "Structurize"]
 
