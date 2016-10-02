@@ -5,13 +5,13 @@
 
 (def link
   [:.c-link {:text-decoration :none
-             :color (-> vars :color :grey-a)
+             :color (-> vars :color :dimgrey)
              :pointer-events :auto}
 
-   [:&:visited :&:hover :&:focus :&:active {:color (-> vars :color :grey-a)
+   [:&:visited :&:hover :&:focus :&:active {:color (-> vars :color :dimgrey)
                                             :text-decoration :none}]
    [:&:hover {:cursor :pointer
-              :color (-> vars :color :black-a)}]
+              :color (-> vars :color :black)}]
 
    [:&--p-size
     (u/make-modifiers {:var :p-size :prop :font-size :unit px})]

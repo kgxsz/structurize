@@ -15,7 +15,7 @@
                         :padding-right (-> vars :spacing :x-small px)
                         :border-radius (-> vars :border-radius :small px)
                         :margin-bottom (-> vars :spacing :xx-small px)
-                        :background-color (-> vars :color :grey-c)
+                        :background-color (u/alpha (-> vars :color :black) (-> vars :alpha :low))
                         :white-space :nowrap}]
 
     [:&__key {:display :flex
@@ -24,15 +24,15 @@
               :margin-right (-> vars :spacing :xx-small px)
               :cursor :pointer}
      [:&--first {:margin-left 0}]
-     [:&--written {:color (-> vars :color :light-green)}]
-     [:&--downstream-focused {:background-color (-> vars :color :light-blue)
-                              :color (-> vars :color :dark-blue)}]
-     [:&--focused {:background-color (-> vars :color :dark-blue)
-                   :color (-> vars :color :light-blue)}]]
+     [:&--written {:color (-> vars :color :palegreen)}]
+     [:&--downstream-focused {:background-color (-> vars :color :lightcyan)
+                              :color (-> vars :color :dullblue)}]
+     [:&--focused {:background-color (-> vars :color :dullblue)
+                   :color (-> vars :color :lightcyan)}]]
 
     [:&__value {:display :flex
                 :align-items :center}
      [:&--clickable {:cursor :pointer}]
-     [:&--written {:color (-> vars :color :light-green)}]
-     [:&--focused {:background-color (-> vars :color :light-blue)
-                   :color (-> vars :color :dark-blue)}]]]])
+     [:&--written {:color (-> vars :color :palegreen)}]
+     [:&--focused {:background-color (-> vars :color :lightcyan)
+                   :color (-> vars :color :dullblue)}]]]])

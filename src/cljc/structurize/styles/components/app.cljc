@@ -4,6 +4,6 @@
             [garden.units :refer [px percent ms vh vw]]))
 
 (def app
-  [:.c-app {:color (-> vars :color :grey-a)
+  [:.c-app {:color (-> vars :color :dimgrey)
             :font-family "'Raleway', Arial"
             :font-size (-> vars :p-size :medium px)}])

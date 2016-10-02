@@ -94,7 +94,7 @@
        [:span.c-text.c-text--h-size-medium.c-text--margin-top-small "Structurize"]
 
        [:div.l-col.l-col--align-center.l-col--margin-top-xx-large
-        (let [path (b/path-for (:routes config-opts) :component-guide)]
+        (let [path (b/path-for (:routes config-opts) :components)]
           [:a.c-link.c-link--margin-top-large {:href path
                                                :on-click (u/without-default
                                                           #(side-effect! Φ :home-page/change-location

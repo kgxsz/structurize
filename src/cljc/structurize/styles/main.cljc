@@ -42,7 +42,7 @@
 
 
 (def general
-  [:html {:background-color (-> vars :color :white-b)
+  [:html {:background-color (-> vars :color :whitesmoke)
           :height (percent 100)
           :overflow-y :scroll}
    [:body {:height (percent 100)}]

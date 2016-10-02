@@ -4,8 +4,7 @@
             [garden.units :refer [px percent ms vh vw]]))
 
 (def text
-  [:.c-text {:text-decoration :none
-             :color (-> vars :color :grey-a)}
+  [:.c-text {:text-decoration :none}
 
    [:&--p-size
     (u/make-modifiers {:var :p-size :prop :font-size :unit px})]

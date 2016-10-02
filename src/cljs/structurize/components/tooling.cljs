@@ -27,7 +27,7 @@
     {:on-click (u/without-propagation
                 #(side-effect! φ :tooling/toggle-tooling-slide-over
                                {:+slide-over +slide-over}))}
-    [:div.c-icon.c-icon--cog.c-icon--color-white-b]]
+    [:div.c-icon.c-icon--cog.c-icon--color-white]]
    [:div.l-col.l-col--fill-parent
     [:div.l-col__item.c-tooling__item
      [writes-browser φ]]

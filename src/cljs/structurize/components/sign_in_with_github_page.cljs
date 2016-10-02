@@ -37,7 +37,6 @@
                            [:div.l-col.l-col--align-center
                             [:div.c-icon.c-icon--poop.c-icon--h-size-medium]
                             [:div.c-text.c-text--margin-top-medium "We couldn't sign you in with GitHub."]]
-
                            [:div.c-icon.c-icon--clock.c-icon--h-size-medium])]))}))
 
 

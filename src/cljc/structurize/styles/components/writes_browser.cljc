@@ -5,7 +5,7 @@
 
 (def writes-browser
   [:.c-writes-browser
-   [:&__controls {:background-color (u/alpha (-> vars :color :grey-a) (-> vars :alpha :low))
+   [:&__controls {:background-color (u/alpha (-> vars :color :black) (-> vars :alpha :low))
                   :border-radius (-> vars :border-radius :medium px)}
 
     [:&__item {:display :flex
@@ -19,8 +19,8 @@
                :opacity (-> vars :alpha :low)}
 
      [:&:last-child {:margin-bottom 0}]
-     [:&--green {:background-color (-> vars :color :light-green)}]
-     [:&--yellow {:background-color (-> vars :color :light-yellow)}]
+     [:&--green {:background-color (-> vars :color :palegreen)}]
+     [:&--yellow {:background-color (-> vars :color :cornsilk)}]
      [:&--opaque {:opacity 1}]
      [:&--clickable {:cursor :pointer}]]]
 
@@ -47,7 +47,7 @@
                    :padding-left (-> vars :spacing :x-small px)
                    :padding-right (-> vars :spacing :x-small px)
                    :border-radius (-> vars :border-radius :small px)
-                   :background-color (-> vars :color :light-green)
+                   :background-color (-> vars :color :palegreen)
                    :font-size (-> vars :p-size :x-small px)
                    :white-space :nowrap
-                   :color (-> vars :color :dark-green)}]]]])
+                   :color (-> vars :color :olivedrab)}]]]])

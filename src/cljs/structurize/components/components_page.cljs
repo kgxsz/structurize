@@ -28,5 +28,11 @@
   (log-debug φ "render components-page")
   [:div.l-col.l-col--align-center.l-col--padding-top-25
    [:div.c-icon.c-icon--construction.c-icon--h-size-medium]
-   [:div.c-text.c-text--margin-top-medium "This page is under construction."]])
+   [:div.c-text.c-text--margin-top-medium "This page is under construction."]
+   #_[:div.l-col.l-col--margin-top-xxx-large.l-col--margin-bottom-xxx-large
+    (for [[k v] (sort-by first (:color vars))]
+      [:div.l-row.l-row--margin-top-medium {:key k}
+       [:div.l-cell.l-cell--height-xx-large.l-cell--width-xx-large {:style {:background-color v}}]
+       [:div.l-cell.l-cell--justify-center.l-cell--align-center.l-cell--height-xx-large.l-cell--padding-left-large
+        (name k)]])]])
 

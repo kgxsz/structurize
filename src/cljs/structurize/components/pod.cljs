@@ -19,18 +19,22 @@
 (defn make-texture [Φ {:keys [node]}]
   (let [svg (d3.select node)
         colour (rand-nth
-                (vals (select-keys (-> vars :color) [:green-medium
-                                                     :amber-medium
-                                                     :teal-medium
-                                                     :baby-blue-medium
-                                                     :pink-medium
-                                                     :cyan-medium
-                                                     :yellow-medium
-                                                     :violet-medium
-                                                     :purple-medium
-                                                     :red-medium
-                                                     :orange-medium
-                                                     :blue-medium])))
+                (vals (select-keys (-> vars :color) [:cadetblue
+                                                     :brown
+                                                     :crimson
+
+                                                     :darkcyan
+                                                     :darkmagenta
+                                                     :darkslateblue
+                                                     :forestgreen
+                                                     :lavendar
+                                                     :lightpink
+                                                     :mediumslateblue
+                                                     :peru
+                                                     :sandybrown
+                                                     :thistle
+
+                                                     ])))
         orientation "6/8"
         width 1
         size 5

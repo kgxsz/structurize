@@ -9,5 +9,5 @@
                :position :fixed
                :top 0
                :z-index 1
-               :background-color (-> vars :color :white-a)}
-   [:&__item {:background-color (-> vars :color :white-b)}]])
+               :background-color (-> vars :color :white)}
+   [:&__item {:background-color (-> vars :color :whitesmoke)}]])

@@ -41,7 +41,7 @@
   [:div.l-cell.l-cell--align-center.l-cell--height-100 {:style {:width (+ width margin-left margin-right)
                                                                 :padding-left (+ margin-left gutter)
                                                                 :padding-right (+ margin-right gutter)}}
-   [:span.c-text.c-text--p-size-xx-large.c-text--color-white-a
+   [:span.c-text.c-text--p-size-xx-large.c-text--color-white
     "Keigo's Superstore"]])
 
 (defn masthead-lip-left [Φ {:keys [width col-n col-width gutter margin-left]}]

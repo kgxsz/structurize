@@ -16,7 +16,7 @@
 
 ;; components ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defn unknown-page [φ ]
+(defn unknown-page [φ]
   (log-debug φ "render unkown-page")
   [:div.l-col.l-col--align-center.l-col--padding-top-25
    [:div.c-icon.c-icon--poop.c-icon--h-size-medium]

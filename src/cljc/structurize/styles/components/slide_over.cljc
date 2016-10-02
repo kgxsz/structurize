@@ -5,7 +5,7 @@
 
 (def slide-over
   [:.c-slide-over {:height (percent 100)
-                   :background-color (-> vars :color :transparent)
+                   :background-color (u/alpha (-> vars :color :white) (-> vars :alpha :none))
                    :position :absolute
                    :top 0
                    :transition-property :right
