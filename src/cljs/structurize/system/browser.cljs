@@ -45,12 +45,7 @@
                      (< width sm) :sm
                      (< width md) :md
                      (< width lg) :lg
-                     :else :xl)
-        {:keys [max-col-width min-col-width min-col-n]} (get-in config-opts [:viewport :triptych])
-        gutter (get-in config-opts [:viewport :triptych :gutter breakpoint])
-        col-n (max min-col-n (quot (- width gutter) (+ min-col-width gutter)))
-        col-width (min max-col-width (int (/ (- width (* (inc col-n) gutter)) col-n)))
-        margin (- width (* col-n (+ col-width gutter)) gutter)]
+                     :else :xl)]
 
     (log/debug "receiving resize from browser")
 
@@ -58,11 +53,7 @@
             (fn [x]
               (assoc x :viewport {:width width
                                   :height (.-height (dom/getViewportSize))
-                                  :breakpoint breakpoint
-                                  :triptych {:col-n col-n
-                                             :col-width col-width
-                                             :margin margin
-                                             :gutter gutter}})))))
+                                  :breakpoint breakpoint})))))
 
 (defn make-transformer
   "Custom transformer required to manage query parameters."
