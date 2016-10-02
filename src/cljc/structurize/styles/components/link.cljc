@@ -5,9 +5,10 @@
 
 (def link
   [:.c-link {:text-decoration :none
+             :color (-> vars :color :grey-a)
              :pointer-events :auto}
 
-   [:&:visited :&:hover :&:focus :&:active {:color :inherit
+   [:&:visited :&:hover :&:focus :&:active {:color (-> vars :color :grey-a)
                                             :text-decoration :none}]
    [:&:hover {:cursor :pointer
               :color (-> vars :color :black-a)}]

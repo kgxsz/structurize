@@ -28,10 +28,10 @@
   (let [svg (d3.select node)
 
         focus-x (/ width 2)
-        focus-y (* height .35)
+        focus-y (* height 0.35)
         grey-scale-max 240
         grey-scale-min 190
-        point-n 150
+        point-n (int (/ (* width height) 10000))
         radial-max (js/Math.sqrt (+ (js/Math.pow (max focus-x (- width focus-x)) 2)
                                     (js/Math.pow (max focus-y (- height focus-y)) 2)))
         scale-factor (/ (- grey-scale-max grey-scale-min) radial-max)
@@ -58,22 +58,12 @@
                          (.attr "d" (fn [d i] (str "M" (.join d "L") "Z")))
                          (.datum (fn [d i] (aget d "point")))
                          (.attr "fill" (fn [d] (aget d "fill")))))]
-    (def paths (-> svg
-                   (.selectAll "paths")
-                   (.data (voronoi points))
-                   (.enter)
-                   (.append "path")
-                   (.call draw-paths)))
-
-    (.on svg "mousemove" (fn []
-                           (let [[x y] (d3.mouse node)
-                                 z (grey-scale [x y])]
-                             (aset points 0 (clj->js {:x x
-                                                      :y y
-                                                      :fill (c/rgb->hex {:red z :green z :blue z})}))
-                             (set! paths (-> paths
-                                             (.data (voronoi points))
-                                             (.call draw-paths))))))))
+    (-> svg
+        (.selectAll "paths")
+        (.data (voronoi points))
+        (.enter)
+        (.append "path")
+        (.call draw-paths))))
 
 
 ;; components ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
