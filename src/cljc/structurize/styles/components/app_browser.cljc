@@ -15,7 +15,7 @@
                         :padding-right (-> vars :spacing :x-small px)
                         :border-radius (-> vars :border-radius :small px)
                         :margin-bottom (-> vars :spacing :xx-small px)
-                        :background-color (u/alpha (-> vars :color :black) (-> vars :alpha :low))
+                        :background-color (u/alpha (-> vars :color :deepgrey) (-> vars :alpha :low))
                         :white-space :nowrap}]
 
     [:&__key {:display :flex

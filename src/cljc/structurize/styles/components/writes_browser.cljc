@@ -5,7 +5,7 @@
 
 (def writes-browser
   [:.c-writes-browser
-   [:&__controls {:background-color (u/alpha (-> vars :color :black) (-> vars :alpha :low))
+   [:&__controls {:background-color (u/alpha (-> vars :color :deepgrey) (-> vars :alpha :low))
                   :border-radius (-> vars :border-radius :medium px)}
 
     [:&__item {:display :flex
