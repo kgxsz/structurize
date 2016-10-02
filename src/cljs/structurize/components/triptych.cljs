@@ -40,7 +40,6 @@
   (let [{:keys [width breakpoint]} (track φ l/view-single
                                           (in [:viewport]))
         {:keys [col-n col-width gutter margin] :as triptych-facts} (calculate-triptych-facts {:width width :breakpoint breakpoint})
-         _ (js/console.warn "col-n" col-n)
         {[center-f center-props] :c center-hidden :hidden} center
         {[left-f left-props] :c left-hidden :hidden} left
         {[right-f right-props] :c right-hidden :hidden} right
