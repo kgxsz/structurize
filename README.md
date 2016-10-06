@@ -1,7 +1,6 @@
 #Structurize
 
-#####A repository to mess around with Component, Sente, and other goods.
-[![Stories in Ready](https://badge.waffle.io/kgxsz/structurize.svg?label=ready&title=Ready)](http://waffle.io/kgxsz/structurize)
+#####A repository to mess around with Component, Reagent, Sente, and other goods.
 [![Build Status](https://travis-ci.org/kgxsz/structurize.svg?branch=master)](https://travis-ci.org/kgxsz/structurize)
 
 ## Local development setup
