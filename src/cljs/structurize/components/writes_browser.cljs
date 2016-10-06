@@ -11,8 +11,6 @@
             [reagent.core :as r])
   (:require-macros [structurize.components.macros :refer [log-info log-debug log-error]]))
 
-;; TODO - spec everywhere
-
 ;; components ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defn writes-browser [φ]

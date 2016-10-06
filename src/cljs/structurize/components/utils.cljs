@@ -1,6 +1,5 @@
 (ns structurize.components.utils)
 
-;; TODO - spec everywhere
 
 (defn ->class
   "Takes a map of keywords and booleans and transforms it

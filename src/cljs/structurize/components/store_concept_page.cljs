@@ -18,8 +18,6 @@
             [reagent.core :as r])
   (:require-macros [structurize.components.macros :refer [log-info log-debug log-error]]))
 
-;; TODO - spec everywhere
-
 ;; components ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defn store-concept-page-left [Φ {:keys [width col-n col-width gutter margin-left]}]

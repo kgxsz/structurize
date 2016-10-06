@@ -12,8 +12,6 @@
             [reagent.core :as r])
   (:require-macros [structurize.components.macros :refer [log-info log-debug log-error]]))
 
-;; TODO - spec everywhere
-
 ;; d3 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defn make-texture [Φ {:keys [node]}]

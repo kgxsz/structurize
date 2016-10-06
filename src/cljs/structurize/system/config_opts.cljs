@@ -15,20 +15,10 @@
                                     :sm 768
                                     :md 992
                                     :lg 1200
-                                    :xl :infinity}
-                      :triptych {:gutter {:xs 6
-                                          :sm 6
-                                          :md 10
-                                          :lg 10
-                                          :xl 10}
-                                 :max-col-width 220
-                                 :min-col-width 190
-                                 :min-col-n 2}}
+                                    :xl :infinity}}
            :comms {:chsk-opts {:type :auto
                                :packer :edn}}
            :routes ["/" [["" :home]
-                         ["components" :components]
-                         ["concepts/store" :store-concept]
                          ["sign-in/github" :sign-in-with-github]
                          [true :unknown]]]))
 

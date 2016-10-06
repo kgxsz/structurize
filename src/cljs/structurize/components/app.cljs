@@ -5,8 +5,6 @@
             [structurize.system.comms :refer [send! post!]]
             [structurize.components.utils :as u]
             [structurize.components.home-page :refer [home-page]]
-            [structurize.components.components-page :refer [components-page]]
-            [structurize.components.store-concept-page :refer [store-concept-page]]
             [structurize.components.unknown-page :refer [unknown-page]]
             [structurize.components.loading-page :refer [loading-page]]
             [structurize.components.sign-in-with-github-page :refer [sign-in-with-github-page]]
@@ -17,8 +15,6 @@
             [reagent.core :as r])
   (:require-macros [cljs.core.async.macros :refer [go]]
                    [structurize.components.macros :refer [log-info log-debug log-error]]))
-
-;; TODO - spec everywhere
 
 (defn app [{:keys [config-opts] :as φ}]
   (let [handler (track φ l/view-single
@@ -40,7 +36,5 @@
      (match [loading? handler]
             [true _] [loading-page φ]
             [_ :home] [home-page φ]
-            [_ :components] [components-page φ]
-            [_ :store-concept] [store-concept-page φ]
             [_ :sign-in-with-github] [sign-in-with-github-page φ]
             [_ :unknown] [unknown-page φ])]))

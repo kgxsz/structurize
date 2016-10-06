@@ -11,7 +11,6 @@
             [reagent.core :as r])
   (:require-macros [structurize.components.macros :refer [log-info log-debug log-error]]))
 
-;; TODO - spec everywhere
 
 (def calculate-triptych-facts
   (memoize
@@ -33,6 +32,7 @@
         :col-width col-width
         :margin margin
         :gutter gutter}))))
+
 
 ;; components ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
