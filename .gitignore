@@ -8,7 +8,7 @@ releases
 ### Clojure ###
 pom.xml
 pom.xml.asc
-*jar
+*.jar
 /lib/
 /classes/
 /target/
@@ -89,7 +89,7 @@ $RECYCLE.BIN/
 ### Leiningen ###
 pom.xml
 pom.xml.asc
-*jar
+*.jar
 /lib/
 /classes/
 /target/

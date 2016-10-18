@@ -1,5 +1,5 @@
 (ns structurize.system.config-opts
-  (:require [structurize.config :refer [config]]
+  (:require [structurize.public-config :refer [public-config]]
             [com.stuartsierra.component :as component]
             [taoensso.timbre :as log]))
 

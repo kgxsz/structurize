@@ -32,11 +32,14 @@
                                     "resources/public/js/structurize.js"
                                     "resources/public/css/structurize.css"]
 
+
   :plugins [[lein-garden "0.2.6"]]
 
   :uberjar-name "structurize-standalone.jar"
 
-  :profiles {:dev {:source-paths ["src/clj" "src/cljc" "env/dev/clj"]
+  :omit-source true
+
+  :profiles {:dev {:source-paths ["src/clj" "src/cljc" "profiles/dev/clj"]
 
                    :dependencies [[org.clojure/tools.namespace "0.2.11"]]
 
@@ -47,12 +50,12 @@
                                   :port 4000}
 
                    :cljsbuild {:builds [{:id "structurize"
-                                         :source-paths ["src/cljs" "src/cljc" "env/dev/cljs"]
-                                         :figwheel {:on-jsload "structurize.runner/reload"}
+                                         :source-paths ["src/cljs" "src/cljc" "profiles/dev/cljs"]
+                                         :figwheel {:on-jsload "structurize.main/reload"}
                                          :compiler {:output-to "resources/public/js/structurize.js"
-                                                    :main "structurize.runner"
+                                                    :main "structurize.main"
                                                     :asset-path "/js/out"
-                                                    :foreign-libs [{:file "dev-resources/js/foreign-libs/d3-voronoi.js"
+                                                    :foreign-libs [{:file "src/js/d3-voronoi.js"
                                                                     :provides ["d3.voronoi"]}]
                                                     :optimizations :none
                                                     :source-map true}}]}
@@ -67,7 +70,7 @@
                               :nrepl-port 5000
                               :css-dirs ["resources/public/css"]}}
 
-             :uberjar {:source-paths ["src/clj" "src/cljc" "env/prod/clj"]
+             :uberjar {:source-paths ["src/clj" "src/cljc" "profiles/uberjar/clj"]
 
                        :aot :all
 
@@ -79,11 +82,11 @@
                                leiningen.garden]
 
                        :cljsbuild {:builds [{:id "structurize"
-                                             :source-paths ["src/cljs" "src/cljc" "env/prod/cljs"]
+                                             :source-paths ["src/cljs" "src/cljc" "profiles/uberjar/cljs"]
                                              :compiler {:output-to "resources/public/js/structurize.js"
-                                                        :main "structurize.runner"
+                                                        :main "structurize.main"
                                                         :asset-path "/js/out"
-                                                        :foreign-libs [{:file  "dev-resources/js/foreign-libs/d3-voronoi.js"
+                                                        :foreign-libs [{:file "src/js/d3-voronoi.js"
                                                                         :provides ["d3.voronoi"]}]
                                                         :optimizations :advanced}}]}
 

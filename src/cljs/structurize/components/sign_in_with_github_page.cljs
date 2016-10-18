@@ -21,10 +21,10 @@
    {:component-did-mount #(side-effect! φ :sign-in-with-github-page/did-mount)
     :reagent-render (fn [φ]
                       (let [error? (track φ l/view
-                                          (l/+> (in [:location :query]) (in [:auth :sign-in-with-github-status]))
+                                          (l/+> (in [:location :query]) (in [:auth :sign-in-with-github-failed?]))
                                           (fn [[query sign-in-with-github-status]]
                                             (match [query sign-in-with-github-status]
-                                                   [_ :failed] true
+                                                   [_ true] true
                                                    [:error _] true
                                                    :else false)))]
 

@@ -1,4 +1,4 @@
-(ns structurize.runner
+(ns structurize.main
   (:require [structurize.system :refer [system]]
             [cljsjs.lodash]
             [cljsjs.d3]

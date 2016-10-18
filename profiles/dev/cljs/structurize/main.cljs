@@ -1,4 +1,4 @@
-(ns ^:figwheel-no-load structurize.runner
+(ns ^:figwheel-no-load structurize.main
   (:require [structurize.system :refer [system]]
             [structurize.system.app-renderer :as app-renderer]
             [structurize.system.tooling-renderer :as tooling-renderer]

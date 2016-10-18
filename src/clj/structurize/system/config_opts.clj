@@ -1,5 +1,6 @@
 (ns structurize.system.config-opts
-  (:require [clojure.edn :as edn]
+  (:require [structurize.public-config :refer [public-config]]
+            [clojure.edn :as edn]
             [com.stuartsierra.component :as component]
             [taoensso.timbre :as log]
             [camel-snake-kebab.core :as csk]))
@@ -7,30 +8,22 @@
 
 ;; helper functions ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defn get-config
-  "Goes and gets pubic and private config from hardcoded locations, then merges them.
-   If no private file is present, will simply give an empty map in its place."
-  []
-
-  (let [home (System/getProperty "user.home")
-        public-config (-> "resources/config.edn" slurp edn/read-string)
-        private-config (try
-                         (-> (str home "/.lein/structurize/config.edn") slurp edn/read-string)
-                         (catch java.io.FileNotFoundException e {}))]
-    (merge public-config private-config)))
-
-
 (defn make-config
   "Returns a function that takes a kw and first checks if an env var exists,
    before going to the config map to get a value."
   []
 
-  (let [config (get-config)]
+  (let [home (System/getProperty "user.home")
+        private-config (try
+                         (-> (str home "/.lein/structurize/private_config.edn") slurp edn/read-string)
+                         (catch java.io.FileNotFoundException e {}))
+        config (merge public-config private-config)]
+
     (fn [kw {:keys [type]}]
       (if-let [v (-> kw name csk/->SCREAMING_SNAKE_CASE System/getenv)]
         (case type
           :integer (edn/read-string v)
-          v)
+          :string v)
         (get config kw)))))
 
 
@@ -43,9 +36,9 @@
     (log/info "initialising config-opts")
     (let [config (make-config)]
       (assoc component
-             :github-auth {:client-id (config :github-auth-client-id {})
-                           :client-secret (config :github-auth-client-secret {})
-                           :redirect-prefix (config :github-auth-redirect-prefix {})
+             :github-auth {:client-id (config :github-auth-client-id {:type :string})
+                           :client-secret (config :github-auth-client-secret {:type :string})
+                           :redirect-prefix (config :github-auth-redirect-prefix {:type :string})
                            :scope "user:email"}
 
              :comms {:chsk-opts {:packer :edn}}

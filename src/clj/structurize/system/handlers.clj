@@ -14,7 +14,7 @@
 (defn root-page-handler [request]
   (let [root-page (html5
                    [:head
-                    [:title "Structurize"]
+                    [:title "structurize"]
                     [:meta {:name "viewport" :content "width = device-width, initial-scale = 1.0, user-scalable = no"}]
                     [:link {:type "text/css" :href "https://fonts.googleapis.com/css?family=Fira+Mono|Raleway:300" :rel "stylesheet"}]
                     (include-css "/css/icomoon.css")
@@ -23,7 +23,7 @@
                     [:div#js-app]
                     [:div#js-tooling]
                     (include-js "/js/structurize.js")
-                    [:script {:type "text/javascript"} "structurize.runner.start();"]])]
+                    [:script {:type "text/javascript"} "structurize.main.start();"]])]
     (-> root-page response (content-type "text/html"))))
 
 
@@ -56,7 +56,7 @@
                                                               :method :get
                                                               :oauth-token access-token
                                                               :headers {"Accept" "application/json"}
-                                                              :timeout 10000})]
+                                                              :timeout 5000})]
 
               (if (= scope (get-in config-opts [:github-auth :scope]))
 

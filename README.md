@@ -1,6 +1,6 @@
-#Structurize
+#structurize
 
-#####A repository to mess around with Component, Reagent, Sente, and other goods.
+#####A repository to mess around with Component, Om/Next, Sente, and other goods.
 [![Build Status](https://travis-ci.org/kgxsz/structurize.svg?branch=master)](https://travis-ci.org/kgxsz/structurize)
 
 ## Local development setup

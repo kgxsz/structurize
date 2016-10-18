@@ -1,6 +1,5 @@
 (ns structurize.components.utils)
 
-
 (defn ->class
   "Takes a map of keywords and booleans and transforms it
    into a class string suitable for hiccup's class prop."
