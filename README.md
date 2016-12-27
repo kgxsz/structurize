@@ -1,4 +1,4 @@
-#structurize
+#Structurize
 
 #####A repository to mess around with Component, Om/Next, Sente, and other goods.
 [![Build Status](https://travis-ci.org/kgxsz/structurize.svg?branch=master)](https://travis-ci.org/kgxsz/structurize)
