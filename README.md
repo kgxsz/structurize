@@ -1,6 +1,6 @@
 # Structurize
 
-##### A repository to mess around with Component, Reagent, Sente, and other goods.
+##### A repository to mess around with Component, Reagent, Sente, and other goods. See it live [here](https://kgxsz-structurize.herokuapp.com/)
 [![Build Status](https://travis-ci.org/kgxsz/structurize.svg?branch=master)](https://travis-ci.org/kgxsz/structurize)
 
 ## Local development setup
